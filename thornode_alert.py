@@ -37,9 +37,9 @@ def enterThornodeAddress(update, context):
     url = getRandNode() + ':1317/thorchain/nodeaccounts'
 
     request = requests.get(url)
-    allNodesJson = request.json()
+    all_nodes_json = request.json()
 
-    node = getThorNodeObject(allNodesJson, address)
+    node = getThorNodeObject(all_nodes_json, address)
     if node is None:
         return update.message.reply_text('⛔️ The THORnode address you entered does not exist! ⛔️\n'
                                          '                      Please try again.')
@@ -48,10 +48,6 @@ def enterThornodeAddress(update, context):
     for field in node_fields:
         context.user_data[field] = node[field]
 
-    # context.user_data["status"] = node["status"]
-    # context.user_data["bond"] = node["bond"]
-    # context.user_data["slash_points"] = node["slash_points"]
-
     text = 'The address you monitor is: ' + address
 
     for field in node_fields:
@@ -59,16 +55,11 @@ def enterThornodeAddress(update, context):
 
     update.message.reply_text(text)
 
-    # Add job to queue and stop current one if there is a timer already
-    if 'checkNodeJob' in context.user_data:
-        old_job = context.user_data['checkNodeJob']
-        old_job.schedule_removal()
-    new_job = context.job_queue.run_repeating(checkNode, 30, context=update)
-    context.user_data['checkNodeJob'] = new_job
+    context.job_queue.run_repeating(checkNode, 30, context={"chat_id": update.message.chat.id, "user_data": context.user_data})
+    #context.user_data['job_running'] = True
 
 
 def getStats(update, context):
-    # update.message.reply_text('The address you listen to is: ' + context.user_data["thornode_address"])
     update.message.reply_text('The address you listen to is: ' + context.user_data["address"] +
                               '\nCurrent status: ' + context.user_data["status"] +
                               '\nCurrent bond: ' + context.user_data["bond"] +
@@ -92,45 +83,47 @@ def getRandNode():
     return hardcoded_node
 
 
-def getThorNodeObject(allNodesJson, address):
-    for i in range(0, len(allNodesJson)):
-        if allNodesJson[i]["node_address"] == address:
-            return allNodesJson[i]
+def getThorNodeObject(all_nodes_json, address):
+    for i in range(0, len(all_nodes_json)):
+        if all_nodes_json[i]["node_address"] == address:
+            return all_nodes_json[i]
     return None
 
 
 def checkNode(context):
-    job = context.job
+    chat_id = context.job.context["chat_id"]
+    user_data = context.job.context["user_data"]
 
-    address = context.user_data['address']
+    address = user_data['address']
     url = getRandNode() + ':1317/thorchain/nodeaccounts'
 
     request = requests.get(url)
-    allNodesJson = request.json()
+    all_nodes_json = request.json()
 
-    node = getThorNodeObject(allNodesJson, address)
+    node = getThorNodeObject(all_nodes_json, address)
     if node is None:
-        job.context.message.reply_text('⛔️ The THORnode you monitor is not active anymore! ⛔️\n'
-                                       '                Please set a new THORnode address.')
-        old_job = context.user_data['checkNodeJob']
-        old_job.schedule_removal()
+        context.bot.send_message(chat_id, '⛔️ The THORnode you monitor is not active anymore! ⛔️\n'
+                                      '                Please set a new THORnode address.')
         return
 
     for field in node_fields:
-        if context.user_data[field] != node[field]:
+        if user_data[field] != node[field]:
             text = field + ' changed! 💥\n THORnode address: ' + address
             for key in node_fields:
-                text += '\n' + key + ': ' + context.user_data[key] + ' ➡️ ' + node[key]
-                context.user_data[key] = node[key]
+                text += '\n' + key + ': ' + user_data[key] + ' ➡️ ' + node[key]
+                user_data[key] = node[key]
 
-            job.context.message.reply_text(text)
+            context.bot.send_message(chat_id, text)
             return
-
-    #context.user_data["status"] = node["status"]
-    #context.user_data["bond"] = node["bond"]
-    #context.user_data["slash_points"] = node["slash_points"]
+    context.bot.send_message(chat_id, 'nothing new!')
 
     #job.context.message.reply_text("hi")
+
+def start_monitoring_jobs(dp):
+    chat_ids = dp.user_data.keys()
+    for chat_id in chat_ids:
+        dp.job_queue.run_repeating(checkNode, 30,
+                                   context={"chat_id": chat_id, "user_data": dp.user_data[chat_id]})
 
 
 def main():
@@ -144,8 +137,6 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
-
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("enterThornodeAddress", enterThornodeAddress,
                                   pass_args=True,
@@ -155,6 +146,8 @@ def main():
 
     # log all errors
     dp.add_error_handler(error)
+
+    start_monitoring_jobs(dp)
 
     # Start the Bot
     updater.start_polling()
