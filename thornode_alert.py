@@ -5,11 +5,8 @@ import json
 import os
 
 TYPING_ADDRESS = range(1)
-
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-
 NODE_FIELDS = ["status", "bond", "slash_points"]
-
 HARDCODED_NODE = "http://67.205.166.241:1317/thorchain/nodeaccounts"
 HARDCODED_LOCAL_NODE = "http://localhost:8000/node_data.json"
 
@@ -186,8 +183,8 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    dp.add_handler(CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'))
     dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'))
 
     conv_handler = ConversationHandler(
         entry_points=[CallbackQueryHandler(set_address, pattern='^' + 'set Address' + '$')],
