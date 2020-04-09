@@ -1,8 +1,18 @@
 import logging
-import os
 import random
 import requests
 import json
+import os
+
+TYPING_ADDRESS = range(1)
+
+TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
+
+NODE_FIELDS = ["status", "bond", "slash_points"]
+
+HARDCODED_NODE = "http://67.205.166.241:1317/thorchain/nodeaccounts"
+HARDCODED_LOCAL_NODE = "http://localhost:8000/node_data.json"
+
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, MessageHandler,
@@ -14,12 +24,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-CHOOSING, TYPING_ADDRESS = range(2)
-
-telegram_token = os.environ["TELEGRAM_TOKEN"]
-
-node_fields = ["status", "bond", "slash_points"]
-
 
 def start(update, context):
     update.message.reply_text(
@@ -28,11 +32,11 @@ def start(update, context):
         'Enter the address of a THORnode, and the Bot will notify you if there is a change in the nodes status, bond or slash_points.\n')
 
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(checkNode, 30,
+        context.job_queue.run_repeating(check_node, 30,
                                         context={"chat_id": update.message.chat.id, "user_data": context.user_data})
         context.user_data['job_started'] = True
 
-    return show_actions(context, update.message.chat.id)
+    show_actions(context, update.message.chat.id)
 
 
 def set_address(update, context):
@@ -46,39 +50,6 @@ def set_address(update, context):
 
     query.edit_message_text(text)
     return TYPING_ADDRESS
-
-
-def cancel(update, context):
-    return show_actions(context, update.message.chat.id)
-
-
-def address_received(update, context):
-    # address = update.message.text.partition(' ')[2]
-    address = update.message.text
-    url = get_rand_node_url()
-
-    request = requests.get(url)
-    all_nodes_json = request.json()
-
-    node = getThorNodeObject(all_nodes_json, address)
-    if node is None:
-        update.message.reply_text('⛔️ The THORnode address you entered does not exist! ⛔️\n'
-                                  '                      Please try again.\n' +
-                                  '(Enter /cancel to return to the menu)')
-        context.user_data['job_running'] = False
-        return TYPING_ADDRESS
-
-    context.user_data["address"] = address
-    for field in node_fields:
-        context.user_data[field] = node[field]
-
-    text = 'The address you monitor is: ' + address
-    for field in node_fields:
-        text += '\nCurrent ' + field + ': ' + node[field]
-    update.message.reply_text(text)
-
-    context.user_data['job_running'] = True
-    return show_actions(context, update.message.chat.id)
 
 
 def get_stats(update, context):
@@ -98,14 +69,46 @@ def get_stats(update, context):
                 '\n\nPlease set an address of an active THORnode!')
 
     query.edit_message_text(text)
-    return show_actions(context, update.effective_chat.id)
+    show_actions(context, update.effective_chat.id)
+
+
+def cancel(update, context):
+    show_actions(context, update.message.chat.id)
+    return ConversationHandler.END
+
+
+def address_received(update, context):
+    address = update.message.text
+    url = get_rand_node_url()
+
+    request = requests.get(url)
+    all_nodes_json = request.json()
+
+    node = get_thor_node_object(all_nodes_json, address)
+    if node is None:
+        update.message.reply_text('⛔️ The THORnode address you entered does not exist! ⛔️\n'
+                                  '                      Please try again.\n' +
+                                  '(Enter /cancel to return to the menu)')
+        return TYPING_ADDRESS
+
+    context.user_data["address"] = address
+    for field in NODE_FIELDS:
+        context.user_data[field] = node[field]
+
+    text = 'The address you monitor is: ' + address
+    for field in NODE_FIELDS:
+        text += '\nCurrent ' + field + ': ' + node[field]
+    update.message.reply_text(text)
+
+    context.user_data['job_running'] = True
+    show_actions(context, update.message.chat.id)
+    return ConversationHandler.END
 
 
 def show_actions(context, chat_id):
     keyboard = [[InlineKeyboardButton("set Address", callback_data='set Address'),
                  InlineKeyboardButton("get Stats", callback_data='get Stats')]]
     context.bot.send_message(chat_id, 'Choose an action:', reply_markup=InlineKeyboardMarkup(keyboard))
-    return CHOOSING
 
 
 def error(update, context):
@@ -121,24 +124,22 @@ def get_rand_node_url():
     # randNodeIndex = random.randrange(0, len(data.active))
     # randNode = data.active[randNodeIndex]
 
-    # hardcoded_node = "http://67.205.166.241:1317/thorchain/nodeaccounts"
-    hardcoded_node = "http://localhost:8000/node_data.json"
-    return hardcoded_node
+    return HARDCODED_LOCAL_NODE
 
 
-def getThorNodeObject(all_nodes_json, address):
+def get_thor_node_object(all_nodes_json, address):
     for i in range(0, len(all_nodes_json)):
         if all_nodes_json[i]["node_address"] == address:
             return all_nodes_json[i]
     return None
 
 
-def checkNode(context):
+def check_node(context):
     chat_id = context.job.context["chat_id"]
     user_data = context.job.context["user_data"]
 
-    if 'job_running' not in user_data or user_data['job_running'] == False:
-        return  # show_actions(context, chat_id)
+    if 'job_running' not in user_data or user_data['job_running'] is False:
+        return
 
     address = user_data['address']
     url = get_rand_node_url()
@@ -146,25 +147,26 @@ def checkNode(context):
     request = requests.get(url)
     all_nodes_json = request.json()
 
-    node = getThorNodeObject(all_nodes_json, address)
+    node = get_thor_node_object(all_nodes_json, address)
     if node is None:
         context.bot.send_message(chat_id, '⛔️ The THORnode you monitor is not active anymore! ⛔️\n'
                                           '                Please set a new THORnode address.')
         user_data['job_running'] = False
-        return show_actions(context, chat_id)
+        show_actions(context, chat_id)
+        return
 
     changed_values = False
     text = ''
-    for field in node_fields:
+    for field in NODE_FIELDS:
         if user_data[field] != node[field]:
             changed_values = True
             text += field + ' changed! 💥\n'
 
     if changed_values:
         text += '\n THORnode address: ' + address + '\n'
-        for key in node_fields:
-            text += '\n' + key + ': ' + user_data[key] + ' ➡️ ' + node[key]
-            user_data[key] = node[key]
+        for field in NODE_FIELDS:
+            text += '\n' + field + ': ' + user_data[field] + ' ➡️ ' + node[field]
+            user_data[field] = node[field]
 
         context.bot.send_message(chat_id, text)
         show_actions(context, chat_id)
@@ -173,53 +175,40 @@ def checkNode(context):
 def start_monitoring_jobs(dp):
     chat_ids = dp.user_data.keys()
     for chat_id in chat_ids:
-        dp.job_queue.run_repeating(checkNode, 30,
+        dp.job_queue.run_repeating(check_node, 30,
                                    context={"chat_id": chat_id, "user_data": dp.user_data[chat_id]})
 
 
 def main():
-    # Create the Updater and pass it your bot's token.
-    # Make sure to set use_context=True to use the new context based callbacks
-    # Post version 12 this will no longer be necessary
-
     my_persistence = PicklePersistence(filename='session_data')
-    updater = Updater(telegram_token, persistence=my_persistence, use_context=True)
+    updater = Updater(TELEGRAM_TOKEN, persistence=my_persistence, use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    # dp.add_handler(CommandHandler("start", start))
-    # dp.add_handler(CommandHandler("address_received", address_received,
-    #                              pass_args=True,
-    #                              pass_job_queue=True,
-    #                              pass_chat_data=True))
-    # dp.add_handler(CommandHandler("get_stats", get_stats))
-    # updater.dispatcher.add_handler(CallbackQueryHandler(address_received, pattern='^' + 'set Address' + '$'))
-    # updater.dispatcher.add_handler(CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'))
+    dp.add_handler(CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'))
+    dp.add_handler(CommandHandler('start', start))
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start),
-                      CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'),
-                      CallbackQueryHandler(set_address, pattern='^' + 'set Address' + '$')],
+        entry_points=[CallbackQueryHandler(set_address, pattern='^' + 'set Address' + '$')],
 
         states={
-            CHOOSING: [CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'),
-                       CallbackQueryHandler(set_address, pattern='^' + 'set Address' + '$')],
-
             TYPING_ADDRESS: [CommandHandler('cancel', cancel),
+                             CallbackQueryHandler(set_address, pattern='^' + 'set Address' + '$'),
                              MessageHandler(Filters.text, address_received,
                                             pass_job_queue=True,
                                             pass_chat_data=True)]
         },
-
         fallbacks=[]
     )
 
+    # add conversation handler to rule them all
     dp.add_handler(conv_handler)
 
     # log all errors
     dp.add_error_handler(error)
 
+    # start a check_node job for everyone who ever used the bot
     start_monitoring_jobs(dp)
 
     # Start the Bot
