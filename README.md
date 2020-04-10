@@ -12,6 +12,7 @@ Steps to run this repo:
 * Start local Thornode endpoint
 * Start the bot
 * Try the bot out
+* Changes for production
 
 ##Install python-telegram-bot library
 In your terminal type `pip install python-telegram-bot`
@@ -66,8 +67,15 @@ Now search for this name in your telegram client, open the chat and hit start!
 
 At this point, you can play with the bot, see what it does and assert that it does the right thing!
 
-This bot is persistent, which means that it stores data in the file `session_data`. 
+This bot is persistent, which means that it stores data in the file `session_data/session_data`. 
 Once you stop the bot and restart it again, the functionality should continue as if the 
 bot was never stopped.
 
-If you don't want the bot to be persistent, simply delete the file `session_data`.
+If you don't want the bot to be persistent, simply delete the file `session_data` in the `session_data/` 
+folder before startup.
+
+## Changes for production
+For production you use the real THORnode information (ok from testnet), not from our python server.
+
+For that comment out this line `return HARDCODED_LOCAL_NODE`. The return statement below returns
+the IP address to get values from the testnet.

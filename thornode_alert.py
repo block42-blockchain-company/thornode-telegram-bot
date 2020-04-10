@@ -180,7 +180,7 @@ def start_monitoring_jobs(dp):
 
 
 def main():
-    my_persistence = PicklePersistence(filename='session_data')
+    my_persistence = PicklePersistence(filename='session_data/session_data')
     updater = Updater(TELEGRAM_TOKEN, persistence=my_persistence, use_context=True)
 
     # Get the dispatcher to register handlers
