@@ -1,19 +1,14 @@
 import logging
 import random
 import requests
-import json
-import os
 
-TYPING_ADDRESS = range(1)
-TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-NODE_FIELDS = ["status", "bond", "slash_points"]
-HARDCODED_NODE = "http://67.205.166.241:1317/thorchain/nodeaccounts"
-HARDCODED_LOCAL_NODE = "http://localhost:8000/node_data.json"
-
+from constants import *
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, MessageHandler,
                           ConversationHandler, Filters)
+
+from telegram.ext.dispatcher import run_async
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -21,7 +16,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-
+# Give all functions that are registered Handlers in the dispatcher their own thread
+@run_async
 def start(update, context):
     update.message.reply_text(
         'Heil ok sæll! 😁\n'
@@ -36,6 +32,7 @@ def start(update, context):
     show_actions(context, update.message.chat.id)
 
 
+@run_async
 def set_address(update, context):
     query = update.callback_query
     query.answer()
@@ -49,6 +46,7 @@ def set_address(update, context):
     return TYPING_ADDRESS
 
 
+@run_async
 def get_stats(update, context):
     query = update.callback_query
     query.answer()
@@ -69,11 +67,13 @@ def get_stats(update, context):
     show_actions(context, update.effective_chat.id)
 
 
+@run_async
 def cancel(update, context):
     show_actions(context, update.message.chat.id)
     return ConversationHandler.END
 
 
+@run_async
 def address_received(update, context):
     address = update.message.text
     url = get_rand_node_url()
@@ -108,20 +108,23 @@ def show_actions(context, chat_id):
     context.bot.send_message(chat_id, 'Choose an action:', reply_markup=InlineKeyboardMarkup(keyboard))
 
 
+@run_async
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
 def get_rand_node_url():
-    # url = "https://testnet-seed.thorchain.info/"
-    # request = requests.get(url)
-    # data = request.json()
-    #
-    # randNodeIndex = random.randrange(0, len(data.active))
-    # randNode = data.active[randNodeIndex]
+    url = "https://testnet-seed.thorchain.info/"
+    request = requests.get(url)
+    data = request.json()
+
+    randNodeIndex = random.randrange(0, len(data))
+    randNode = data[randNodeIndex]
 
     return HARDCODED_LOCAL_NODE
+    return 'http://' + randNode + ':1317/thorchain/nodeaccounts'
+
 
 
 def get_thor_node_object(all_nodes_json, address):
@@ -130,7 +133,7 @@ def get_thor_node_object(all_nodes_json, address):
             return all_nodes_json[i]
     return None
 
-
+# Jobs already have their own thread each, we don't need to set @run_async
 def check_node(context):
     chat_id = context.job.context["chat_id"]
     user_data = context.job.context["user_data"]
@@ -183,6 +186,9 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
+    # start a check_node job for everyone who ever used the bot
+    start_monitoring_jobs(dp)
+
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CallbackQueryHandler(get_stats, pattern='^' + 'get Stats' + '$'))
 
@@ -204,9 +210,6 @@ def main():
 
     # log all errors
     dp.add_error_handler(error)
-
-    # start a check_node job for everyone who ever used the bot
-    start_monitoring_jobs(dp)
 
     # Start the Bot
     updater.start_polling()
