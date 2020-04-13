@@ -1,3 +1,0 @@
-docker build -t thornode-telegram-alert-bot .
-docker volume create thorbot-session-data-vol
-docker run --env TELEGRAM_BOT_TOKEN=<TELEGRAM_BOT_TOKEN> --dns '1.1.1.1' --mount source=thorbot-session-data-vol,target=/storage thornode-telegram-alert-bot
