@@ -89,8 +89,4 @@ Finally run the docker container:
 docker run --env TELEGRAM_BOT_TOKEN=XXX --dns '1.1.1.1' --mount source=thornode-data-volume,target=/storage thornode-bot
 ```
 
-Replace the `--env` flag with your telegram bot token.
-
-The `--dns` flag tells docker to use cloudflare's dns server. We found out that cloudflare usually the quickest to respond.
-
-Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `/storage`. This is the directory where your bot saves and retrieves the session.data file.
+Replace the `--env` flag with your telegram bot token. The `--dns` flag tells docker to use cloudflare's dns server. We found out that cloudflare usually the quickest to respond. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `/storage`. This is the directory where your bot saves and retrieves the session.data file.
