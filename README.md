@@ -61,7 +61,7 @@ When you created the telegram token via BotFather, you gave your bot a specific 
 
 At this point, you can play with the bot, see what it does and assert that it does the right thing!
 
-This bot is persistent, which means, it stores data in the file `session_data/session_data`.  Once you stop and restart the bot again, everything should continue as if the bot was never stopped (because of persisting the session data).
+This bot is persistent, which means, it stores data in the file `storage/session.data`.  Once you stop and restart the bot again, everything should continue as if the bot was never stopped (because of the persisting the session data).
 
 If you don't want the bot to be persistent, simply delete the file `session.data` in the `storage` folder before startup.
 

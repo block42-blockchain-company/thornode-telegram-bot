@@ -2,7 +2,7 @@ import os
 
 TYPING_ADDRESS = range(1)
 
-TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
+TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 
 NODE_FIELDS = ["status", "bond", "slash_points"]
 
