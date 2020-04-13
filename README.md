@@ -1,4 +1,4 @@
-# thornode-telegram-bot
+# thornode-telegram-bot ⚡🤖
 A telegram bot to monitor the status of THORNodes.
 
 ## Requirements
