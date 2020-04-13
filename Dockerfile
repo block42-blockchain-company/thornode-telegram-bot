@@ -1,9 +1,11 @@
 FROM python:3.7
 
-VOLUME storage
+RUN mkdir /storage
+RUN mkdir /test
 
-ADD thornode_bot.py /
-ADD requirements.txt /
+ADD thornode_bot.py/ /
+ADD requirements.txt/ /
+ADD test/nodeaccounts.json /test
 
 RUN pip install -r requirements.txt
 
