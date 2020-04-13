@@ -2,11 +2,21 @@
 A telegram bot to monitor the status of THORNodes.
 
 ## Requirements
-* Python3
 * Telegram
-* Docker (if you want to run as docker container)
+* Docker (if you want to run with docker)
+* Python3 (if you want to run without docker)
 
-## Steps to run
+## Quickstart
+
+Install `docker` and run:
+
+```
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env DEBUG={True|False} --dns '1.1.1.1' --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
+```
+
+Make sure to set the correct value for `TELEGRAM_BOT_TOKEN` and `DEBUG`.
+
+## Steps to run everything yourself
 * Install dependencies
 * Create Telegram bot token via [BotFather](https://t.me/BotFather)
 * Set environment variables
