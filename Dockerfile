@@ -1,11 +1,10 @@
-FROM python:3
+FROM python:3.7
 
-VOLUME session_data
+VOLUME storage
 
 ADD thornode_bot.py /
 ADD constants.py /
 
-RUN pip install python-telegram-bot
-RUN pip install requests
+RUN pip install -r requirements.txt
 
-CMD [ "python", "./thornode_alert.py" ]
+CMD [ "python", "./thornode_bot.py" ]

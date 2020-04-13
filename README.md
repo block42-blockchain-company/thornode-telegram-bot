@@ -23,9 +23,9 @@ Start a Telegram chat with [BotFather](https://t.me/BotFather) and click `start`
 Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. Save this token in a secure location (for example in an environment variable ;).
 
 ## Set Telegram token as environment variable
-Save the above created telegram token in the environment variable `TELEGRAM_TOKEN`.
+Save the above created telegram token in the environment variable `TELEGRAM_BOT_TOKEN`.
 
-To do this, in your terminal type `export TELEGRAM_TOKEN=1234567890:xxxYourTokenxxxxx`, where
+To do this, in your terminal type `export TELEGRAM_BOT_TOKEN=1234567890:xxxYourTokenxxxxx`, where
 the value after the `=` should be your own token.
 
 Alternatively, if your using a Jetbrains IDE like Pycharm, you can set this environment variable
@@ -60,9 +60,9 @@ When you created the telegram token via BotFather, you gave your bot a specific 
 
 At this point, you can play with the bot, see what it does and assert that it does the right thing!
 
-This bot is persistent, which means, it stores data in the file `session_data/session_data`.  Once you stop and restart the bot again, everything should continue as if the bot was never stopped (because of the persisting the session data).
+This bot is persistent, which means, it stores data in the file `storage/session.data`.  Once you stop and restart the bot again, everything should continue as if the bot was never stopped (because of the persisting the session data).
 
-If you don't want the bot to be persistent, simply delete the file `session_data` in the `session_data` folder before startup.
+If you don't want the bot to be persistent, simply delete the file `session.data` in the `storage` folder before startup.
 
 ## Production
 For production you use real THORNode data, not from the local python endpoint.
