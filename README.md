@@ -9,44 +9,47 @@ A telegram bot to monitor the status of THORNodes.
 ## Steps to run
 * Install dependencies
 * Create Telegram bot token via [BotFather](https://t.me/BotFather)
-* Set Telegram token as environment variable
+* Set environment variables
 * Start the mock THORNode endpoint
 * Start the bot
 * Run & test the bot
 * Production
 
 ## Install dependencies
-Install all required libraries via: `pip install -r requirements.txt`
+Install all required dependencies via: `pip install -r requirements.txt`
 
 ## Create Telegram bot token via BotFather
 Start a Telegram chat with [BotFather](https://t.me/BotFather) and click `start`.
 
-Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. Save this token in a secure location (for example in an environment variable ;).
+Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. Save this token, you will need it in a second.
 
-## Set Telegram token as environment variable
-Save the above created telegram token in the environment variable `TELEGRAM_BOT_TOKEN`.
+## Set environment variables
+Set the telegram bot token you just created as an environment variable: `TELEGRAM_BOT_TOKEN`
 
-Go to your terminal and type `export TELEGRAM_BOT_TOKEN=XXX`, where the value after the `=` should be your own bot token.
+```
+export TELEGRAM_BOT_TOKEN=XXX
+```
 
-Alternatively, if your using a Jetbrains IDE (e.g. Pycharm), you can set this environment variable for your run configuration which is very convenient for development (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
+If your using a Jetbrains IDE (e.g. Pycharm), you can set this environment variable for your run configuration which is very convenient for development (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
 ## Start the mock THORNode endpoint
-To test whether the bot actually notifies us about changes we need a way to manipulate the data the bot is fetching. Do that with the local json file `test/nodeaccounts.json`.
+To test whether the bot actually notifies you about changes, the data the bot is quering needs to change. You can simulate that by manually editing `test/nodeaccounts.json`.
 
-Go to the directory of this repo in your terminal, and start a local server with:
+Go to the root directory of this project and start the mock endpoint (`-d` specifies the webroot where we use the `test` directory):
 
 ```
 python3 -m http.server 8000 --bind 127.0.0.1 -d test
 ```
 
-If everything works, this local endpoint returns you the content of `test/nodeaccounts.json`:
+If everything works fine you should receive the content of `test/nodeaccounts.json` at this endpoint:
 
 ```
 http://localhost:8000/nodeaccounts.json
 ```
 
 ## Start the bot
-Open the directory in your terminal, and start the bot via
+Start the bot via:
+
 ```
 python3 thornode_bot.py
 ```
@@ -54,19 +57,16 @@ python3 thornode_bot.py
 Make sure to see a message in the console that the bot is running.
 
 ## Run & test the bot
-When you created the telegram token via BotFather, you gave your bot a specific name. Now search for this name in your Telegram client, open the chat and hit start!
+When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram, open the chat and hit start!
 
-At this point, you can play with the bot, see what it does and assert that it does the right thing!
+At this point, you can play with the bot, see what it does and check that everything works fine!
 
-This bot is persistent, which means, it stores data in the file `storage/session.data`.  Once you stop and restart the bot again, everything should continue as if the bot was never stopped (because of the persisting the session data).
+The bot persistents all data, which means it stores its chat data in the file `storage/session.data`.  Once you stop and restart the bot, everything should continue as if the bot was never stopped.
 
-If you don't want the bot to be persistent, simply delete the file `session.data` in the `storage` directory before startup.
-
-### Test notifications
-Just edit the `test/nodeaccounts.json` file, save it and wait for the job to run. The bot should send a message displaying the changes.
+If you want to reset your bot's data, simply delete the file `session.data` in the `storage` directory before startup.
 
 ## Production
-In production you do not want to use mock data from the THORNode endpoint but real network data. To achieve that, just put `DEBUG=False` into your environment variables and the bot will then use the available seed nodes to retrieve the data.
+In production you do not want to use mock data from the local endpoint but real network data. To get real data just set `DEBUG=False` in your environment variables and the bot will use available seed nodes for data retrieval.
 
 ### Docker
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
