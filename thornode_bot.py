@@ -15,15 +15,28 @@ from telegram.ext import (
     Filters
 )
 
-NODE_FIELDS = ['status', 'bond', 'slash_points']
-
-# Get environment variables
-TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-DEBUG = os.environ['DEBUG'] if 'DEBUG' in os.environ is not None else True
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+"""
+######################################################################################################################################################
+Static & environment variables
+######################################################################################################################################################
+"""
+
+NODE_FIELDS = ['status', 'bond', 'slash_points']
+
+TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+DEBUG = os.environ['DEBUG'] if 'DEBUG' in os.environ is not None else True
+
+"""
+######################################################################################################################################################
+Bot handlers
+######################################################################################################################################################
+"""
 
 
 @run_async
@@ -41,11 +54,11 @@ def start(update, context):
         })
         context.user_data['job_started'] = True
 
-    show_actions(context, chat_id=update.message.chat.id)
+    show_action_buttons(context, chat_id=update.message.chat.id)
 
 
 @run_async
-def set_address(update, context):
+def add_thornode(update, context):
     query = update.callback_query
     query.answer()
 
@@ -62,7 +75,7 @@ def set_address(update, context):
 
 
 @run_async
-def get_stats(update, context):
+def show_stats(update, context):
     query = update.callback_query
     query.answer()
 
@@ -79,20 +92,14 @@ def get_stats(update, context):
                'Please enter another THORNode address.'
 
     query.edit_message_text(text)
-    show_actions(context, update.effective_chat.id)
+    show_action_buttons(context, update.effective_chat.id)
 
 
 @run_async
-def cancel(update, context):
-    show_actions(context, update.message.chat.id)
-    return ConversationHandler.END
-
-
-@run_async
-def address_received(update, context):
+def handle_input(update, context):
     address = update.message.text
 
-    url = get_rand_node_url()
+    url = get_endpoint()
     all_nodes_json = requests.get(url).json()
     node = get_thor_node_object(all_nodes_json, address)
 
@@ -109,18 +116,17 @@ def address_received(update, context):
     context.user_data['job_running'] = True
 
     # TODO: Show stats right away
-    #get_stats(update, context)
-    show_actions(context, update.message.chat.id)
+    # get_stats(update, context)
+
+    show_action_buttons(context, update.message.chat.id)
 
     return ConversationHandler.END
 
 
-def show_actions(context, chat_id):
-    keyboard = [[
-        InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
-        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats')
-    ]]
-    context.bot.send_message(chat_id, 'What do you want to do?', reply_markup=InlineKeyboardMarkup(keyboard))
+@run_async
+def cancel(update, context):
+    show_action_buttons(context, update.message.chat.id)
+    return ConversationHandler.END
 
 
 @run_async
@@ -129,7 +135,22 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 
-def get_rand_node_url():
+"""
+######################################################################################################################################################
+Helper functions
+######################################################################################################################################################
+"""
+
+
+def show_action_buttons(context, chat_id):
+    keyboard = [[
+        InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
+        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats')
+    ]]
+    context.bot.send_message(chat_id, 'What do you want to do?', reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+def get_endpoint():
     endpoints = requests.get('https://testnet-seed.thorchain.info').json()
     random_endpoint = endpoints[random.randrange(0, len(endpoints))]
     return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
@@ -143,7 +164,6 @@ def get_thor_node_object(all_nodes_json, address):
     return None
 
 
-# Jobs already have their own thread each, we don't need to set @run_async
 def check_node(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
@@ -153,7 +173,7 @@ def check_node(context):
 
     address = user_data['address']
 
-    url = get_rand_node_url()
+    url = get_endpoint()
     all_nodes_json = requests.get(url).json()
     new_user_data = get_thor_node_object(all_nodes_json, address)
 
@@ -164,7 +184,7 @@ def check_node(context):
                                  'Please enter another THORNode address.'
                                  )
         user_data['job_running'] = False
-        show_actions(context, chat_id)
+        show_action_buttons(context, chat_id)
         return
 
     changed_values = False
@@ -184,16 +204,14 @@ def check_node(context):
         user_data['slash_points'] = new_user_data['slash_points']
 
         context.bot.send_message(chat_id, text)
-        show_actions(context, chat_id)
+        show_action_buttons(context, chat_id)
 
 
-def start_monitoring_jobs(dp):
-    chat_ids = dp.user_data.keys()
-
-    for chat_id in chat_ids:
-        dp.job_queue.run_repeating(check_node, 30, context={
-            'chat_id': chat_id, 'user_data': dp.user_data[chat_id]
-        })
+"""
+######################################################################################################################################################
+Application
+######################################################################################################################################################
+"""
 
 
 # Conversation state(s)
@@ -205,26 +223,29 @@ def main():
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
     dispatcher = bot.dispatcher
 
-    # Start a check_node job for everyone who ever used the bot
-    start_monitoring_jobs(dispatcher)
+    # Restart jobs for all users
+    chat_ids = dispatcher.user_data.keys()
+    for chat_id in chat_ids:
+        dispatcher.job_queue.run_repeating(check_node, interval=30, context={
+            'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
+        })
 
+    # Add command handlers
     dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CallbackQueryHandler(get_stats, pattern='^show_stats$'))
-
-    conversation_handler = ConversationHandler(
-        entry_points=[CallbackQueryHandler(set_address, pattern='^add_thornode$')],
-        states={WAIT_FOR_USER_INPUT: [
-            CommandHandler('cancel', cancel),
-            CallbackQueryHandler(set_address, pattern='^add_thornode$'),
-            MessageHandler(Filters.text, address_received, pass_job_queue=True, pass_chat_data=True)
-        ]},
-        fallbacks=[]
-    )
+    dispatcher.add_handler(CallbackQueryHandler(show_stats, pattern='^show_stats$'))
 
     # Add conversation handler to rule them all
-    dispatcher.add_handler(conversation_handler)
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$')],
+        states={WAIT_FOR_USER_INPUT: [
+            CommandHandler('cancel', cancel),
+            CallbackQueryHandler(add_thornode, pattern='^add_thornode$'),
+            MessageHandler(Filters.text, handle_input, pass_job_queue=True, pass_chat_data=True)
+        ]},
+        fallbacks=[]
+    ))
 
-    # Log all errors
+    # Add error handler
     dispatcher.add_error_handler(error)
 
     # Start the bot
