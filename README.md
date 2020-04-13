@@ -15,7 +15,7 @@ docker volume create thornode-bot-volume
 docker run --env TELEGRAM_BOT_TOKEN=XXX --env DEBUG={True|False} --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
 ```
 
-Make sure to set the correct value for `TELEGRAM_BOT_TOKEN` and `DEBUG`.
+Make sure to set the correct values for `TELEGRAM_BOT_TOKEN` and `DEBUG`.
 
 ## Steps to run everything yourself
 * Install dependencies
