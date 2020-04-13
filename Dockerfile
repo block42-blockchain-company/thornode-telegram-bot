@@ -2,7 +2,7 @@ FROM python:3
 
 VOLUME session_data
 
-ADD thornode_alert.py /
+ADD thornode_bot.py /
 ADD constants.py /
 
 RUN pip install python-telegram-bot
