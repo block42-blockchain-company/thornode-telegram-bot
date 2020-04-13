@@ -159,3 +159,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/venv,macos,pycharm,windows
+
+.idea
+storage/session.data
