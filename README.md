@@ -67,7 +67,7 @@ If you don't want the bot to be persistent, simply delete the file `session.data
 In production you do not want to use mock data from the THORNode endpoint but real network data. To achieve that, just put `DEBUG=False` into your environment variables and the bot will then use the available seed nodes to retrieve the data.
 
 ### Docker
-To run the bot as a docker container, make sure you have docker installed (see here: https://docs.docker.com/get-docker).
+To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
 
 Navigate to the root directory of this reposiroty and execute the following commands:
 
