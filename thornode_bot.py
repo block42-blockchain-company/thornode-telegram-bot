@@ -34,21 +34,25 @@ DEBUG = os.environ['DEBUG'] if 'DEBUG' in os.environ is not None else True
 
 """
 ######################################################################################################################################################
-Bot handlers
+Handlers
 ######################################################################################################################################################
 """
 
 
 @run_async
 def start(update, context):
-    update.message.reply_text(
-        'Heil ok sæll! I am your THORNode Bot. 🤖\n' +
-        'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*!\n',
-        parse_mode='markdown'
-    )
+    """
+    Send start message and display action buttons.
+    """
 
+    text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' +\
+           'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*!\n'
+
+    update.message.reply_text(text, parse_mode='markdown')
+
+    # Restart job for user
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(check_node, 30, context={
+        context.job_queue.run_repeating(check_thornode, interval=30, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })
@@ -92,6 +96,7 @@ def show_stats(update, context):
                'Please enter another THORNode address.'
 
     query.edit_message_text(text)
+
     show_action_buttons(context, update.effective_chat.id)
 
 
@@ -116,7 +121,7 @@ def handle_input(update, context):
     context.user_data['job_running'] = True
 
     # TODO: Show stats right away
-    # get_stats(update, context)
+    # show_stats(update, context)
 
     show_action_buttons(context, update.message.chat.id)
 
@@ -129,15 +134,9 @@ def cancel(update, context):
     return ConversationHandler.END
 
 
-@run_async
-def error(update, context):
-    """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
-
-
 """
 ######################################################################################################################################################
-Helper functions
+Helpers
 ######################################################################################################################################################
 """
 
@@ -164,7 +163,7 @@ def get_thor_node_object(all_nodes_json, address):
     return None
 
 
-def check_node(context):
+def check_thornode(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
@@ -207,6 +206,10 @@ def check_node(context):
         show_action_buttons(context, chat_id)
 
 
+def error(update, context):
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
 """
 ######################################################################################################################################################
 Application
@@ -226,7 +229,7 @@ def main():
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
     for chat_id in chat_ids:
-        dispatcher.job_queue.run_repeating(check_node, interval=30, context={
+        dispatcher.job_queue.run_repeating(check_thornode, interval=30, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
