@@ -29,7 +29,7 @@
       "ed25519": "thorpub1addwnpepqf50yudpf46r6xg9u6t50zq5p5vawywdc3amcgk3898shyh704k4xhv5098"
     },
     "validator_cons_pub_key": "thorcpub1zcjduepqktgjammzpsnccuuqpr2kk2pagh9jcklet6sfylj4zjf5nxke9rgqaqy9lp",
-    "bond": "24000000",
+    "bond": "2400000",
     "active_block_height": "0",
     "bond_address": "tbnb193a8kfjkm2yl58w76gn0unppnhzrv9q7vdsgv9",
     "slash_points": "0",

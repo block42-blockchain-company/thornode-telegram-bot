@@ -1,3 +1,4 @@
+import os
 import random
 import logging
 import requests
@@ -14,13 +15,14 @@ from telegram.ext import (
     Filters
 )
 
-from constants import *
+NODE_FIELDS = ['status', 'bond', 'slash_points']
+
+# Get environment variables
+TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+DEBUG = os.environ['DEBUG'] if 'DEBUG' in os.environ is not None else True
 
 # Enable logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -56,7 +58,7 @@ def set_address(update, context):
 
     query.edit_message_text(text)
 
-    return TYPING_ADDRESS
+    return WAIT_FOR_USER_INPUT
 
 
 @run_async
@@ -96,7 +98,7 @@ def address_received(update, context):
 
     if node is None:
         update.message.reply_text('⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
-        return TYPING_ADDRESS
+        return WAIT_FOR_USER_INPUT
 
     context.user_data['address'] = address
     for field in NODE_FIELDS:
@@ -128,15 +130,9 @@ def error(update, context):
 
 
 def get_rand_node_url():
-    url = 'https://testnet-seed.thorchain.info/'
-    data = requests.get(url).json()
-
-    randNodeIndex = random.randrange(0, len(data))
-
-    return HARDCODED_LOCAL_NODE
-
-    randNode = data[randNodeIndex]
-    return 'http://' + randNode + ':1317/thorchain/nodeaccounts'
+    endpoints = requests.get('https://testnet-seed.thorchain.info').json()
+    random_endpoint = endpoints[random.randrange(0, len(endpoints))]
+    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
 
 
 def get_thor_node_object(all_nodes_json, address):
@@ -200,6 +196,10 @@ def start_monitoring_jobs(dp):
         })
 
 
+# Conversation state(s)
+WAIT_FOR_USER_INPUT = range(1)
+
+
 def main():
     # Init telegram bot
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
@@ -213,7 +213,7 @@ def main():
 
     conversation_handler = ConversationHandler(
         entry_points=[CallbackQueryHandler(set_address, pattern='^add_thornode$')],
-        states={TYPING_ADDRESS: [
+        states={WAIT_FOR_USER_INPUT: [
             CommandHandler('cancel', cancel),
             CallbackQueryHandler(set_address, pattern='^add_thornode$'),
             MessageHandler(Filters.text, address_received, pass_job_queue=True, pass_chat_data=True)
