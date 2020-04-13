@@ -11,7 +11,8 @@ A telegram bot to monitor the status of THORNodes.
 Install `docker` and run:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env DEBUG={True|False} --dns '1.1.1.1' --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
+docker volume create thornode-bot-volume
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env DEBUG={True|False} --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
 ```
 
 Make sure to set the correct value for `TELEGRAM_BOT_TOKEN` and `DEBUG`.
@@ -98,7 +99,7 @@ docker volume create thornode-bot-volume
 Finally run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --dns '1.1.1.1' --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
-Replace the `--env` flag with your telegram bot token. The `--dns` flag tells docker to use cloudflare's dns server. We found out that cloudflare usually the quickest to respond. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. This is the directory where your bot saves and retrieves the `session.data` file.
+Replace the `--env` flag with your telegram bot token. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. This is the directory where your bot saves and retrieves the `session.data` file.
