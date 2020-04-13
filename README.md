@@ -64,10 +64,10 @@ This bot is persistent, which means, it stores data in the file `storage/session
 If you don't want the bot to be persistent, simply delete the file `session.data` in the `storage` directory before startup.
 
 ## Production
-In production we do not use data from our local mock THORNode endpoint but real network data.
+In production you do not want to use mock data from the THORNode endpoint but real network data. To achieve that, just put `DEBUG=False` into your environment variables and the bot will then use the available seed nodes to retrieve the data.
 
 ### Docker
-To run the bot as a docker container, make sure you have docker installed (see here: https://docs.docker.com/get-docker).
+To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
 
 Navigate to the root directory of this reposiroty and execute the following commands:
 
@@ -89,4 +89,4 @@ Finally run the docker container:
 docker run --env TELEGRAM_BOT_TOKEN=XXX --dns '1.1.1.1' --mount source=thornode-data-volume,target=/storage thornode-bot
 ```
 
-Replace the `--env` flag with your telegram bot token. The `--dns` flag tells docker to use cloudflare's dns server. We found out that cloudflare usually the quickest to respond. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `/storage`. This is the directory where your bot saves and retrieves the session.data file.
+Replace the `--env` flag with your telegram bot token. The `--dns` flag tells docker to use cloudflare's dns server. We found out that cloudflare usually the quickest to respond. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `/storage`. This is the directory where your bot saves and retrieves the `session.data` file.
