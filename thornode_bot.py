@@ -15,11 +15,9 @@ from telegram.ext import (
     Filters
 )
 
-
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 """
 ######################################################################################################################################################
@@ -27,10 +25,8 @@ Static & environment variables
 ######################################################################################################################################################
 """
 
-NODE_FIELDS = ['status', 'bond', 'slash_points']
-
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-DEBUG = os.environ['DEBUG'] if 'DEBUG' in os.environ is not None else True
+DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """
 ######################################################################################################################################################
@@ -45,11 +41,6 @@ def start(update, context):
     Send start message and display action buttons.
     """
 
-    text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' +\
-           'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*!\n'
-
-    update.message.reply_text(text, parse_mode='markdown')
-
     # Restart job for user
     if 'job_started' not in context.user_data:
         context.job_queue.run_repeating(check_thornode, interval=30, context={
@@ -58,21 +49,32 @@ def start(update, context):
         })
         context.user_data['job_started'] = True
 
+    text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
+           'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*!\n'
+
+    # Send message
+    update.message.reply_text(text, parse_mode='markdown')
     show_action_buttons(context, chat_id=update.message.chat.id)
 
 
 @run_async
 def add_thornode(update, context):
+    """
+    Initiate a conversation and prompt for user input (thornode address).
+    """
+
+    # Enable message editing
     query = update.callback_query
     query.answer()
 
     text = ''
 
-    if 'job_running' in context.user_data and context.user_data['job_running']:
+    if 'address_valid' in context.user_data and context.user_data['address_valid'] is True:
         text += '⚠️ This will override this THORNode: ' + context.user_data['address'] + '\n\n'
 
     text += 'What\'s the address of your THORNode? (enter /cancel to return to the menu)'
 
+    # Send message
     query.edit_message_text(text)
 
     return WAIT_FOR_USER_INPUT
@@ -80,58 +82,137 @@ def add_thornode(update, context):
 
 @run_async
 def show_stats(update, context):
+    """
+    Send thornode stats if a valid address is available.
+    """
+
+    # Enable message editing
     query = update.callback_query
     query.answer()
 
-    text = 'You have not told me about your THORNode yet. Please add one!'
+    # Check if user has set a thornode address
+    if 'address' not in context.user_data:
+        text = 'You have not told me about your THORNode yet. Please add one!'
+        query.edit_message_text(text)
+        show_action_buttons(context, update.effective_chat.id)
+        return ConversationHandler.END
 
-    if 'address' in context.user_data and context.user_data['job_running']:
+    # Check if thornode address is valid
+    if context.user_data['address_valid'] is True:
         text = 'THORNode: ' + context.user_data['address'] + '\n' + \
                'Status: ' + context.user_data['status'].capitalize() + '\n' + \
                'Bond: ' + '{:,} RUNE'.format(int(context.user_data['bond'])) + '\n' + \
                'Slash Points: ' + '{:,}'.format(int(context.user_data['slash_points']))
-    elif 'address' in context.user_data and not context.user_data['job_running']:
-        text = 'THORnode is not active anymore! 💀' + '\n' + \
+    else:
+        text = 'THORNode is not active anymore! 💀' + '\n' + \
                'Address: ' + context.user_data['address'] + '\n\n' + \
                'Please enter another THORNode address.'
 
+    # Send message
     query.edit_message_text(text)
+    show_action_buttons(context, chat_id=update.effective_chat.id)
 
-    show_action_buttons(context, update.effective_chat.id)
+    return ConversationHandler.END
 
 
 @run_async
 def handle_input(update, context):
+    """
+    Handle text input after an user has asked to add a new thornode.
+    """
+
+    # Assume text input is an address
     address = update.message.text
 
-    url = get_endpoint()
-    all_nodes_json = requests.get(url).json()
-    node = get_thor_node_object(all_nodes_json, address)
+    # Try to get node based on given address
+    nodes = requests.get(url=get_endpoint()).json()
+    node = next(filter(lambda node: node['node_address'] == address, nodes), None)
 
     if node is None:
         update.message.reply_text('⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
         return WAIT_FOR_USER_INPUT
 
+    # Update data
     context.user_data['address'] = address
-    for field in NODE_FIELDS:
-        context.user_data[field] = node[field]
+    context.user_data['address_valid'] = True
+    context.user_data['status'] = node['status']
+    context.user_data['bond'] = node['bond']
+    context.user_data['slash_points'] = node['slash_points']
 
+    # Send message
     update.message.reply_text('Got it! 👌')
-
-    context.user_data['job_running'] = True
-
-    # TODO: Show stats right away
-    # show_stats(update, context)
-
-    show_action_buttons(context, update.message.chat.id)
+    show_action_buttons(context, chat_id=update.message.chat.id)
 
     return ConversationHandler.END
 
 
 @run_async
 def cancel(update, context):
-    show_action_buttons(context, update.message.chat.id)
+    """
+    Cancel any open conversation.
+    """
+
+    show_action_buttons(context, chat_id=update.message.chat.id)
     return ConversationHandler.END
+
+
+"""
+######################################################################################################################################################
+Jobs
+######################################################################################################################################################
+"""
+
+
+def check_thornode(context):
+    """
+    Check the thornode for any changes.
+    """
+
+    chat_id = context.job.context['chat_id']
+    user_data = context.job.context['user_data']
+
+    # Check if address is valid
+    if 'address_valid' not in user_data or user_data['address_valid'] is False:
+        return
+
+    address = user_data['address']
+
+    # Try to get node based on given address
+    nodes = requests.get(url=get_endpoint()).json()
+    node = next(filter(lambda node: node['node_address'] == address, nodes), None)
+
+    if node is None:
+        text = 'THORNode is not active anymore! 💀' + '\n' + \
+               'Address: ' + user_data['address'] + '\n\n' + \
+               'Please enter another THORNode address.'
+
+        # Update data
+        user_data['address_valid'] = False
+
+        # Send message
+        context.bot.send_message(chat_id, text)
+        show_action_buttons(context, chat_id=chat_id)
+
+        return
+
+    # Check which node fields have changed
+    changed_fields = [field for field in ['status', 'bond', 'slash_points'] if user_data[field] != node[field]]
+
+    # Check if there are any changes
+    if len(changed_fields) > 0:
+        text = 'THORNode: ' + user_data['address'] + '\n' + \
+               'Status: ' + user_data['status'].capitalize() + ' ➡️ ' + node['status'].capitalize() + '\n' + \
+               'Bond: ' + '{:,} RUNE'.format(int(user_data['bond'])) + ' ➡️ ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
+               'Slash Points: ' + '{:,}'.format(int(user_data['slash_points'])) + ' ➡️ ' + '{:,}'.format(int(node['slash_points']))
+
+        # Update data
+        user_data['status'] = node['status']
+        user_data['bond'] = node['bond']
+        user_data['slash_points'] = node['slash_points']
+
+        # Send message
+        context.bot.send_message(chat_id, text)
+        show_action_buttons(context, chat_id=chat_id)
 
 
 """
@@ -142,72 +223,39 @@ Helpers
 
 
 def show_action_buttons(context, chat_id):
+    """
+    Show buttons for supported actions.
+    """
+
     keyboard = [[
         InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
         InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats')
     ]]
+
+    # Send message
     context.bot.send_message(chat_id, 'What do you want to do?', reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_endpoint():
+    """
+    Return a endpoint to query data from.
+    """
+
+    if DEBUG:
+        return 'http://localhost:8000/nodeaccounts.json'
+
     endpoints = requests.get('https://testnet-seed.thorchain.info').json()
     random_endpoint = endpoints[random.randrange(0, len(endpoints))]
-    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
 
-
-def get_thor_node_object(all_nodes_json, address):
-    for i in range(0, len(all_nodes_json)):
-        if all_nodes_json[i]['node_address'] == address:
-            return all_nodes_json[i]
-
-    return None
-
-
-def check_thornode(context):
-    chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
-
-    if 'job_running' not in user_data or user_data['job_running'] is False:
-        return
-
-    address = user_data['address']
-
-    url = get_endpoint()
-    all_nodes_json = requests.get(url).json()
-    new_user_data = get_thor_node_object(all_nodes_json, address)
-
-    if new_user_data is None:
-        context.bot.send_message(chat_id,
-                                 'THORnode is not active anymore! 💀' + '\n' +
-                                 'Address: ' + context.user_data['address'] + '\n\n' +
-                                 'Please enter another THORNode address.'
-                                 )
-        user_data['job_running'] = False
-        show_action_buttons(context, chat_id)
-        return
-
-    changed_values = False
-    for field in NODE_FIELDS:
-        if user_data[field] != new_user_data[field]:
-            changed_values = True
-
-    if changed_values:
-        text = 'THORNode: ' + user_data['address'] + '\n' + \
-               'Status: ' + user_data['status'].capitalize() + ' ➡️ ' + new_user_data['status'].capitalize() + '\n' + \
-               'Bond: ' + '{:,} RUNE'.format(int(user_data['bond'])) + ' ➡️ ' + '{:,} RUNE'.format(int(new_user_data['bond'])) + '\n' + \
-               'Slash Points: ' + '{:,}'.format(int(user_data['slash_points'])) + ' ➡️ ' + '{:,}'.format(int(new_user_data['slash_points']))
-
-        # Update user data
-        user_data['status'] = new_user_data['status']
-        user_data['bond'] = new_user_data['bond']
-        user_data['slash_points'] = new_user_data['slash_points']
-
-        context.bot.send_message(chat_id, text)
-        show_action_buttons(context, chat_id)
+    return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
 
 
 def error(update, context):
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+    """
+    Log error.
+    """
+
+    logger.warning('Update "%s" caused error: %s', update, context.error)
 
 
 """
@@ -216,12 +264,15 @@ Application
 ######################################################################################################################################################
 """
 
-
 # Conversation state(s)
 WAIT_FOR_USER_INPUT = range(1)
 
 
 def main():
+    """
+    Init telegram bot, attach handlers and wait for incoming requests.
+    """
+
     # Init telegram bot
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
     dispatcher = bot.dispatcher
