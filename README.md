@@ -65,3 +65,30 @@ If you don't want the bot to be persistent, simply delete the file `session.data
 
 ## Production
 In production we do not use data from our local mock THORNode endpoint but real network data.
+
+### Docker
+To run the bot as a docker container, you need to have docker installed 
+(check out https://docs.docker.com/get-docker/ if you haven't).
+
+Navigate to the directory of this repo, and execute the following commands.
+The first command builds the docker image as described in the Dockerfile:
+```
+docker build -t thornode-telegram-alert-bot .
+```
+To make the bot persistent, we need to create a volume. If the bot crashes or is restarted, 
+the volume won't be affected and keeps the session data:
+```
+docker volume create thorbot-session-data-vol
+```
+Then to run the docker image as a container, run:
+```
+docker run --env TELEGRAM_BOT_TOKEN=xxxxxYourTokenxxxxx --dns '1.1.1.1' --mount source=thorbot-session-data-vol,target=/storage thornode-telegram-alert-bot
+```
+Replace the `--env` flag with your telegram token. 
+
+The `--dns` flag tells the container to use cloudflare's dns server. 
+We found that cloudflare is a bit faster than the preset dns server.
+
+Finally, the `--mount` flag tells the container to mount our previously created volume
+in the folder /session_data. This is exactly the folder where our 
+bot expects to save and retrieve the session_data file.
