@@ -7,10 +7,10 @@
       "ed25519": "thorpub1addwnpepqvcv305r20cg4cw4r2z8fy5ywgdav8fx3kuhv6kvm2d5rp3zqqeac7yg6rg"
     },
     "validator_cons_pub_key": "thorcpub1zcjduepqdn4kq7sa3gel2spa7nldpewm295rzklhnxjvqvfrsvd5wdk0y02quac8wc",
-    "bond": "100000042",
+    "bond": "1250000",
     "active_block_height": "17283",
     "bond_address": "tbnb1387yt6meuwyjmxg79fq0a3h5xh36zwmm3ylqfq",
-    "slash_points": "09",
+    "slash_points": "120",
     "status_since": "17283",
     "observer_active": false,
     "signer_active": false,
@@ -29,7 +29,7 @@
       "ed25519": "thorpub1addwnpepqf50yudpf46r6xg9u6t50zq5p5vawywdc3amcgk3898shyh704k4xhv5098"
     },
     "validator_cons_pub_key": "thorcpub1zcjduepqktgjammzpsnccuuqpr2kk2pagh9jcklet6sfylj4zjf5nxke9rgqaqy9lp",
-    "bond": "10000000420",
+    "bond": "24000000",
     "active_block_height": "0",
     "bond_address": "tbnb193a8kfjkm2yl58w76gn0unppnhzrv9q7vdsgv9",
     "slash_points": "0",
