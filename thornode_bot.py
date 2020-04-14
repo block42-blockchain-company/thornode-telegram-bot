@@ -125,7 +125,12 @@ def handle_input(update, context):
     address = update.message.text
 
     # Try to get node based on given address
-    nodes = requests.get(url=get_endpoint()).json()
+    while True:
+        request = requests.get(url=get_endpoint())
+        if request.status_code == 200:
+            break
+
+    nodes = request.json()
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
 
     if node is None:
@@ -178,7 +183,12 @@ def check_thornode(context):
     address = user_data['address']
 
     # Try to get node based on given address
-    nodes = requests.get(url=get_endpoint()).json()
+    while True:
+        request = requests.get(url=get_endpoint())
+        if request.status_code == 200:
+            break
+
+    nodes = request.json()
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
 
     if node is None:
@@ -280,7 +290,7 @@ def main():
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
     for chat_id in chat_ids:
-        dispatcher.job_queue.run_repeating(check_thornode, interval=30, context={
+        dispatcher.job_queue.run_repeating(check_thornode, interval=5, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
