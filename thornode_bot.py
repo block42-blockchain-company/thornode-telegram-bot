@@ -126,11 +126,11 @@ def handle_input(update, context):
 
     # Try to get node based on given address
     while True:
-        request = requests.get(url=get_endpoint())
-        if request.status_code == 200:
+        response = requests.get(url=get_endpoint())
+        if response.status_code == 200:
             break
 
-    nodes = request.json()
+    nodes = response.json()
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
 
     if node is None:
@@ -184,11 +184,11 @@ def check_thornode(context):
 
     # Try to get node based on given address
     while True:
-        request = requests.get(url=get_endpoint())
-        if request.status_code == 200:
+        response = requests.get(url=get_endpoint())
+        if response.status_code == 200:
             break
 
-    nodes = request.json()
+    nodes = response.json()
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
 
     if node is None:
