@@ -25,6 +25,7 @@ Make sure to set the correct values for `TELEGRAM_BOT_TOKEN` and `DEBUG`.
 * Start the bot
 * Run & test the bot
 * Production
+* Testing
 
 ## Install dependencies
 Install all required dependencies via: `pip install -r requirements.txt`
@@ -103,3 +104,30 @@ docker run --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,targe
 ```
 
 Replace the `--env` flag with your telegram bot token. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. This is the directory where your bot saves and retrieves the `session.data` file.
+
+## Testing
+To test the Thornode Bot, you need to impersonate your own Telegram Client programmatically.
+
+To do that, you need to obtain your API ID and API hash by creating a 
+telegram application that uses your user identity on https://my.telegram.org .
+Simply login in with your phone number that is registered on telegram, 
+then choose any application (we chose Android) and follow the steps. 
+
+Once you get access to api_id and api_hash, save them in the Environment variables
+`TELEGRAM_API_ID` and `TELEGRAM_API_HASH` respectively.
+
+You also need to have set the `TELEGRAM_BOT_TOKEN` environment variable with your 
+telegram bot token and set `DEBUG=True` as explained in previous sections.
+
+Keep in mind that the test always deletes the `session.data` file inside `storage/`
+in order to have fresh starts for every integration test. If you wish to keep your
+persistent data, don't run the integration test or comment out 
+the line `os.remove("../storage/session.data")` in integration_test.py
+
+To run the test open the `test/` folder in your terminal and run
+```
+python3 integration_test.py
+```
+
+The test should endure a few minutes.
+Every command succeded if you see `-----ALL TESTS PASSED-----` at the end.
