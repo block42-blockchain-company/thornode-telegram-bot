@@ -1,6 +1,5 @@
 import copy
 import json
-import string
 import time
 import http.server
 import os
@@ -20,22 +19,18 @@ if os.path.exists("../storage/session.data"):
     os.remove("../storage/session.data")
 thorbot = Popen(['python3', 'thornode_bot.py'], cwd="../")
 
-app = Client("my_account")
+app = Client(
+    "my_account",
+    api_id=os.environ['TELEGRAM_API_ID'],
+    api_hash=os.environ['TELEGRAM_API_HASH']
+)
 
 with open('nodeaccounts.json') as json_read_file:
     node_data = json.load(json_read_file)
     VALID_ADDRESS = node_data[0]["node_address"]
 
-#@app.on_message()
-#def my_handler(client, message):
-#    print(message)
-#    app.send_message(message.chat.id,
-#                     "Paul got kidnapped. To free him, send 1000 bitcoin to this address: 3DPNFXGoe8QGiEXEApQ3QtHb8wM15VCQU3")
-#    time.sleep(5)
-#    app.send_message(message.chat.id,
-#                     "Just kidding c: I'm trying out Pyrogram Telegram API!")
-
 chat_id = "THORnodeAlert_bot"
+
 
 def start():
     app.send_message(chat_id, "/start")
@@ -102,15 +97,23 @@ def notify(field):
     time.sleep(40)
     first_response = next(itertools.islice(app.iter_history(chat_id), 1, None))
     second_response = next(itertools.islice(app.iter_history(chat_id), 0, None))
-    expected_response = 'THORNode: ' + node_data_original[0]['node_address'] + '\n' + \
-               'Status: ' + node_data_original[0]['status'].capitalize() + ' ➡️ ' + node_data_new[0]['status'].capitalize() + '\n' + \
-               'Bond: ' + '{:,} RUNE'.format(int(node_data_original[0]['bond'])) + ' ➡️ ' + '{:,} RUNE'.format(int(node_data_new[0]['bond'])) + '\n' + \
-               'Slash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points'])) + ' ➡️ ' + '{:,}'.format(int(node_data_new[0]['slash_points']))
+
+    if field == "node_address":
+        expected_response = 'THORNode is not active anymore! 💀' + '\n' + \
+                           'Address: ' + node_data_original[0]['node_address'] + '\n\n' + \
+                           'Please enter another THORNode address.'
+    else:
+        expected_response = 'THORNode: ' + node_data_original[0]['node_address'] + '\n' + \
+                   'Status: ' + node_data_original[0]['status'].capitalize() + ' ➡️ ' + node_data_new[0]['status'].capitalize() + '\n' + \
+                   'Bond: ' + '{:,} RUNE'.format(int(node_data_original[0]['bond'])) + ' ➡️ ' + '{:,} RUNE'.format(int(node_data_new[0]['bond'])) + '\n' + \
+                   'Slash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points'])) + ' ➡️ ' + '{:,}'.format(int(node_data_new[0]['slash_points']))
+
     assert first_response.text.find(expected_response) != -1, \
         "Expected '" + expected_response + "' but got '" + first_response.text + "'"
     assert second_response.text == "What do you want to do?", "What do you want to do? - " \
                                                               "not visible after Show THORNode Stats"
     print("Notification Thornode data change - works with " + field)
+
 
 with app:
     try:
@@ -127,10 +130,19 @@ with app:
         add_address(VALID_ADDRESS,
                     "What's the address of your THORNode? (enter /cancel to return to the menu)",
                     "Got it! 👌")
-        #show_stats("THORNode: " + VALID_ADDRESS)
+        add_address(VALID_ADDRESS,
+                    '⚠️ This will override this THORNode: ' + VALID_ADDRESS + '\n\n'
+                    'What\'s the address of your THORNode? (enter /cancel to return to the menu)',
+                    "Got it! 👌")
+        show_stats("THORNode: " + VALID_ADDRESS)
         notify("status")
         notify("bond")
         notify("slash_points")
+        notify("node_address")
+        show_stats('THORNode is not active anymore! 💀' + '\n' + \
+                   'Address: ' + VALID_ADDRESS + '\n\n' + \
+                   'Please enter another THORNode address.')
+
         print("-----ALL TESTS PASSED-----")
 
     except AssertionError as e:
