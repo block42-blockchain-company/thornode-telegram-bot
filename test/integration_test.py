@@ -1,89 +1,85 @@
 import copy
 import json
 import time
-import http.server
 import os
 import itertools
 import random
 
 from subprocess import Popen
-from pyrogram import Client
+from pyrogram import Client as TelegramClient
 
-PORT = 8080
-Handler = http.server.SimpleHTTPRequestHandler
-
-
-server = Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'])
+mock_api_process = Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'])
 
 if os.path.exists("../storage/session.data"):
     os.remove("../storage/session.data")
-thorbot = Popen(['python3', 'thornode_bot.py'], cwd="../")
 
-app = Client(
+thornode_bot_process = Popen(['python3', 'thornode_bot.py'], cwd="../")
+
+telegram = TelegramClient(
     "my_account",
     api_id=os.environ['TELEGRAM_API_ID'],
     api_hash=os.environ['TELEGRAM_API_HASH']
 )
 
-with open('nodeaccounts.json') as json_read_file:
-    node_data = json.load(json_read_file)
-    VALID_ADDRESS = node_data[0]["node_address"]
+# We got an address from our mock api json file.
+# This address will be recognized as valid by our bot and used throughout the tests.
+VALID_ADDRESS = json.load(open('nodeaccounts.json'))[0]['node_address']
 
-chat_id = "THORnodeAlert_bot"
+BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
 
-def start():
-    app.send_message(chat_id, "/start")
+def test_start():
+    telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
 
-    response = next(app.iter_history(chat_id))
+    response = next(telegram.iter_history(BOT_ID))
     assert response.reply_markup.inline_keyboard[0][0].text == "Add THORNode", "Add THORNode not visible after /start"
     assert response.reply_markup.inline_keyboard[0][1].text == "Show THORNode Stats", \
         "Show THORNode Stats not visible after /start"
-    print("/start - works as expected")
+    print("/start ✅")
     print("------------------------")
 
 
-def show_stats(expected_response):
-    app.send_message(chat_id, "/start")
+def test_show_stats(expected_response):
+    telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
-    response = next(app.iter_history(chat_id))
+    response = next(telegram.iter_history(BOT_ID))
 
     response.click("Show THORNode Stats")
 
     time.sleep(3)
-    first_response = next(itertools.islice(app.iter_history(chat_id), 1, None))
-    second_response = next(itertools.islice(app.iter_history(chat_id), 0, None))
+    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
     assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                     "' but got '" + first_response.text + "'"
+                                                     "'\nbut got\n'" + first_response.text + "'"
     assert second_response.text == "What do you want to do?", "What do you want to do? - " \
                                                               "not visible after Show THORNode Stats"
-    print("Show THORNode Stats button - works as expected")
+    print("Show THORNode Stats ✅")
     print("------------------------")
 
 
-def add_address(address, expected_response1, expected_response2):
-    app.send_message(chat_id, "/start")
+def test_add_address(address, expected_response1, expected_response2):
+    telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
-    response0 = next(app.iter_history(chat_id))
+    setup_response = next(telegram.iter_history(BOT_ID))
 
-    response0.click("Add THORNode")
+    setup_response.click("Add THORNode")
     time.sleep(3)
-    response1 = next(app.iter_history(chat_id))
-    app.send_message(chat_id, address)
+    first_response = next(telegram.iter_history(BOT_ID))
+    telegram.send_message(BOT_ID, address)
     time.sleep(3)
-    response2_first = next(itertools.islice(app.iter_history(chat_id), 1, None))
-    response2_second = next(itertools.islice(app.iter_history(chat_id), 0, None))
+    second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
-    assert response1.text == expected_response1, "Expected '" + expected_response1 + "' but got '" + response1.text + "'"
-    assert response2_first.text == expected_response2 or response2_second.text == expected_response2, \
-        "Expected '" + expected_response2 + "' but got '" + response2_first.text + "' and '" + response2_second.text + "'"
-    print("Add THORNode button - works as expected with " + address)
+    assert first_response.text == expected_response1, "Expected '" + expected_response1 + "' but got '" + first_response.text + "'"
+    assert second_response_1.text == expected_response2 or second_response_2.text == expected_response2, \
+        "Expected '" + expected_response2 + "' but got '" + second_response_1.text + "' and '" + second_response_2.text + "'"
+    print("Add THORNode with " + address + " ✅")
     print("------------------------")
 
 
-def notify(field):
+def test_notify(field):
     with open('nodeaccounts.json') as json_read_file:
         node_data_original = json.load(json_read_file)
         node_data_new = copy.deepcopy(node_data_original)
@@ -95,8 +91,8 @@ def notify(field):
         json.dump(node_data_new, json_write_file)
 
     time.sleep(40)
-    first_response = next(itertools.islice(app.iter_history(chat_id), 1, None))
-    second_response = next(itertools.islice(app.iter_history(chat_id), 0, None))
+    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
     if field == "node_address":
         expected_response = 'THORNode is not active anymore! 💀' + '\n' + \
@@ -112,46 +108,43 @@ def notify(field):
         "Expected '" + expected_response + "' but got '" + first_response.text + "'"
     assert second_response.text == "What do you want to do?", "What do you want to do? - " \
                                                               "not visible after Show THORNode Stats"
-    print("Notification Thornode data change - works with " + field)
+    print("Notification Thornode data change with " + field + " ✅")
 
 
-with app:
+with telegram:
     try:
         time.sleep(5)
-        start()
-        show_stats("You have not told me about your THORNode yet. Please add one!")
-        add_address("invalidAddress",
-                    "What's the address of your THORNode? (enter /cancel to return to the menu)",
-                    "⛔️ I have not found a THORNode with this address! Please try another one. "
-                    "(enter /cancel to return to the menu)")
-        add_address("/cancel",
-                    "What's the address of your THORNode? (enter /cancel to return to the menu)",
-                    "What do you want to do?")
-        add_address(VALID_ADDRESS,
-                    "What's the address of your THORNode? (enter /cancel to return to the menu)",
-                    "Got it! 👌")
-        add_address(VALID_ADDRESS,
-                    '⚠️ This will override this THORNode: ' + VALID_ADDRESS + '\n\n'
-                    'What\'s the address of your THORNode? (enter /cancel to return to the menu)',
-                    "Got it! 👌")
-        show_stats("THORNode: " + VALID_ADDRESS)
-        notify("status")
-        notify("bond")
-        notify("slash_points")
-        notify("node_address")
-        show_stats('THORNode is not active anymore! 💀' + '\n' + \
-                   'Address: ' + VALID_ADDRESS + '\n\n' + \
-                   'Please enter another THORNode address.')
+        test_start()
+        test_show_stats(expected_response="You have not told me about your THORNode yet. Please add one!")
+        test_add_address(address="invalidAddress",
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="⛔️ I have not found a THORNode with this address! Please try another one. "
+                                            "(enter /cancel to return to the menu)")
+        test_add_address(address="/cancel",
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="What do you want to do?")
+        test_add_address(address=VALID_ADDRESS,
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="Got it! 👌")
+        test_add_address(address=VALID_ADDRESS,
+                         expected_response1="⚠️ This will override this THORNode: " + VALID_ADDRESS + "\n\n" 
+                                            "What\'s the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="Got it! 👌")
+        test_show_stats(expected_response="THORNode: " + VALID_ADDRESS)
+        test_notify(field="status")
+        test_notify(field="bond")
+        test_notify(field="slash_points")
+        test_notify(field="node_address")
+        test_show_stats(expected_response='THORNode is not active anymore! 💀' + '\n' +
+                        'Address: ' + VALID_ADDRESS + '\n\n' +
+                        'Please enter another THORNode address.')
 
-        print("-----ALL TESTS PASSED-----")
+        print("✅ -----ALL TESTS PASSED----- ✅")
 
     except AssertionError as e:
-        print("Assertion Error: ")
+        print("💥 Assertion Error: 💥")
         print(e)
-        print("--> Shutting done Thorbot, Server and Telegram Client...")
+        print("💥 --> Shutting done Thornode Bot Process, Mock API Server Process and Telegram Client... 💥")
     finally:
-        thorbot.terminate()
-        server.kill()
-
-
-
+        thornode_bot_process.terminate()
+        mock_api_process.kill()
