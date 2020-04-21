@@ -5,8 +5,6 @@ RUN mkdir /test
 
 ADD thornode_bot.py/ /
 ADD requirements.txt/ /
-ADD test/nodeaccounts.json /test
-ADD test/integration_test.py /test
 
 RUN pip install -r requirements.txt
 
