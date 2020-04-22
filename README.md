@@ -12,10 +12,11 @@ Install `docker` and run:
 
 ```
 docker volume create thornode-bot-volume
-docker run -d --env TELEGRAM_BOT_TOKEN=XXX --env DEBUG={True|False} --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
+docker run -d --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
+docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
 
-Make sure to set the correct values for `TELEGRAM_BOT_TOKEN` and `DEBUG`.
+Make sure to set the correct value for `TELEGRAM_BOT_TOKEN`.
 
 ## Steps to run everything yourself
 * Install dependencies
@@ -78,7 +79,8 @@ The bot persistents all data, which means it stores its chat data in the file `s
 If you want to reset your bot's data, simply delete the file `session.data` in the `storage` directory before startup.
 
 ## Production
-In production you do not want to use mock data from the local endpoint but real network data. To get real data just set `DEBUG=False` in your environment variables and the bot will use available seed nodes for data retrieval.
+In production you do not want to use mock data from the local endpoint but real network data. 
+To get real data just set `DEBUG=False` in your environment variables and the bot will use available seed nodes for data retrieval.
 
 ### Docker
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
@@ -104,6 +106,21 @@ docker run --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,targe
 ```
 
 Replace the `--env` flag with your telegram bot token. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. This is the directory where your bot saves and retrieves the `session.data` file.
+
+
+### Healthcheck
+There is a health check in the Dockerfile that runs the `healthcheck.py` file.
+The script assures that `thornode_bot.py` is periodically updating the `health.check` file.
+
+If the docker health check fails, the docker container is marked as "unhealthy". 
+However, when using docker standalone (without docker compose or docker swarm) this doesn't do anything.
+To restart unhealthy containers, we have to use the autoheal image https://hub.docker.com/r/willfarrell/autoheal/ .
+
+To make sure a potentially unhealthy thorbot_node container is restarted, run the autoheal container alongside the
+thornode_bot container:
+```
+docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
+```
 
 ## Testing
 To test the Thornode Bot, you need to impersonate your own Telegram Client programmatically.
