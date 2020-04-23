@@ -230,8 +230,9 @@ def healthy(context):
     """
         Write timestamp into health.check file for the health check
     """
-    timestamp = datetime.timestamp(datetime.now())
+
     with open('storage/health.check', 'w') as healthcheck_file:
+        timestamp = datetime.timestamp(datetime.now())
         healthcheck_file.write(str(timestamp))
 
 
@@ -305,7 +306,7 @@ def main():
         })
 
     # Start job for health check
-    dispatcher.job_queue.run_repeating(healthy, interval=10, context={})
+    dispatcher.job_queue.run_repeating(healthy, interval=5, context={})
 
     # Add command handlers
     dispatcher.add_handler(CommandHandler('start', start))
