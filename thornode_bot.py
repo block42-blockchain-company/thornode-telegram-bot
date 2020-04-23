@@ -27,6 +27,7 @@ Static & environment variables
 """
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+THORNODE_IP = os.environ['THORNODE_IP']
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """
@@ -51,7 +52,8 @@ def start(update, context):
         context.user_data['job_started'] = True
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
-           'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*!\n'
+           'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
+           'and when your *Block Height* got stuck!\n'
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
@@ -125,14 +127,7 @@ def handle_input(update, context):
     # Assume text input is an address
     address = update.message.text
 
-    # Try to get node based on given address
-    while True:
-        response = requests.get(url=get_endpoint())
-        if response.status_code == 200:
-            break
-
-    nodes = response.json()
-    node = next(filter(lambda node: node['node_address'] == address, nodes), None)
+    node = get_node_object(address=address)
 
     if node is None:
         update.message.reply_text('⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
@@ -183,14 +178,8 @@ def check_thornode(context):
 
     address = user_data['address']
 
-    # Try to get node based on given address
-    while True:
-        response = requests.get(url=get_endpoint())
-        if response.status_code == 200:
-            break
-
-    nodes = response.json()
-    node = next(filter(lambda node: node['node_address'] == address, nodes), None)
+    node = get_node_object(address=address)
+    block_height = get_block_height()
 
     if node is None:
         text = 'THORNode is not active anymore! 💀' + '\n' + \
@@ -223,6 +212,43 @@ def check_thornode(context):
 
         # Send message
         context.bot.send_message(chat_id, text)
+
+    # Check if block height got stuck
+    if 'block_height' in user_data and block_height <= user_data['block_height']:
+
+        # Increase stuck count to know if we already sent a notification
+        block_height_stuck_count = user_data['block_height_stuck_count']
+        block_height_stuck_count = block_height_stuck_count + 1
+        user_data['block_height_stuck_count'] = block_height_stuck_count
+    else:
+        # Check if we have to send a notification that the Height increases again
+        if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
+            text = 'Block height is increasing again! 👌' + '\n' + \
+                   'IP: ' + THORNODE_IP + '\n' + \
+                   'Block height now at: ' + block_height + '\n'
+            context.bot.send_message(chat_id, text)
+            user_data['block_height_stuck_count'] = -1
+        else:
+            user_data['block_height_stuck_count'] = 0
+
+    # Set current block height
+    user_data['block_height'] = block_height
+
+    # If it just got stuck send a message
+    if user_data['block_height_stuck_count'] == 1:
+        text = 'Block height is not increasing anymore! 💀' + '\n' + \
+               'IP: ' + THORNODE_IP + '\n' + \
+               'Block height stuck at: ' + block_height + '\n\n' + \
+               'Please check your Thornode immediately!'
+        context.bot.send_message(chat_id, text)
+
+    # Show buttons if there were changes or block height just got (un)stuck
+    # Stuck count:
+    # 0 == everthings alright
+    # 1 == just got stuck
+    # -1 == just got unstuck
+    # > 1 == still stuck
+    if len(changed_fields) > 0 or user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
         show_action_buttons(context, chat_id=chat_id)
 
 
@@ -257,9 +283,40 @@ def show_action_buttons(context, chat_id):
     context.bot.send_message(chat_id, 'What do you want to do?', reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def get_endpoint():
+def get_node_object(address):
     """
-    Return a endpoint to query data from.
+        Query nodeaccounts endpoints and return the Thornode object
+    """
+
+    while True:
+        response = requests.get(url=get_nodeaccounts_endpoint())
+        if response.status_code == 200:
+            break
+
+    nodes = response.json()
+
+    # get the right node
+    node = next(filter(lambda node: node['node_address'] == address, nodes), None)
+    return node
+
+
+def get_block_height():
+    """
+        Return block height of your Thornode
+    """
+
+    while True:
+        response = requests.get(url=get_status_endpoint())
+        if response.status_code == 200:
+            break
+
+    status = response.json()
+    return status['result']['sync_info']['latest_block_height']
+
+
+def get_nodeaccounts_endpoint():
+    """
+    Return the nodeaccounts endpoint to query data from.
     """
 
     if DEBUG:
@@ -269,6 +326,17 @@ def get_endpoint():
     random_endpoint = endpoints[random.randrange(0, len(endpoints))]
 
     return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
+
+
+def get_status_endpoint():
+    """
+       Return the endpoint for block height checks
+    """
+
+    if DEBUG:
+        return 'http://localhost:8000/status.json'
+
+    return 'http://' + THORNODE_IP + ':26657/status'
 
 
 def error(update, context):
@@ -297,6 +365,9 @@ def main():
     # Init telegram bot
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
     dispatcher = bot.dispatcher
+
+    if DEBUG:
+        dispatcher.job_queue.run_repeating(increase_block_height, interval=5)
 
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
