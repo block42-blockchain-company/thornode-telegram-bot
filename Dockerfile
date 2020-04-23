@@ -10,6 +10,6 @@ ADD requirements.txt/ /
 
 RUN pip install -r requirements.txt
 
-HEALTHCHECK --start-period=10s --interval=30s --retries=1 --timeout=3s CMD [ "python", "./healthcheck.py" ]
+HEALTHCHECK --start-period=10s --interval=10s --retries=2 --timeout=3s CMD [ "python", "./healthcheck.py" ]
 
 CMD [ "python", "./thornode_bot.py" ]
