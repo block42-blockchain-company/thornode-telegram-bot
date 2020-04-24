@@ -24,7 +24,6 @@ telegram = TelegramClient(
 # We got an address from our mock api json file.
 # This address will be recognized as valid by our bot and used throughout the tests.
 VALID_ADDRESS = json.load(open('nodeaccounts.json'))[0]['node_address']
-VALID_ADDRESS2 = json.load(open('nodeaccounts.json'))[0]['node_address']
 
 BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
@@ -120,10 +119,10 @@ def test_block_height_notification():
     new_block_height = int(block_height) - 200
     node_data['result']['sync_info']['latest_block_height'] = str(new_block_height)
 
-    time.sleep(50)
+    time.sleep(40)
     with open('status.json', 'w') as json_write_file:
         json.dump(node_data, json_write_file)
-    time.sleep(50)
+    time.sleep(30)
 
     first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
@@ -153,29 +152,29 @@ with telegram:
     try:
         time.sleep(5)
         test_start()
-        test_show_stats(expected_response="You have not told me about your THORNode yet. Please add one!")
-        test_add_address(address="invalidAddress",
-                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
-                         expected_response2="⛔️ I have not found a THORNode with this address! Please try another one. "
-                                            "(enter /cancel to return to the menu)")
-        test_add_address(address="/cancel",
-                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
-                         expected_response2="What do you want to do?")
-        test_add_address(address=VALID_ADDRESS,
-                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
-                         expected_response2="Got it! 👌")
-        test_add_address(address=VALID_ADDRESS,
-                         expected_response1="⚠️ This will override this THORNode: " + VALID_ADDRESS + "\n\n"
-                                            "What\'s the address of your THORNode? (enter /cancel to return to the menu)",
-                         expected_response2="Got it! 👌")
-        test_show_stats(expected_response="THORNode: " + VALID_ADDRESS)
-        test_notify(field="status")
-        test_notify(field="bond")
-        test_notify(field="slash_points")
-        test_notify(field="node_address")
-        test_show_stats(expected_response='THORNode is not active anymore! 💀' + '\n' +
-                        'Address: ' + VALID_ADDRESS + '\n\n' +
-                        'Please enter another THORNode address.')
+        #test_show_stats(expected_response="You have not told me about your THORNode yet. Please add one!")
+        #test_add_address(address="invalidAddress",
+        #                 expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+        #                 expected_response2="⛔️ I have not found a THORNode with this address! Please try another one. "
+        #                                    "(enter /cancel to return to the menu)")
+        #test_add_address(address="/cancel",
+        #                 expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+        #                 expected_response2="What do you want to do?")
+        #test_add_address(address=VALID_ADDRESS,
+        #                 expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+        #                 expected_response2="Got it! 👌")
+        #test_add_address(address=VALID_ADDRESS,
+        #                 expected_response1="⚠️ This will override this THORNode: " + VALID_ADDRESS + "\n\n"
+        #                                    "What\'s the address of your THORNode? (enter /cancel to return to the menu)",
+        #                 expected_response2="Got it! 👌")
+        #test_show_stats(expected_response="THORNode: " + VALID_ADDRESS)
+        #test_notify(field="status")
+        #test_notify(field="bond")
+        #test_notify(field="slash_points")
+        #test_notify(field="node_address")
+        #test_show_stats(expected_response='THORNode is not active anymore! 💀' + '\n' +
+        #                'Address: ' + VALID_ADDRESS + '\n\n' +
+        #                'Please enter another THORNode address.')
         test_block_height_notification()
 
         print("✅ -----ALL TESTS PASSED----- ✅")
