@@ -2,7 +2,7 @@ import os
 import logging
 import requests
 from datetime import datetime
-import json
+from subprocess import Popen
 
 from telegram.ext.dispatcher import run_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -32,9 +32,22 @@ DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """
 ######################################################################################################################################################
+Debug Processes
+######################################################################################################################################################
+"""
+
+if DEBUG:
+    mock_api_process = Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'], cwd="test/")
+    increase_block_height_process = Popen(['python3', 'increase_block_height.py'], cwd="test/")
+
+
+"""
+######################################################################################################################################################
 Handlers
 ######################################################################################################################################################
 """
+
+
 
 
 @run_async
@@ -282,23 +295,6 @@ def healthy(context):
         healthcheck_file.write(str(timestamp))
 
 
-def increase_block_height(context):
-    """
-        Only in Debug mode
-        To artificially increase the block height status.json is modified
-    """
-
-    with open('test/status.json') as json_read_file:
-        node_data = json.load(json_read_file)
-
-    block_height = node_data['result']['sync_info']['latest_block_height']
-    new_block_height = int(block_height) + 1
-    node_data['result']['sync_info']['latest_block_height'] = str(new_block_height)
-
-    with open('test/status.json', 'w') as json_write_file:
-        json.dump(node_data, json_write_file)
-
-
 """
 ######################################################################################################################################################
 Helpers
@@ -399,9 +395,6 @@ def main():
     # Init telegram bot
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
     dispatcher = bot.dispatcher
-
-    if DEBUG:
-        dispatcher.job_queue.run_repeating(increase_block_height, interval=5)
 
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
