@@ -12,11 +12,11 @@ Install `docker` and run:
 
 ```
 docker volume create thornode-bot-volume
-docker run -d --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
+docker run -d --env TELEGRAM_BOT_TOKEN=XXX --env NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
 docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
 
-Make sure to set the correct value for `TELEGRAM_BOT_TOKEN`.
+Make sure to set the correct values for `NODE_IP` and `TELEGRAM_BOT_TOKEN`
 
 ## Steps to run everything yourself
 * Install dependencies
@@ -43,7 +43,20 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 export TELEGRAM_BOT_TOKEN=XXX
 ```
 
-If your using a Jetbrains IDE (e.g. Pycharm), you can set this environment variable for your run configuration which is very convenient for development (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
+Next you need to specify the IP of the Node that you want to watch in `NODE_IP` environment variable.
+To run it on your own machine alongside the Nodes, set it to `localhost`.
+If you don't know any IPs of Nodes, take one of the seed nodes from https://testnet-seed.thorchain.info .
+```
+export NODE_IP=3.228.22.197
+```
+
+Finally, if you want test the Thornode Telegram Bot with data from your local machine, you
+need to set the debug environment variable:
+```
+export DEBUG=True
+```
+
+If your using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run configuration which is very convenient for development (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
 ## Start the mock THORNode endpoint
 To test whether the bot actually notifies you about changes, the data the bot is quering needs to change. You can simulate that by manually editing `test/nodeaccounts.json`.
@@ -102,7 +115,7 @@ docker volume create thornode-bot-volume
 Finally run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Replace the `--env` flag with your telegram bot token. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. This is the directory where your bot saves and retrieves the `session.data` file.
