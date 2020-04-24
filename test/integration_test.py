@@ -184,4 +184,3 @@ with telegram:
         print("💥 --> Shutting done Thornode Bot Process, Mock API Server Process and Telegram Client... 💥")
     finally:
         thornode_bot_process.terminate()
-        mock_api_process.kill()
