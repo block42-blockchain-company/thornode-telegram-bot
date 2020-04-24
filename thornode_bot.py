@@ -1,5 +1,4 @@
 import os
-import random
 import logging
 import requests
 from datetime import datetime
@@ -27,7 +26,7 @@ Static & environment variables
 """
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-THORNODE_IP = os.environ['THORNODE_IP']
+NODE_IP = os.environ['NODE_IP']
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """
@@ -45,7 +44,7 @@ def start(update, context):
 
     # Restart job for user
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(check_thornode, interval=30, context={
+        context.job_queue.run_repeating(node_checks, interval=30, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })
@@ -164,6 +163,15 @@ Jobs
 """
 
 
+def node_checks(context):
+    """
+        periodic checks of various stats
+    """
+
+    check_thornode(context)
+    check_block_height(context)
+
+
 def check_thornode(context):
     """
     Check the thornode for any changes.
@@ -179,7 +187,6 @@ def check_thornode(context):
     address = user_data['address']
 
     node = get_node_object(address=address)
-    block_height = get_block_height()
 
     if node is None:
         text = 'THORNode is not active anymore! 💀' + '\n' + \
@@ -192,7 +199,6 @@ def check_thornode(context):
         # Send message
         context.bot.send_message(chat_id, text)
         show_action_buttons(context, chat_id=chat_id)
-
         return
 
     # Check which node fields have changed
@@ -213,6 +219,20 @@ def check_thornode(context):
         # Send message
         context.bot.send_message(chat_id, text)
 
+    if len(changed_fields) > 0:
+        show_action_buttons(context, chat_id=chat_id)
+
+
+def check_block_height(context):
+    """
+        Make sure the block height increases
+    """
+
+    chat_id = context.job.context['chat_id']
+    user_data = context.job.context['user_data']
+
+    block_height = get_block_height()
+
     # Check if block height got stuck
     if 'block_height' in user_data and block_height <= user_data['block_height']:
 
@@ -224,7 +244,7 @@ def check_thornode(context):
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
-                   'IP: ' + THORNODE_IP + '\n' + \
+                   'IP: ' + NODE_IP + '\n' + \
                    'Block height now at: ' + block_height + '\n'
             context.bot.send_message(chat_id, text)
             user_data['block_height_stuck_count'] = -1
@@ -237,7 +257,7 @@ def check_thornode(context):
     # If it just got stuck send a message
     if user_data['block_height_stuck_count'] == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
-               'IP: ' + THORNODE_IP + '\n' + \
+               'IP: ' + NODE_IP + '\n' + \
                'Block height stuck at: ' + block_height + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
@@ -248,7 +268,8 @@ def check_thornode(context):
     # 1 == just got stuck
     # -1 == just got unstuck
     # > 1 == still stuck
-    if len(changed_fields) > 0 or user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
+
+    if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
         show_action_buttons(context, chat_id=chat_id)
 
 
@@ -322,10 +343,7 @@ def get_nodeaccounts_endpoint():
     if DEBUG:
         return 'http://localhost:8000/nodeaccounts.json'
 
-    endpoints = requests.get('https://testnet-seed.thorchain.info').json()
-    random_endpoint = endpoints[random.randrange(0, len(endpoints))]
-
-    return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
+    return 'http://' + NODE_IP + ':1317/thorchain/nodeaccounts'
 
 
 def get_status_endpoint():
@@ -336,7 +354,7 @@ def get_status_endpoint():
     if DEBUG:
         return 'http://localhost:8000/status.json'
 
-    return 'http://' + THORNODE_IP + ':26657/status'
+    return 'http://' + NODE_IP + ':26657/status'
 
 
 def error(update, context):
@@ -372,7 +390,7 @@ def main():
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
     for chat_id in chat_ids:
-        dispatcher.job_queue.run_repeating(check_thornode, interval=30, context={
+        dispatcher.job_queue.run_repeating(node_checks, interval=30, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
