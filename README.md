@@ -22,7 +22,6 @@ Make sure to set the correct values for `NODE_IP` and `TELEGRAM_BOT_TOKEN`
 * Install dependencies
 * Create Telegram bot token via [BotFather](https://t.me/BotFather)
 * Set environment variables
-* Start the mock THORNode endpoint
 * Start the bot
 * Run & test the bot
 * Production
@@ -55,23 +54,19 @@ need to set the debug environment variable:
 ```
 export DEBUG=True
 ```
+The DEBUG flag set to True will run a local web server as a separate process. 
+This way the telegram bot can access the local files `nodeaccounts.json` und `status.json`
+in the `test/` folder.
+
+To test whether the bot actually notifies you about changes, the data the bot is quering needs to change. 
+You can simulate that by manually editing `test/nodeaccounts.json`.
+
+Futhermore in DEBUG mode a separate process runs `increase_block_height.py` which artificially increases
+the block height so that there are no notifications that the block height got stuck.
+
 
 If your using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run configuration which is very convenient for development (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
-## Start the mock THORNode endpoint
-To test whether the bot actually notifies you about changes, the data the bot is quering needs to change. You can simulate that by manually editing `test/nodeaccounts.json`.
-
-Go to the root directory of this project and start the mock endpoint (`-d` specifies the webroot where we use the `test` directory):
-
-```
-python3 -m http.server 8000 --bind 127.0.0.1 -d test
-```
-
-If everything works fine you should receive the content of `test/nodeaccounts.json` at this endpoint:
-
-```
-http://localhost:8000/nodeaccounts.json
-```
 
 ## Start the bot
 Start the bot via:
