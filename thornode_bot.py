@@ -52,7 +52,7 @@ def start(update, context):
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
-           'and when your *Block Height* got stuck!\n'
+           'and if your *Block Height* gets stuck!'
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
@@ -237,9 +237,7 @@ def check_block_height(context):
     if 'block_height' in user_data and block_height <= user_data['block_height']:
 
         # Increase stuck count to know if we already sent a notification
-        block_height_stuck_count = user_data['block_height_stuck_count']
-        block_height_stuck_count = block_height_stuck_count + 1
-        user_data['block_height_stuck_count'] = block_height_stuck_count
+        user_data['block_height_stuck_count'] += 1
     else:
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
