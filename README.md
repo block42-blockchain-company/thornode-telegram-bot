@@ -15,8 +15,8 @@ docker volume create thornode-bot-volume
 docker run -d --env TELEGRAM_BOT_TOKEN=XXX --env NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
 docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
-
 Make sure to set the correct values for `NODE_IP` and `TELEGRAM_BOT_TOKEN`
+
 
 ## Steps to run everything yourself
 * Install dependencies

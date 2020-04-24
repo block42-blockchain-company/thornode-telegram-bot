@@ -27,11 +27,7 @@ Static & environment variables
 """
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-<<<<<<< HEAD
 NODE_IP = os.environ['NODE_IP']
-=======
-THORNODE_IP = os.environ['THORNODE_IP']
->>>>>>> check block height increases + testing
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """
@@ -57,11 +53,7 @@ def start(update, context):
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
-<<<<<<< HEAD
            'and if your *Block Height* gets stuck!'
-=======
-           'and when your *Block Height* got stuck!\n'
->>>>>>> check block height increases + testing
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
@@ -196,10 +188,6 @@ def check_thornode(context):
     address = user_data['address']
 
     node = get_node_object(address=address)
-<<<<<<< HEAD
-=======
-    block_height = get_block_height()
->>>>>>> check block height increases + testing
 
     if node is None:
         text = 'THORNode is not active anymore! 💀' + '\n' + \
@@ -232,7 +220,6 @@ def check_thornode(context):
         # Send message
         context.bot.send_message(chat_id, text)
 
-<<<<<<< HEAD
     if len(changed_fields) > 0:
         show_action_buttons(context, chat_id=chat_id)
 
@@ -247,28 +234,16 @@ def check_block_height(context):
 
     block_height = get_block_height()
 
-=======
->>>>>>> check block height increases + testing
     # Check if block height got stuck
     if 'block_height' in user_data and block_height <= user_data['block_height']:
 
         # Increase stuck count to know if we already sent a notification
-<<<<<<< HEAD
         user_data['block_height_stuck_count'] += 1
-=======
-        block_height_stuck_count = user_data['block_height_stuck_count']
-        block_height_stuck_count = block_height_stuck_count + 1
-        user_data['block_height_stuck_count'] = block_height_stuck_count
->>>>>>> check block height increases + testing
     else:
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
-<<<<<<< HEAD
                    'IP: ' + NODE_IP + '\n' + \
-=======
-                   'IP: ' + THORNODE_IP + '\n' + \
->>>>>>> check block height increases + testing
                    'Block height now at: ' + block_height + '\n'
             context.bot.send_message(chat_id, text)
             user_data['block_height_stuck_count'] = -1
@@ -281,11 +256,7 @@ def check_block_height(context):
     # If it just got stuck send a message
     if user_data['block_height_stuck_count'] == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
-<<<<<<< HEAD
                'IP: ' + NODE_IP + '\n' + \
-=======
-               'IP: ' + THORNODE_IP + '\n' + \
->>>>>>> check block height increases + testing
                'Block height stuck at: ' + block_height + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
@@ -296,12 +267,8 @@ def check_block_height(context):
     # 1 == just got stuck
     # -1 == just got unstuck
     # > 1 == still stuck
-<<<<<<< HEAD
 
     if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
-=======
-    if len(changed_fields) > 0 or user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
->>>>>>> check block height increases + testing
         show_action_buttons(context, chat_id=chat_id)
 
 
@@ -371,7 +338,6 @@ def get_node_object(address):
 
 
 def get_block_height():
-<<<<<<< HEAD
     """
         Return block height of your Thornode
     """
@@ -387,23 +353,6 @@ def get_block_height():
 
 def get_nodeaccounts_endpoint():
     """
-=======
-    """
-        Return block height of your Thornode
-    """
-
-    while True:
-        response = requests.get(url=get_status_endpoint())
-        if response.status_code == 200:
-            break
-
-    status = response.json()
-    return status['result']['sync_info']['latest_block_height']
-
-
-def get_nodeaccounts_endpoint():
-    """
->>>>>>> check block height increases + testing
     Return the nodeaccounts endpoint to query data from.
     """
 
@@ -422,17 +371,6 @@ def get_status_endpoint():
         return 'http://localhost:8000/status.json'
 
     return 'http://' + NODE_IP + ':26657/status'
-
-
-def get_status_endpoint():
-    """
-       Return the endpoint for block height checks
-    """
-
-    if DEBUG:
-        return 'http://localhost:8000/status.json'
-
-    return 'http://' + THORNODE_IP + ':26657/status'
 
 
 def error(update, context):
