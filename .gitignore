@@ -161,3 +161,4 @@ $RECYCLE.BIN/
 
 .idea
 storage/session.data
+storage/health.check

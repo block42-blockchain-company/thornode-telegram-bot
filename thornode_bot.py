@@ -2,6 +2,7 @@ import os
 import random
 import logging
 import requests
+from datetime import datetime
 
 from telegram.ext.dispatcher import run_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -225,6 +226,16 @@ def check_thornode(context):
         show_action_buttons(context, chat_id=chat_id)
 
 
+def healthy(context):
+    """
+        Write timestamp into health.check file for the health check
+    """
+
+    with open('storage/health.check', 'w') as healthcheck_file:
+        timestamp = datetime.timestamp(datetime.now())
+        healthcheck_file.write(str(timestamp))
+
+
 """
 ######################################################################################################################################################
 Helpers
@@ -290,9 +301,12 @@ def main():
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
     for chat_id in chat_ids:
-        dispatcher.job_queue.run_repeating(check_thornode, interval=5, context={
+        dispatcher.job_queue.run_repeating(check_thornode, interval=30, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
+
+    # Start job for health check
+    dispatcher.job_queue.run_repeating(healthy, interval=5, context={})
 
     # Add command handlers
     dispatcher.add_handler(CommandHandler('start', start))
