@@ -1,3 +1,4 @@
+import atexit
 import os
 import logging
 import requests
@@ -36,10 +37,15 @@ Debug Processes
 ######################################################################################################################################################
 """
 
+
 if DEBUG:
     mock_api_process = Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'], cwd="test/")
     increase_block_height_process = Popen(['python3', 'increase_block_height.py'], cwd="test/")
 
+    def cleanup():
+        mock_api_process.terminate()
+        increase_block_height_process.terminate()
+    atexit.register(cleanup)
 
 """
 ######################################################################################################################################################
@@ -66,7 +72,7 @@ def start(update, context):
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
-           'and if your *Block Height* gets stuck!'
+           'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!'
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
@@ -184,6 +190,7 @@ def node_checks(context):
 
     check_thornode(context)
     check_block_height(context)
+    check_midgard_api(context)
 
 
 def check_thornode(context):
@@ -285,6 +292,31 @@ def check_block_height(context):
         show_action_buttons(context, chat_id=chat_id)
 
 
+def check_midgard_api(context):
+    """
+        Check that Midgard API is ok
+    """
+    chat_id = context.job.context['chat_id']
+    user_data = context.job.context['user_data']
+
+    if 'is_midgard_healthy' not in user_data:
+        user_data['is_midgard_healthy'] = True
+
+    if user_data['is_midgard_healthy'] and not is_midgard_healthy():
+        user_data['is_midgard_healthy'] = False
+        text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
+               'IP: ' + NODE_IP + '\n\n' + \
+               'Please check your Thornode immediately!'
+        context.bot.send_message(chat_id, text)
+        show_action_buttons(context, chat_id=chat_id)
+    elif not user_data['is_midgard_healthy'] and is_midgard_healthy():
+        user_data['is_midgard_healthy'] = True
+        text = 'Midgard API is healthy again! 👌' + '\n' + \
+               'IP: ' + NODE_IP + '\n'
+        context.bot.send_message(chat_id, text)
+        show_action_buttons(context, chat_id=chat_id)
+
+
 def healthy(context):
     """
         Write timestamp into health.check file for the health check
@@ -347,6 +379,21 @@ def get_block_height():
     return status['result']['sync_info']['latest_block_height']
 
 
+def is_midgard_healthy():
+    """
+        Return status of 
+    """
+
+    response = requests.get(url=get_midgard_endpoint())
+    if response.status_code != 200:
+        return False
+
+    if response.text == '"OK"':
+        return True
+    else:
+        return False
+
+
 def get_nodeaccounts_endpoint():
     """
     Return the nodeaccounts endpoint to query data from.
@@ -367,6 +414,17 @@ def get_status_endpoint():
         return 'http://localhost:8000/status.json'
 
     return 'http://' + NODE_IP + ':26657/status'
+
+
+def get_midgard_endpoint():
+    """
+        Return the endpoint for Midgard API check
+    """
+
+    if DEBUG:
+        return 'http://localhost:8000/midgard.json'
+
+    return 'http://' + NODE_IP + ':8080/v1/health'
 
 
 def error(update, context):
