@@ -51,7 +51,7 @@ def test_show_stats(expected_response):
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
     assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                     "'\nbut got\n'" + first_response.text + "'"
+                                                     "'\n but got \n'" + first_response.text + "'"
     assert second_response.text == "What do you want to do?", "What do you want to do? - " \
                                                               "not visible after Show THORNode Stats"
     print("Show THORNode Stats ✅")
@@ -78,7 +78,7 @@ def test_add_address(address, expected_response1, expected_response2):
     print("------------------------")
 
 
-def test_notify(field):
+def test_thornode_notification(field):
     with open('nodeaccounts.json') as json_read_file:
         node_data_original = json.load(json_read_file)
         node_data_new = copy.deepcopy(node_data_original)
@@ -108,6 +108,7 @@ def test_notify(field):
     assert second_response.text == "What do you want to do?", "What do you want to do? - " \
                                                               "not visible after Show THORNode Stats"
     print("Notification Thornode data change with " + field + " ✅")
+    print("------------------------")
 
 
 def test_block_height_notification():
@@ -147,6 +148,34 @@ def test_block_height_notification():
     print("------------------------")
 
 
+def test_midgard_notification():
+    with open('midgard.json', 'w') as write_file:
+        write_file.write('"FAIL"')
+    time.sleep(40)
+    
+    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+
+    expected_response = 'Midgard API is not healthy anymore'
+    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + first_response.text + "'"
+    assert second_response.text == "What do you want to do?", "What do you want to do? - " \
+                                                              "not visible after block height notification"
+
+    with open('midgard.json', 'w') as write_file:
+        write_file.write('"OK"')
+    time.sleep(40)
+    
+    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+
+    expected_response = 'Midgard API is healthy again'
+    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + first_response.text + "'"
+    assert second_response.text == "What do you want to do?", "What do you want to do? - " \
+                                                              "not visible after block height notification"
+
+
 with telegram:
     try:
         time.sleep(5)
@@ -167,14 +196,15 @@ with telegram:
                                             "What\'s the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="Got it! 👌")
         test_show_stats(expected_response="THORNode: " + VALID_ADDRESS)
-        test_notify(field="status")
-        test_notify(field="bond")
-        test_notify(field="slash_points")
-        test_notify(field="node_address")
+        test_thornode_notification(field="status")
+        test_thornode_notification(field="bond")
+        test_thornode_notification(field="slash_points")
+        test_thornode_notification(field="node_address")
         test_show_stats(expected_response='THORNode is not active anymore! 💀' + '\n' +
                         'Address: ' + VALID_ADDRESS + '\n\n' +
                         'Please enter another THORNode address.')
         test_block_height_notification()
+        test_midgard_notification()
 
         print("✅ -----ALL TESTS PASSED----- ✅")
 
