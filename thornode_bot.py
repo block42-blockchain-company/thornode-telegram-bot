@@ -27,7 +27,7 @@ Static & environment variables
 """
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-NODE_IP = os.environ['NODE_IP']
+NODE_IP = os.environ['NODE_IP'] if 'NODE_IP' in os.environ else 'localhost'
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """

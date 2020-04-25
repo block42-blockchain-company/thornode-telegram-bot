@@ -12,11 +12,13 @@ Install `docker` and run:
 
 ```
 docker volume create thornode-bot-volume
-docker run -d --env TELEGRAM_BOT_TOKEN=XXX --env NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
+docker run -d --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot
 docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
-Make sure to set the correct values for `NODE_IP` and `TELEGRAM_BOT_TOKEN`
-
+Make sure to set the correct value for `TELEGRAM_BOT_TOKEN`
+If you don't want the default behaviour to monitor your own Node on `localhost`, 
+add `--env NODE_IP=XXX` to `docker run` command of the thornode_bot.
+If you don't know any IP, set `NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
 
 ## Steps to run everything yourself
 * Install dependencies
@@ -42,8 +44,8 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 export TELEGRAM_BOT_TOKEN=XXX
 ```
 
-Next you need to specify the IP of the Node that you want to watch in `NODE_IP` environment variable.
-To run it on your own machine alongside the Nodes, set it to `localhost`.
+Next you can specify the IP of the Node that you want to watch in `NODE_IP` environment variable.
+Leave this environment variable unset to listen on `localhost`.
 If you don't know any IPs of Nodes, take one of the seed nodes from https://testnet-seed.thorchain.info .
 ```
 export NODE_IP=3.228.22.197
