@@ -302,14 +302,14 @@ def check_midgard_api(context):
     if 'is_midgard_healthy' not in user_data:
         user_data['is_midgard_healthy'] = True
 
-    if user_data['is_midgard_healthy'] and not is_midgard_healthy():
+    if user_data['is_midgard_healthy'] == True and not is_midgard_healthy():
         user_data['is_midgard_healthy'] = False
         text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
                'IP: ' + NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
         show_action_buttons(context, chat_id=chat_id)
-    elif not user_data['is_midgard_healthy'] and is_midgard_healthy():
+    elif user_data['is_midgard_healthy'] == False and is_midgard_healthy():
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + NODE_IP + '\n'
@@ -399,10 +399,8 @@ def get_nodeaccounts_endpoint():
     Return the nodeaccounts endpoint to query data from.
     """
 
-    if DEBUG:
-        return 'http://localhost:8000/nodeaccounts.json'
+    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + NODE_IP + '1317/thorchain/nodeaccounts'
 
-    return 'http://' + NODE_IP + ':1317/thorchain/nodeaccounts'
 
 
 def get_status_endpoint():
@@ -410,22 +408,14 @@ def get_status_endpoint():
        Return the endpoint for block height checks
     """
 
-    if DEBUG:
-        return 'http://localhost:8000/status.json'
-
-    return 'http://' + NODE_IP + ':26657/status'
-
+    return 'http://localhost:8000/status.json' if DEBUG else 'http://' + NODE_IP + ':26657/status'
 
 def get_midgard_endpoint():
     """
         Return the endpoint for Midgard API check
     """
 
-    if DEBUG:
-        return 'http://localhost:8000/midgard.json'
-
-    return 'http://' + NODE_IP + ':8080/v1/health'
-
+    return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + NODE_IP + ':8080/v1/health'
 
 def error(update, context):
     """
