@@ -94,7 +94,7 @@ def add_thornode(update, context):
     # Send message
     query.edit_message_text(text)
 
-    return WAIT_FOR_USER_INPUT
+    return WAIT_FOR_ADDRESS
 
 
 @run_async
@@ -133,7 +133,7 @@ def handle_input(update, context):
 
     if node is None:
         update.message.reply_text('⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
-        return WAIT_FOR_USER_INPUT
+        return WAIT_FOR_ADDRESS
 
     # Update data
     context.user_data[address] = {}
@@ -166,7 +166,7 @@ def thornode_details(update, context):
     # Send message
     text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-    return WAIT_FOR_DETAIL
+    return WAIT_FOR_ACTION
 
 
 @run_async
@@ -218,13 +218,13 @@ def check_thornodes(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    # flag to show home buttons or not
+    # Flag to show home buttons or not
     message_sent = False
 
-    # list to delete entries after loop
+    # List to delete entries after loop
     delete_addresses = []
     
-    # iterate through all keys
+    # Iterate through all keys
     for address in user_data.keys():
         # Filter out the thornode addresses
         if "thor" in address:
@@ -393,7 +393,7 @@ def get_node_object(address):
 
     nodes = response.json()
 
-    # get the right node
+    # Get the right node
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
     return node
 
@@ -466,7 +466,7 @@ Application
 """
 
 # Conversation state(s)
-WAIT_FOR_USER_INPUT, WAIT_FOR_DETAIL = range(2)
+WAIT_FOR_ADDRESS, WAIT_FOR_ACTION = range(2)
 
 
 def main():
@@ -494,7 +494,7 @@ def main():
     # "Home Screen" conversation handler
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$')],
-        states={WAIT_FOR_USER_INPUT: [
+        states={WAIT_FOR_ADDRESS: [
             CommandHandler('cancel', cancel),
             CallbackQueryHandler(add_thornode, pattern='^add_thornode$'),
             MessageHandler(Filters.text, handle_input, pass_job_queue=True, pass_chat_data=True)
@@ -505,7 +505,7 @@ def main():
     # Thornode Detail conversation handler
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details-')],
-        states={WAIT_FOR_DETAIL: [
+        states={WAIT_FOR_ACTION: [
             CommandHandler('cancel', cancel),
             CallbackQueryHandler(thornode_details, pattern='^thornode_details-'),
             CallbackQueryHandler(show_stats, pattern='^show_stats'),
