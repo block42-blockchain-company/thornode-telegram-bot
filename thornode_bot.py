@@ -221,6 +221,9 @@ def check_thornodes(context):
     # flag to show home buttons or not
     message_sent = False
 
+    # list to delete entries after loop
+    delete_addresses = []
+    
     # iterate through all keys
     for address in user_data.keys():
         # Filter out the thornode addresses
@@ -229,10 +232,11 @@ def check_thornodes(context):
 
             if node is None:
                 text = 'THORNode is not active anymore! 💀' + '\n' + \
-                       'Address: ' + user_data[address]['address'] + '\n\n' + \
+                       'Address: ' + address + '\n\n' + \
                        'Please enter another THORNode address.'
 
-                del user_data[address]
+                delete_addresses.append(address)
+    
                 # Send message
                 context.bot.send_message(chat_id, text)
                 message_sent = True
@@ -259,6 +263,9 @@ def check_thornodes(context):
                 # Send message
                 context.bot.send_message(chat_id, text)
                 message_sent = True
+
+    for address in delete_addresses:
+        del user_data[address]
 
     if message_sent:
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
@@ -328,7 +335,7 @@ def check_midgard_api(context):
                'IP: ' + NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
-        show_home_buttons(context, chat_id=chat_id)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
     elif user_data['is_midgard_healthy'] == False and is_midgard_healthy():
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
