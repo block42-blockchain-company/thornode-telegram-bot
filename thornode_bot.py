@@ -54,8 +54,6 @@ Handlers
 """
 
 
-
-
 @run_async
 def start(update, context):
     """
@@ -102,7 +100,7 @@ def add_thornode(update, context):
 @run_async
 def show_stats(update, context):
     """
-    Send thornode stats if a valid address is available.
+    Send thornode stats of the chosen address
     """
 
     # Enable message editing
@@ -153,7 +151,7 @@ def handle_input(update, context):
 @run_async
 def thornode_details(update, context):
     """
-        Shows thornode detail buttons
+    Shows thornode detail buttons
     """
 
     query = update.callback_query
@@ -167,21 +165,21 @@ def thornode_details(update, context):
 
     # Send message
     text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
-    context.bot.send_message(query.message.chat_id, text, reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     return WAIT_FOR_DETAIL
 
 
 @run_async
 def back_button(update, context):
     """
-        Return to home menu
+    Return to home menu
     """
 
     query = update.callback_query
     # Answer so that the small clock when you click a button disappears
     query.answer()
 
-    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
+    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data, query=query)
     return ConversationHandler.END
 
 
@@ -204,7 +202,7 @@ Jobs
 
 def node_checks(context):
     """
-        periodic checks of various stats
+    Periodic checks of various node stats
     """
 
     check_thornodes(context)
@@ -214,7 +212,7 @@ def node_checks(context):
 
 def check_thornodes(context):
     """
-    Check the thornode for any changes.
+    Check all added thornodes for any changes.
     """
 
     chat_id = context.job.context['chat_id']
@@ -268,7 +266,7 @@ def check_thornodes(context):
 
 def check_block_height(context):
     """
-        Make sure the block height increases
+    Make sure the block height increases
     """
 
     chat_id = context.job.context['chat_id']
@@ -316,7 +314,7 @@ def check_block_height(context):
 
 def check_midgard_api(context):
     """
-        Check that Midgard API is ok
+    Check that Midgard API is ok
     """
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
@@ -341,7 +339,7 @@ def check_midgard_api(context):
 
 def healthy(context):
     """
-        Write timestamp into health.check file for the health check
+    Write timestamp into health.check file for the health check
     """
 
     with open('storage/health.check', 'w') as healthcheck_file:
@@ -356,10 +354,11 @@ Helpers
 """
 
 
-def show_home_buttons(context, chat_id, user_data):
+def show_home_buttons(context, chat_id, user_data, query=None):
     """
     Show buttons for supported actions.
     """
+
     keyboard = [[]]
 
     for key in user_data.keys():
@@ -368,13 +367,16 @@ def show_home_buttons(context, chat_id, user_data):
 
     keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode')])
 
-    # Send message
-    context.bot.send_message(chat_id, 'Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
+    # Edit message or write a new one depending on function call
+    if query:
+        query.edit_message_text('Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        context.bot.send_message(chat_id, 'Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_node_object(address):
     """
-        Query nodeaccounts endpoints and return the Thornode object
+    Query nodeaccounts endpoints and return the Thornode object
     """
 
     while True:
@@ -391,7 +393,7 @@ def get_node_object(address):
 
 def get_block_height():
     """
-        Return block height of your Thornode
+    Return block height of your Thornode
     """
 
     while True:
@@ -405,7 +407,7 @@ def get_block_height():
 
 def is_midgard_healthy():
     """
-        Return status of 
+    Return status of Midgard API
     """
 
     response = requests.get(url=get_midgard_endpoint())
@@ -428,7 +430,7 @@ def get_nodeaccounts_endpoint():
 
 def get_status_endpoint():
     """
-       Return the endpoint for block height checks
+    Return the endpoint for block height checks
     """
 
     return 'http://localhost:8000/status.json' if DEBUG else 'http://' + NODE_IP + ':26657/status'
@@ -436,7 +438,7 @@ def get_status_endpoint():
 
 def get_midgard_endpoint():
     """
-        Return the endpoint for Midgard API check
+    Return the endpoint for Midgard API check
     """
 
     return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + NODE_IP + ':8080/v1/health'
@@ -457,7 +459,7 @@ Application
 """
 
 # Conversation state(s)
-WAIT_FOR_USER_INPUT,WAIT_FOR_DETAIL = range(2)
+WAIT_FOR_USER_INPUT, WAIT_FOR_DETAIL = range(2)
 
 
 def main():
@@ -482,7 +484,7 @@ def main():
     # Add command handlers
     dispatcher.add_handler(CommandHandler('start', start))
 
-    # Add Thornode conversation handler
+    # "Home Screen" conversation handler
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$')],
         states={WAIT_FOR_USER_INPUT: [
@@ -493,7 +495,7 @@ def main():
         fallbacks=[]
     ))
     
-    # Thornode  Detail conversation handler
+    # Thornode Detail conversation handler
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details-')],
         states={WAIT_FOR_DETAIL: [
