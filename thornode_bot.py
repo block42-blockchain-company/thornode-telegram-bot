@@ -60,13 +60,14 @@ def start(update, context):
     Send start message and display action buttons.
     """
 
-    # Restart job for user
+    # Start job for user
     if 'job_started' not in context.user_data:
         context.job_queue.run_repeating(node_checks, interval=30, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })
         context.user_data['job_started'] = True
+        context.user_data['nodes'] = {}
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
@@ -98,29 +99,6 @@ def add_thornode(update, context):
 
 
 @run_async
-def show_stats(update, context):
-    """
-    Send thornode stats of the chosen address
-    """
-
-    # Enable message editing
-    query = update.callback_query
-    query.answer()
-    address = query.data.split("-")[1]
-
-    text = 'THORNode: ' + address + '\n' + \
-           'Status: ' + context.user_data[address]['status'].capitalize() + '\n' + \
-           'Bond: ' + '{:,} RUNE'.format(int(context.user_data[address]['bond'])) + '\n' + \
-           'Slash Points: ' + '{:,}'.format(int(context.user_data[address]['slash_points']))
-
-    # Send message
-    query.edit_message_text(text)
-    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
-
-    return ConversationHandler.END
-
-
-@run_async
 def handle_input(update, context):
     """
     Handle text input after an user has asked to add a new thornode.
@@ -132,18 +110,44 @@ def handle_input(update, context):
     node = get_node_object(address=address)
 
     if node is None:
-        update.message.reply_text('⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
+        update.message.reply_text(
+            '⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
         return WAIT_FOR_ADDRESS
 
     # Update data
-    context.user_data[address] = {}
-    context.user_data[address]['status'] = node['status']
-    context.user_data[address]['bond'] = node['bond']
-    context.user_data[address]['slash_points'] = node['slash_points']
-    
+    context.user_data['nodes'][address] = {}
+    context.user_data['nodes'][address]['status'] = node['status']
+    context.user_data['nodes'][address]['bond'] = node['bond']
+    context.user_data['nodes'][address]['slash_points'] = node['slash_points']
+
     # Send message
     update.message.reply_text('Got it! 👌')
     show_home_buttons(context, chat_id=update.message.chat.id, user_data=context.user_data)
+
+    return ConversationHandler.END
+
+
+@run_async
+def show_stats(update, context):
+    """
+    Send thornode stats of the chosen address
+    """
+
+    # Enable message editing
+    query = update.callback_query
+    query.answer()
+    address = query.data.split("-")[1]
+
+    node = context.user_data['nodes'][address]
+
+    text = 'THORNode: ' + address + '\n' + \
+           'Status: ' + node['status'].capitalize() + '\n' + \
+           'Bond: ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
+           'Slash Points: ' + '{:,}'.format(int(node['slash_points']))
+
+    # Send message
+    query.edit_message_text(text)
+    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
 
     return ConversationHandler.END
 
@@ -225,47 +229,46 @@ def check_thornodes(context):
     delete_addresses = []
     
     # Iterate through all keys
-    for address in user_data.keys():
-        # Filter out the thornode addresses
-        if "thor" in address:
-            node = get_node_object(address=address)
+    for address in user_data['nodes'].keys():
+        remote_node = get_node_object(address=address)
+        local_node = user_data['nodes'][address]
 
-            if node is None:
-                text = 'THORNode is not active anymore! 💀' + '\n' + \
-                       'Address: ' + address + '\n\n' + \
-                       'Please enter another THORNode address.'
+        if remote_node is None:
+            text = 'THORNode is not active anymore! 💀' + '\n' + \
+                   'Address: ' + address + '\n\n' + \
+                   'Please enter another THORNode address.'
 
-                delete_addresses.append(address)
-    
-                # Send message
-                context.bot.send_message(chat_id, text)
-                message_sent = True
-                continue
+            delete_addresses.append(address)
 
-            # Check which node fields have changed
-            changed_fields = [field for field in ['status', 'bond', 'slash_points'] if user_data[address][field] != node[field]]
+            # Send message
+            context.bot.send_message(chat_id, text)
+            message_sent = True
+            continue
 
-            # Check if there are any changes
-            if len(changed_fields) > 0:
-                text = 'THORNode: ' + address + '\n' + \
-                       'Status: ' + user_data[address]['status'].capitalize() + \
-                       ' ➡️ ' + node['status'].capitalize() + '\n' + \
-                       'Bond: ' + '{:,} RUNE'.format(int(user_data[address]['bond'])) + \
-                       ' ➡️ ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
-                       'Slash Points: ' + '{:,}'.format(int(user_data[address]['slash_points'])) + \
-                       ' ➡️ ' + '{:,}'.format(int(node['slash_points']))
+        # Check which node fields have changed
+        changed_fields = [field for field in ['status', 'bond', 'slash_points'] if local_node[field] != remote_node[field]]
 
-                # Update data
-                user_data[address]['status'] = node['status']
-                user_data[address]['bond'] = node['bond']
-                user_data[address]['slash_points'] = node['slash_points']
+        # Check if there are any changes
+        if len(changed_fields) > 0:
+            text = 'THORNode: ' + address + '\n' + \
+                   'Status: ' + local_node['status'].capitalize() + \
+                   ' ➡️ ' + remote_node['status'].capitalize() + '\n' + \
+                   'Bond: ' + '{:,} RUNE'.format(int(local_node['bond'])) + \
+                   ' ➡️ ' + '{:,} RUNE'.format(int(remote_node['bond'])) + '\n' + \
+                   'Slash Points: ' + '{:,}'.format(int(local_node['slash_points'])) + \
+                   ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
-                # Send message
-                context.bot.send_message(chat_id, text)
-                message_sent = True
+            # Update data
+            local_node['status'] = remote_node['status']
+            local_node['bond'] = remote_node['bond']
+            local_node['slash_points'] = remote_node['slash_points']
+
+            # Send message
+            context.bot.send_message(chat_id, text)
+            message_sent = True
 
     for address in delete_addresses:
-        del user_data[address]
+        del user_data['nodes'][address]
 
     if message_sent:
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
@@ -368,9 +371,8 @@ def show_home_buttons(context, chat_id, user_data, query=None):
 
     keyboard = [[]]
 
-    for key in user_data.keys():
-        if "thor" in key:
-            keyboard.append([InlineKeyboardButton(key, callback_data='thornode_details-' + key)])
+    for address in user_data['nodes'].keys():
+        keyboard.append([InlineKeyboardButton(address, callback_data='thornode_details-' + address)])
 
     keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode')])
 
