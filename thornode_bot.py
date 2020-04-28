@@ -54,21 +54,20 @@ Handlers
 """
 
 
-
-
 @run_async
 def start(update, context):
     """
     Send start message and display action buttons.
     """
 
-    # Restart job for user
+    # Start job for user
     if 'job_started' not in context.user_data:
         context.job_queue.run_repeating(node_checks, interval=30, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })
         context.user_data['job_started'] = True
+        context.user_data['nodes'] = {}
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
@@ -76,7 +75,7 @@ def start(update, context):
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
-    show_action_buttons(context, chat_id=update.message.chat.id)
+    show_home_buttons(context, chat_id=update.message.chat.id, user_data=context.user_data)
 
 
 @run_async
@@ -91,50 +90,12 @@ def add_thornode(update, context):
 
     text = ''
 
-    if 'address_valid' in context.user_data and context.user_data['address_valid'] is True:
-        text += '⚠️ This will override this THORNode: ' + context.user_data['address'] + '\n\n'
-
     text += 'What\'s the address of your THORNode? (enter /cancel to return to the menu)'
 
     # Send message
     query.edit_message_text(text)
 
-    return WAIT_FOR_USER_INPUT
-
-
-@run_async
-def show_stats(update, context):
-    """
-    Send thornode stats if a valid address is available.
-    """
-
-    # Enable message editing
-    query = update.callback_query
-    query.answer()
-
-    # Check if user has set a thornode address
-    if 'address' not in context.user_data:
-        text = 'You have not told me about your THORNode yet. Please add one!'
-        query.edit_message_text(text)
-        show_action_buttons(context, update.effective_chat.id)
-        return ConversationHandler.END
-
-    # Check if thornode address is valid
-    if context.user_data['address_valid'] is True:
-        text = 'THORNode: ' + context.user_data['address'] + '\n' + \
-               'Status: ' + context.user_data['status'].capitalize() + '\n' + \
-               'Bond: ' + '{:,} RUNE'.format(int(context.user_data['bond'])) + '\n' + \
-               'Slash Points: ' + '{:,}'.format(int(context.user_data['slash_points']))
-    else:
-        text = 'THORNode is not active anymore! 💀' + '\n' + \
-               'Address: ' + context.user_data['address'] + '\n\n' + \
-               'Please enter another THORNode address.'
-
-    # Send message
-    query.edit_message_text(text)
-    show_action_buttons(context, chat_id=update.effective_chat.id)
-
-    return ConversationHandler.END
+    return WAIT_FOR_ADDRESS
 
 
 @run_async
@@ -149,20 +110,80 @@ def handle_input(update, context):
     node = get_node_object(address=address)
 
     if node is None:
-        update.message.reply_text('⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
-        return WAIT_FOR_USER_INPUT
+        update.message.reply_text(
+            '⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
+        return WAIT_FOR_ADDRESS
 
     # Update data
-    context.user_data['address'] = address
-    context.user_data['address_valid'] = True
-    context.user_data['status'] = node['status']
-    context.user_data['bond'] = node['bond']
-    context.user_data['slash_points'] = node['slash_points']
+    context.user_data['nodes'][address] = {}
+    context.user_data['nodes'][address]['status'] = node['status']
+    context.user_data['nodes'][address]['bond'] = node['bond']
+    context.user_data['nodes'][address]['slash_points'] = node['slash_points']
 
     # Send message
     update.message.reply_text('Got it! 👌')
-    show_action_buttons(context, chat_id=update.message.chat.id)
+    show_home_buttons(context, chat_id=update.message.chat.id, user_data=context.user_data)
 
+    return ConversationHandler.END
+
+
+@run_async
+def show_stats(update, context):
+    """
+    Send thornode stats of the chosen address
+    """
+
+    # Enable message editing
+    query = update.callback_query
+    query.answer()
+    address = query.data.split("-")[1]
+
+    node = context.user_data['nodes'][address]
+
+    text = 'THORNode: ' + address + '\n' + \
+           'Status: ' + node['status'].capitalize() + '\n' + \
+           'Bond: ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
+           'Slash Points: ' + '{:,}'.format(int(node['slash_points']))
+
+    # Send message
+    query.edit_message_text(text)
+    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
+
+    return ConversationHandler.END
+
+
+@run_async
+def thornode_details(update, context):
+    """
+    Shows thornode detail buttons
+    """
+
+    query = update.callback_query
+    query.answer()
+    address = query.data.split("-")[1]
+
+    keyboard = [[
+        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats-' + address),
+        InlineKeyboardButton('<< Back', callback_data='back_button')
+    ]]
+
+    # Send message
+    text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
+    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    return WAIT_FOR_ACTION
+
+
+@run_async
+def back_button(update, context):
+    """
+    Return to home menu
+    """
+
+    query = update.callback_query
+    # Answer so that the small clock when you click a button disappears
+    query.answer()
+
+    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data, query=query)
     return ConversationHandler.END
 
 
@@ -172,7 +193,7 @@ def cancel(update, context):
     Cancel any open conversation.
     """
 
-    show_action_buttons(context, chat_id=update.message.chat.id)
+    show_home_buttons(context, chat_id=update.message.chat.id, user_data=context.user_data)
     return ConversationHandler.END
 
 
@@ -185,68 +206,77 @@ Jobs
 
 def node_checks(context):
     """
-        periodic checks of various stats
+    Periodic checks of various node stats
     """
 
-    check_thornode(context)
+    check_thornodes(context)
     check_block_height(context)
     check_midgard_api(context)
 
 
-def check_thornode(context):
+def check_thornodes(context):
     """
-    Check the thornode for any changes.
+    Check all added thornodes for any changes.
     """
 
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    # Check if address is valid
-    if 'address_valid' not in user_data or user_data['address_valid'] is False:
-        return
+    # Flag to show home buttons or not
+    message_sent = False
 
-    address = user_data['address']
+    # List to delete entries after loop
+    delete_addresses = []
+    
+    # Iterate through all keys
+    for address in user_data['nodes'].keys():
+        remote_node = get_node_object(address=address)
+        local_node = user_data['nodes'][address]
 
-    node = get_node_object(address=address)
+        if remote_node is None:
+            text = 'THORNode is not active anymore! 💀' + '\n' + \
+                   'Address: ' + address + '\n\n' + \
+                   'Please enter another THORNode address.'
 
-    if node is None:
-        text = 'THORNode is not active anymore! 💀' + '\n' + \
-               'Address: ' + user_data['address'] + '\n\n' + \
-               'Please enter another THORNode address.'
+            delete_addresses.append(address)
 
-        # Update data
-        user_data['address_valid'] = False
+            # Send message
+            context.bot.send_message(chat_id, text)
+            message_sent = True
+            continue
 
-        # Send message
-        context.bot.send_message(chat_id, text)
-        show_action_buttons(context, chat_id=chat_id)
-        return
+        # Check which node fields have changed
+        changed_fields = [field for field in ['status', 'bond', 'slash_points'] if local_node[field] != remote_node[field]]
 
-    # Check which node fields have changed
-    changed_fields = [field for field in ['status', 'bond', 'slash_points'] if user_data[field] != node[field]]
+        # Check if there are any changes
+        if len(changed_fields) > 0:
+            text = 'THORNode: ' + address + '\n' + \
+                   'Status: ' + local_node['status'].capitalize() + \
+                   ' ➡️ ' + remote_node['status'].capitalize() + '\n' + \
+                   'Bond: ' + '{:,} RUNE'.format(int(local_node['bond'])) + \
+                   ' ➡️ ' + '{:,} RUNE'.format(int(remote_node['bond'])) + '\n' + \
+                   'Slash Points: ' + '{:,}'.format(int(local_node['slash_points'])) + \
+                   ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
-    # Check if there are any changes
-    if len(changed_fields) > 0:
-        text = 'THORNode: ' + user_data['address'] + '\n' + \
-               'Status: ' + user_data['status'].capitalize() + ' ➡️ ' + node['status'].capitalize() + '\n' + \
-               'Bond: ' + '{:,} RUNE'.format(int(user_data['bond'])) + ' ➡️ ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
-               'Slash Points: ' + '{:,}'.format(int(user_data['slash_points'])) + ' ➡️ ' + '{:,}'.format(int(node['slash_points']))
+            # Update data
+            local_node['status'] = remote_node['status']
+            local_node['bond'] = remote_node['bond']
+            local_node['slash_points'] = remote_node['slash_points']
 
-        # Update data
-        user_data['status'] = node['status']
-        user_data['bond'] = node['bond']
-        user_data['slash_points'] = node['slash_points']
+            # Send message
+            context.bot.send_message(chat_id, text)
+            message_sent = True
 
-        # Send message
-        context.bot.send_message(chat_id, text)
+    for address in delete_addresses:
+        del user_data['nodes'][address]
 
-    if len(changed_fields) > 0:
-        show_action_buttons(context, chat_id=chat_id)
+    if message_sent:
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
 
 
 def check_block_height(context):
     """
-        Make sure the block height increases
+    Make sure the block height increases
     """
 
     chat_id = context.job.context['chat_id']
@@ -289,12 +319,12 @@ def check_block_height(context):
     # > 1 == still stuck
 
     if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
-        show_action_buttons(context, chat_id=chat_id)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
 
 
 def check_midgard_api(context):
     """
-        Check that Midgard API is ok
+    Check that Midgard API is ok
     """
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
@@ -308,18 +338,18 @@ def check_midgard_api(context):
                'IP: ' + NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
-        show_action_buttons(context, chat_id=chat_id)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
     elif user_data['is_midgard_healthy'] == False and is_midgard_healthy():
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + NODE_IP + '\n'
         context.bot.send_message(chat_id, text)
-        show_action_buttons(context, chat_id=chat_id)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
 
 
 def healthy(context):
     """
-        Write timestamp into health.check file for the health check
+    Write timestamp into health.check file for the health check
     """
 
     with open('storage/health.check', 'w') as healthcheck_file:
@@ -334,23 +364,28 @@ Helpers
 """
 
 
-def show_action_buttons(context, chat_id):
+def show_home_buttons(context, chat_id, user_data, query=None):
     """
     Show buttons for supported actions.
     """
 
-    keyboard = [[
-        InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
-        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats')
-    ]]
+    keyboard = [[]]
 
-    # Send message
-    context.bot.send_message(chat_id, 'What do you want to do?', reply_markup=InlineKeyboardMarkup(keyboard))
+    for address in user_data['nodes'].keys():
+        keyboard.append([InlineKeyboardButton(address, callback_data='thornode_details-' + address)])
+
+    keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode')])
+
+    # Edit message or write a new one depending on function call
+    if query:
+        query.edit_message_text('Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        context.bot.send_message(chat_id, 'Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_node_object(address):
     """
-        Query nodeaccounts endpoints and return the Thornode object
+    Query nodeaccounts endpoints and return the Thornode object
     """
 
     while True:
@@ -360,14 +395,14 @@ def get_node_object(address):
 
     nodes = response.json()
 
-    # get the right node
+    # Get the right node
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
     return node
 
 
 def get_block_height():
     """
-        Return block height of your Thornode
+    Return block height of your Thornode
     """
 
     while True:
@@ -381,7 +416,7 @@ def get_block_height():
 
 def is_midgard_healthy():
     """
-        Return status of 
+    Return status of Midgard API
     """
 
     response = requests.get(url=get_midgard_endpoint())
@@ -402,20 +437,21 @@ def get_nodeaccounts_endpoint():
     return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + NODE_IP + '1317/thorchain/nodeaccounts'
 
 
-
 def get_status_endpoint():
     """
-       Return the endpoint for block height checks
+    Return the endpoint for block height checks
     """
 
     return 'http://localhost:8000/status.json' if DEBUG else 'http://' + NODE_IP + ':26657/status'
 
+
 def get_midgard_endpoint():
     """
-        Return the endpoint for Midgard API check
+    Return the endpoint for Midgard API check
     """
 
     return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + NODE_IP + ':8080/v1/health'
+
 
 def error(update, context):
     """
@@ -432,7 +468,7 @@ Application
 """
 
 # Conversation state(s)
-WAIT_FOR_USER_INPUT = range(1)
+WAIT_FOR_ADDRESS, WAIT_FOR_ACTION = range(2)
 
 
 def main():
@@ -456,15 +492,26 @@ def main():
 
     # Add command handlers
     dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CallbackQueryHandler(show_stats, pattern='^show_stats$'))
 
-    # Add conversation handler to rule them all
+    # "Home Screen" conversation handler
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$')],
-        states={WAIT_FOR_USER_INPUT: [
+        states={WAIT_FOR_ADDRESS: [
             CommandHandler('cancel', cancel),
             CallbackQueryHandler(add_thornode, pattern='^add_thornode$'),
             MessageHandler(Filters.text, handle_input, pass_job_queue=True, pass_chat_data=True)
+        ]},
+        fallbacks=[]
+    ))
+    
+    # Thornode Detail conversation handler
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details-')],
+        states={WAIT_FOR_ACTION: [
+            CommandHandler('cancel', cancel),
+            CallbackQueryHandler(thornode_details, pattern='^thornode_details-'),
+            CallbackQueryHandler(show_stats, pattern='^show_stats'),
+            CallbackQueryHandler(back_button, pattern='^back_button$')
         ]},
         fallbacks=[]
     ))
