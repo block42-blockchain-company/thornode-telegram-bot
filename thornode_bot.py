@@ -423,7 +423,7 @@ def is_midgard_healthy():
     if response.status_code != 200:
         return False
 
-    if response.text == '"OK"':
+    if response.text.find('"OK"') != -1:
         return True
     else:
         return False
@@ -434,7 +434,7 @@ def get_nodeaccounts_endpoint():
     Return the nodeaccounts endpoint to query data from.
     """
 
-    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + NODE_IP + '1317/thorchain/nodeaccounts'
+    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + NODE_IP + ':1317/thorchain/nodeaccounts'
 
 
 def get_status_endpoint():
