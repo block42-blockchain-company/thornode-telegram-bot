@@ -40,11 +40,12 @@ def test_start():
 def test_show_stats(expected_response):
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
+
     setup_response = next(telegram.iter_history(BOT_ID))
     setup_response.click(VALID_ADDRESS)
     time.sleep(3)
-    setup_response = next(telegram.iter_history(BOT_ID))
 
+    setup_response = next(telegram.iter_history(BOT_ID))
     setup_response.click("Show THORNode Stats")
     time.sleep(3)
 
@@ -93,7 +94,8 @@ def test_thornode_detail():
     assert response.text == "You chose\n" + VALID_ADDRESS + "\nWhat do you want to do with that Node?", \
         "Thornode Details not showing the right text"
     assert response.reply_markup.inline_keyboard[0][0].text == "Show THORNode Stats", "Show THORNode Stats Button not in Thornode Details"
-    assert response.reply_markup.inline_keyboard[0][1].text == "<< Back", "<< Back Show Button not in Thornode Details"
+    assert response.reply_markup.inline_keyboard[0][1].text == "Delete THORNode", "Delete THORNode Button not in Thornode Details"
+    assert response.reply_markup.inline_keyboard[1][0].text == "<< Back", "<< Back Show Button not in Thornode Details"
 
     print("Thornode Details with " + VALID_ADDRESS + " ✅")
     print("------------------------")
@@ -116,6 +118,43 @@ def test_back_button():
     assert response.text == "Choose an address from the list below or add one:", "Back Button doesn't work!"
 
     print("Back button with " + VALID_ADDRESS + " ✅")
+    print("------------------------")
+
+
+def test_delete_address(confirm):
+    telegram.send_message(BOT_ID, "/start")
+    time.sleep(3)
+
+    setup_response = next(telegram.iter_history(BOT_ID))
+    setup_response.click(VALID_ADDRESS)
+    time.sleep(3)
+
+    setup_response = next(telegram.iter_history(BOT_ID))
+    setup_response.click("Delete THORNode")
+    time.sleep(3)
+
+    first_response = next(telegram.iter_history(BOT_ID))
+
+    assert first_response.text == '⚠️ Do you really want to remove the address from your monitoring list? ⚠️\n' + VALID_ADDRESS, \
+        "Delete THORNode button doesn't work!"
+
+    if confirm:
+        first_response.click("YES")
+        time.sleep(3)
+        second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+        second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+        assert second_response_1.text == "❌ Thornode address got deleted! ❌\n" + VALID_ADDRESS, \
+            "YES button on deletion confirmation does not yield deletion statement"
+        assert second_response_2.text == "Choose an address from the list below or add one:", \
+            "YES button on deletion confirmation does not go back to main menu"
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == "Add THORNode", "Node is NOT deleted after deletion"
+    else:
+        first_response.click("NO")
+        time.sleep(3)
+        second_response = next(telegram.iter_history(BOT_ID))
+        assert second_response.text == "You chose\n" + VALID_ADDRESS + "\nWhat do you want to do with that Node?", \
+            "NO button on deletion confirmation does not go back to Thornode details"
+    print("Delete Address with confirmation=" + str(confirm) + " ✅")
     print("------------------------")
 
 
@@ -218,6 +257,8 @@ def test_midgard_notification():
                                                               "'\nbut got\n'" + first_response.text + "'"
     assert second_response.text == "Choose an address from the list below or add one:", \
         "Choose an address from the list below or add one: - not visible after block height notification"
+    print("Check Midgard API ✅")
+    print("------------------------")
 
 
 with telegram:
@@ -237,6 +278,11 @@ with telegram:
         test_thornode_detail()
         test_back_button()
         test_show_stats(expected_response="THORNode: " + VALID_ADDRESS)
+        test_delete_address(confirm=False)
+        test_delete_address(confirm=True)
+        test_add_address(address=VALID_ADDRESS,
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="Got it! 👌")
         test_thornode_notification(field="status")
         test_thornode_notification(field="bond")
         test_thornode_notification(field="slash_points")

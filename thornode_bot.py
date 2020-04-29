@@ -199,7 +199,7 @@ def thornode_details(update, context):
     address = query.data.split("-")[1]
     context.user_data['current_detail_address'] = address
 
-    return show_detail_buttons(query, address)
+    return show_detail_buttons(query=query, address=address)
 
 
 @run_async
@@ -235,7 +235,7 @@ def keep_thornode(update, context):
     query = update.callback_query
     # Answer so that the small clock when you click a button disappears
     query.answer()
-    return show_detail_buttons(query, context.user_data['current_detail_address'])
+    return show_detail_buttons(query=query, address=context.user_data['current_detail_address'])
 
 
 """
