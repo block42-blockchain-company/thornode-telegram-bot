@@ -231,33 +231,54 @@ def test_block_height_notification():
     print("------------------------")
 
 
-def test_midgard_notification():
+def test_catch_up_notification(catching_up):
+    with open('status.json') as json_read_file:
+        node_data = json.load(json_read_file)
+
+    node_data['result']['sync_info']['catching_up'] = catching_up
+
+    with open('status.json', 'w') as json_write_file:
+        json.dump(node_data, json_write_file)
+    time.sleep(40)
+
+    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+
+    if catching_up:
+        expected_response = 'The Node is behind the latest block height and catching up!'
+    else:
+        expected_response = 'The node caught up to the latest block height again!'
+        
+    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + first_response.text + "'"
+    assert second_response.text == "Choose an address from the list below or add one:", \
+        "Choose an address from the list below or add one: - not visible after catching_up=" + catching_up + " notification"
+
+    print("Check catch up status with catching_up=" + str(catching_up) + " ✅")
+    print("------------------------")
+    
+
+def test_midgard_notification(health_status):
     with open('midgard.json', 'w') as write_file:
-        write_file.write('"FAIL"')
+        write_file.write(health_status)
     time.sleep(40)
     
     first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
-    expected_response = 'Midgard API is not healthy anymore'
+    if health_status == '"FAIL"':
+        expected_response = 'Midgard API is not healthy anymore'
+    elif health_status == '"OK"':
+        expected_response = 'Midgard API is healthy again'
+    else:
+        assert False, 'Health status for Midgard API test is neither "FAIL" nor "OK"'
+        
     assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
                                                               "'\nbut got\n'" + first_response.text + "'"
     assert second_response.text == "Choose an address from the list below or add one:", \
         "Choose an address from the list below or add one: - not visible after block height notification"
 
-    with open('midgard.json', 'w') as write_file:
-        write_file.write('"OK"')
-    time.sleep(40)
-    
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
-
-    expected_response = 'Midgard API is healthy again'
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "Choose an address from the list below or add one:", \
-        "Choose an address from the list below or add one: - not visible after block height notification"
-    print("Check Midgard API ✅")
+    print("Check Midgard API with health_status=" + health_status + " ✅")
     print("------------------------")
 
 
@@ -288,7 +309,10 @@ with telegram:
         test_thornode_notification(field="slash_points")
         test_thornode_notification(field="node_address")
         test_block_height_notification()
-        test_midgard_notification()
+        test_catch_up_notification(catching_up=True)
+        test_catch_up_notification(catching_up=False)
+        test_midgard_notification(health_status='"FAIL"')
+        test_midgard_notification(health_status='"OK"')
 
         print("✅ -----ALL TESTS PASSED----- ✅")
 

@@ -252,6 +252,7 @@ def node_checks(context):
 
     check_thornodes(context)
     check_block_height(context)
+    check_catch_up_status(context)
     check_midgard_api(context)
 
 
@@ -361,26 +362,57 @@ def check_block_height(context):
 
     if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+        
+        
+def check_catch_up_status(context):
+    """
+    Check if node is some blocks behind with catch up status
+    """
 
+    chat_id = context.job.context['chat_id']
+    user_data = context.job.context['user_data']
+    
+    if 'is_catching_up' not in user_data:
+        user_data['is_catching_up'] = False
+
+    is_catching_up_ = is_catching_up()
+    if user_data['is_catching_up'] == False and is_catching_up_:
+        user_data['is_catching_up'] = True
+        text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
+               'IP: ' + NODE_IP + '\n' + \
+               'Current block height: ' + get_block_height() + '\n\n' + \
+               'Please check your Thornode immediately!'
+        context.bot.send_message(chat_id, text)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+    elif user_data['is_catching_up'] == True and not is_catching_up_:
+        user_data['is_catching_up'] = False
+        text = 'The node caught up to the latest block height again! 👌' + '\n' + \
+               'IP: ' + NODE_IP + '\n' + \
+               'Current block height: ' + get_block_height()
+        context.bot.send_message(chat_id, text)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+    
 
 def check_midgard_api(context):
     """
     Check that Midgard API is ok
     """
+    
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
     if 'is_midgard_healthy' not in user_data:
         user_data['is_midgard_healthy'] = True
 
-    if user_data['is_midgard_healthy'] == True and not is_midgard_healthy():
+    is_midgard_healthy_ = is_midgard_healthy()
+    if user_data['is_midgard_healthy'] == True and not is_midgard_healthy_:
         user_data['is_midgard_healthy'] = False
         text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
                'IP: ' + NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
-    elif user_data['is_midgard_healthy'] == False and is_midgard_healthy():
+    elif user_data['is_midgard_healthy'] == False and is_midgard_healthy_:
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + NODE_IP + '\n'
@@ -472,6 +504,15 @@ def get_block_height():
 
     status = response.json()
     return status['result']['sync_info']['latest_block_height']
+
+
+def is_catching_up():
+    response = requests.get(url=get_status_endpoint())
+    if response.status_code != 200:
+        return True
+
+    status = response.json()
+    return status['result']['sync_info']['catching_up']
 
 
 def is_midgard_healthy():
