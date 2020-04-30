@@ -88,9 +88,7 @@ def add_thornode(update, context):
     query = update.callback_query
     query.answer()
 
-    text = ''
-
-    text += 'What\'s the address of your THORNode? (enter /cancel to return to the menu)'
+    text = 'What\'s the address of your THORNode? (enter /cancel to return to the menu)'
 
     # Send message
     query.edit_message_text(text)
@@ -128,6 +126,44 @@ def handle_input(update, context):
 
 
 @run_async
+def confirm_thornode_deletion(update, context):
+    """
+    Initiate process of thornode address removal
+    """
+    query = update.callback_query
+    query.answer()
+
+    address = context.user_data['selected_node_address']
+
+    keyboard = [[
+        InlineKeyboardButton('YES', callback_data='delete_thornode'),
+        InlineKeyboardButton('NO', callback_data='keep_thornode')
+    ]]
+    text = '⚠️ Do you really want to remove the address from your monitoring list? ⚠️\n' + address
+
+    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    return WAIT_FOR_CONFIRMATION
+
+
+@run_async
+def delete_thornode(update, context):
+    """
+    Remove selected address from the monitored thornodes
+    """
+
+    query = update.callback_query
+    address = context.user_data['selected_node_address']
+
+    del context.user_data['nodes'][address]
+
+    text = "❌ Thornode address got deleted! ❌\n" + address
+    query.answer(text, show_alert=True)
+    context.bot.send_message(update.effective_chat.id, text)
+    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
+    return ConversationHandler.END
+
+
+@run_async
 def show_stats(update, context):
     """
     Send thornode stats of the chosen address
@@ -136,7 +172,7 @@ def show_stats(update, context):
     # Enable message editing
     query = update.callback_query
     query.answer()
-    address = query.data.split("-")[1]
+    address = context.user_data['selected_node_address']
 
     node = context.user_data['nodes'][address]
 
@@ -147,8 +183,8 @@ def show_stats(update, context):
 
     # Send message
     query.edit_message_text(text)
-    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
 
+    show_home_buttons(context, chat_id=update.effective_chat.id, user_data=context.user_data)
     return ConversationHandler.END
 
 
@@ -161,16 +197,9 @@ def thornode_details(update, context):
     query = update.callback_query
     query.answer()
     address = query.data.split("-")[1]
+    context.user_data['selected_node_address'] = address
 
-    keyboard = [[
-        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats-' + address),
-        InlineKeyboardButton('<< Back', callback_data='back_button')
-    ]]
-
-    # Send message
-    text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-    return WAIT_FOR_ACTION
+    return show_detail_buttons(query=query, address=address)
 
 
 @run_async
@@ -195,6 +224,18 @@ def cancel(update, context):
 
     show_home_buttons(context, chat_id=update.message.chat.id, user_data=context.user_data)
     return ConversationHandler.END
+
+
+@run_async
+def keep_thornode(update, context):
+    """
+    Do not remove thornode addess and return to detail menu
+    """
+
+    query = update.callback_query
+    # Answer so that the small clock when you click a button disappears
+    query.answer()
+    return show_detail_buttons(query=query, address=context.user_data['selected_node_address'])
 
 
 """
@@ -383,6 +424,25 @@ def show_home_buttons(context, chat_id, user_data, query=None):
         context.bot.send_message(chat_id, 'Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
 
 
+def show_detail_buttons(query, address):
+    """
+    Show detail buttons for selected address
+    """
+
+    keyboard = [[
+        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats'),
+        InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion')
+        ],
+        [
+            InlineKeyboardButton('<< Back', callback_data='back_button')
+        ]]
+
+    # Send message
+    text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
+    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    return WAIT_FOR_DETAIL
+
+
 def get_node_object(address):
     """
     Query nodeaccounts endpoints and return the Thornode object
@@ -468,7 +528,7 @@ Application
 """
 
 # Conversation state(s)
-WAIT_FOR_ADDRESS, WAIT_FOR_ACTION = range(2)
+WAIT_FOR_ADDRESS, WAIT_FOR_DETAIL, WAIT_FOR_CONFIRMATION = range(3)
 
 
 def main():
@@ -506,13 +566,17 @@ def main():
     
     # Thornode Detail conversation handler
     dispatcher.add_handler(ConversationHandler(
-        entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details-')],
-        states={WAIT_FOR_ACTION: [
-            CommandHandler('cancel', cancel),
-            CallbackQueryHandler(thornode_details, pattern='^thornode_details-'),
-            CallbackQueryHandler(show_stats, pattern='^show_stats'),
-            CallbackQueryHandler(back_button, pattern='^back_button$')
-        ]},
+        entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details')],
+        states={
+            WAIT_FOR_DETAIL: [
+                CommandHandler('cancel', cancel),
+                CallbackQueryHandler(thornode_details, pattern='^thornode_details'),
+                CallbackQueryHandler(show_stats, pattern='^show_stats$'),
+                CallbackQueryHandler(confirm_thornode_deletion, pattern='^confirm_thornode_deletion$', pass_chat_data=True),
+                CallbackQueryHandler(back_button, pattern='^back_button$')],
+            WAIT_FOR_CONFIRMATION: [
+                CallbackQueryHandler(delete_thornode, pattern='^delete_thornode$'),
+                CallbackQueryHandler(keep_thornode, pattern='^keep_thornode$')]},
         fallbacks=[]
     ))
 
