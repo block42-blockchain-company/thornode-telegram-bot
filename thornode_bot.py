@@ -133,7 +133,7 @@ def confirm_thornode_deletion(update, context):
     query = update.callback_query
     query.answer()
 
-    address = context.user_data['current_detail_address']
+    address = context.user_data['selected_node_address']
 
     keyboard = [[
         InlineKeyboardButton('YES', callback_data='delete_thornode'),
@@ -152,7 +152,7 @@ def delete_thornode(update, context):
     """
 
     query = update.callback_query
-    address = context.user_data['current_detail_address']
+    address = context.user_data['selected_node_address']
 
     del context.user_data['nodes'][address]
 
@@ -172,7 +172,7 @@ def show_stats(update, context):
     # Enable message editing
     query = update.callback_query
     query.answer()
-    address = context.user_data['current_detail_address']
+    address = context.user_data['selected_node_address']
 
     node = context.user_data['nodes'][address]
 
@@ -197,7 +197,7 @@ def thornode_details(update, context):
     query = update.callback_query
     query.answer()
     address = query.data.split("-")[1]
-    context.user_data['current_detail_address'] = address
+    context.user_data['selected_node_address'] = address
 
     return show_detail_buttons(query=query, address=address)
 
@@ -235,7 +235,7 @@ def keep_thornode(update, context):
     query = update.callback_query
     # Answer so that the small clock when you click a button disappears
     query.answer()
-    return show_detail_buttons(query=query, address=context.user_data['current_detail_address'])
+    return show_detail_buttons(query=query, address=context.user_data['selected_node_address'])
 
 
 """
