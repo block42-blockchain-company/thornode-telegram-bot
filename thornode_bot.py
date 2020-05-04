@@ -77,7 +77,36 @@ def start(update, context):
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
-    show_thornode_menu(context, chat_id=update.message.chat.id, user_data=context.user_data)
+    show_home_menu(context=context, chat_id=update.message.chat.id)
+
+
+@run_async
+def admin_menu(update, context):
+    """
+    Display admin area buttons
+    """
+
+    query = update.callback_query
+
+    if query.from_user.id not in ADMIN_USER_IDS:
+        query.answer("❌ You are not an Admin! ❌", show_alert=True)
+    else:
+        query.answer()
+
+    return END
+
+
+@run_async
+def thornode_menu(update, context):
+    """
+    Display all Buttons related to thornodes
+    """
+
+    query = update.callback_query
+    query.answer()
+
+    show_thornode_menu(context=None, chat_id=None, user_data=context.user_data, query=query)
+    return THORNODE_MENU
 
 
 @run_async
@@ -122,7 +151,7 @@ def handle_input(update, context):
 
     # Send message
     update.message.reply_text('Got it! 👌')
-    show_thornode_menu(context, chat_id=update.message.chat.id, user_data=context.user_data)
+    show_thornode_menu(context=context, chat_id=update.message.chat.id, user_data=context.user_data)
 
     return END
 
@@ -161,7 +190,7 @@ def delete_thornode(update, context):
     text = "❌ Thornode address got deleted! ❌\n" + address
     query.answer(text, show_alert=True)
     context.bot.send_message(update.effective_chat.id, text)
-    show_thornode_menu(context, chat_id=update.effective_chat.id, user_data=context.user_data)
+    show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
     return END
 
 
@@ -197,12 +226,8 @@ def thornode_details(update, context):
     """
 
     query = update.callback_query
-
-    if query.from_user.id not in ADMIN_USER_IDS:
-        query.answer("❌ You are not an Admin! ❌", show_alert=True)
-        return END
-
     query.answer()
+
     address = query.data.split("-")[1]
     context.user_data['selected_node_address'] = address
 
@@ -210,7 +235,7 @@ def thornode_details(update, context):
 
 
 @run_async
-def back_button(update, context):
+def back_to_home(update, context):
     """
     Return to home menu
     """
@@ -219,7 +244,21 @@ def back_button(update, context):
     # Answer so that the small clock when you click a button disappears
     query.answer()
 
-    show_thornode_menu(context, chat_id=update.effective_chat.id, user_data=context.user_data, query=query)
+    show_home_menu(context=context, chat_id=update.effective_chat.id, query=query)
+    return END
+
+
+@run_async
+def back_button(update, context):
+    """
+    Return to thornode menu
+    """
+
+    query = update.callback_query
+    # Answer so that the small clock when you click a button disappears
+    query.answer()
+
+    show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data, query=query)
     return END
 
 
@@ -243,18 +282,6 @@ def keep_thornode(update, context):
     # Answer so that the small clock when you click a button disappears
     query.answer()
     return show_detail_buttons(query=query, address=context.user_data['selected_node_address'])
-
-
-@run_async
-def admin_menu(update, context):
-    query = update.callback_query
-
-    if query.from_user.id not in ADMIN_USER_IDS:
-        query.answer("❌ You are not an Admin! ❌", show_alert=True)
-    else:
-        query.answer()
-
-    return END
 
 
 """
@@ -332,7 +359,7 @@ def check_thornodes(context):
         del user_data['nodes'][address]
 
     if message_sent:
-        show_thornode_menu(context, chat_id=chat_id, user_data=user_data)
+        show_home_menu(context=context, chat_id=chat_id)
 
 
 def check_thorchain_block_height(context):
@@ -380,14 +407,13 @@ def check_thorchain_block_height(context):
     # > 1 == still stuck
 
     if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
-        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+        show_home_menu(context=context, chat_id=chat_id)
 
 
 def check_thorchain_catch_up_status(context):
     """
     Check if node is some blocks behind with catch up status
     """
-        show_thornode_menu(context, chat_id=chat_id, user_data=user_data)
 
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
@@ -403,14 +429,14 @@ def check_thorchain_catch_up_status(context):
                'Current block height: ' + get_thorchain_block_height() + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
-        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+        show_home_menu(context=context, chat_id=chat_id)
     elif user_data['is_catching_up'] == True and not is_currently_catching_up:
         user_data['is_catching_up'] = False
         text = 'The node caught up to the latest block height again! 👌' + '\n' + \
                'IP: ' + NODE_IP + '\n' + \
                'Current block height: ' + get_thorchain_block_height()
         context.bot.send_message(chat_id, text)
-        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+        show_home_menu(context=context, chat_id=chat_id)
 
 
 def check_thorchain_midgard_api(context):
@@ -431,15 +457,15 @@ def check_thorchain_midgard_api(context):
                'IP: ' + THORCHAIN_NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
-        show_thornode_menu(context, chat_id=chat_id, user_data=user_data)
-    elif user_data['is_midgard_healthy'] == False and is_midgard_healthy():
-        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+        show_home_menu(context, chat_id=chat_id)
+    elif user_data['is_midgard_healthy'] == False and is_thorchain_midgard_healthy():
+        show_home_menu(context, chat_id=chat_id)
     elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + THORCHAIN_NODE_IP + '\n'
         context.bot.send_message(chat_id, text)
-        show_thornode_menu(context, chat_id=chat_id, user_data=user_data)
+        show_home_menu(context, chat_id=chat_id)
 
 
 def update_health_check_file(context):
@@ -461,7 +487,7 @@ Helpers
 
 def show_home_menu(context, chat_id, query=None):
     """
-    Show buttons of homw menu
+    Show buttons of home menu
     """
 
     keyboard = [[InlineKeyboardButton('My THORNodes', callback_data='thornode_menu'),
@@ -487,7 +513,8 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
     for address in user_data['nodes'].keys():
         keyboard.append([InlineKeyboardButton(address, callback_data='thornode_details-' + address)])
 
-    keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode')])
+    keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
+                     InlineKeyboardButton('<< Back', callback_data='back_button')])
 
     # Edit message or write a new one depending on function call
     if query:
@@ -620,7 +647,7 @@ Application
 END = ConversationHandler.END
 
 # Conversation state(s)
-HOME, THORNODE_MENU, WAIT_FOR_ADDRESS, WAIT_FOR_DETAIL, WAIT_FOR_CONFIRMATION = range(5)
+THORNODE_MENU, WAIT_FOR_ADDRESS, WAIT_FOR_DETAIL, WAIT_FOR_CONFIRMATION = range(4)
 
 
 def main():
@@ -683,14 +710,11 @@ def main():
         entry_points=[CallbackQueryHandler(thornode_menu, pattern='^thornode_menu$')],
         states={THORNODE_MENU: [
             add_thornode_conversation,
-            thornode_detail_conversation
+            thornode_detail_conversation,
+            CallbackQueryHandler(back_to_home, pattern='^back_button$')
         ]},
         fallbacks=[],
         allow_reentry=True,
-        map_to_parent={
-            # Return to start menu
-            END: HOME
-        }
     )
 
     # Define Thornode conversation handler
@@ -699,25 +723,15 @@ def main():
         states={},
         fallbacks=[],
         allow_reentry=True,
-        map_to_parent={
-            # Return on Child END to parent HOME state (start menu)
-            END: HOME
-        }
     )
 
-    # Define Start conversation handler
-    start_conversation = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={HOME: [
-            thornode_conversation,
-            admin_conversation
-        ]},
-        fallbacks=[],
-        allow_reentry=True
-    )
 
-    # Add conversation handlers
-    dispatcher.add(start_conversation)
+    # Add start commandHandler handlers
+    dispatcher.add_handler(CommandHandler('start', start))
+    
+    # Add conversationHandler
+    dispatcher.add_handler(thornode_conversation)
+    dispatcher.add_handler(admin_conversation)
 
     # Add error handler
     dispatcher.add_error_handler(error)
