@@ -178,7 +178,7 @@ def show_stats(update, context):
 
     text = 'THORNode: ' + address + '\n' + \
            'Status: ' + node['status'].capitalize() + '\n' + \
-           'Bond: ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
+           'Bond: ' + '{:,} RUNE'.format(tor_to_rune(int(node['bond']))) + '\n' + \
            'Slash Points: ' + '{:,}'.format(int(node['slash_points']))
 
     # Send message
@@ -294,8 +294,8 @@ def check_thornodes(context):
             text = 'THORNode: ' + address + '\n' + \
                    'Status: ' + local_node['status'].capitalize() + \
                    ' ➡️ ' + remote_node['status'].capitalize() + '\n' + \
-                   'Bond: ' + '{:,} RUNE'.format(int(local_node['bond'])) + \
-                   ' ➡️ ' + '{:,} RUNE'.format(int(remote_node['bond'])) + '\n' + \
+                   'Bond: ' + '{:,} RUNE'.format(tor_to_rune(int(local_node['bond']))) + \
+                   ' ➡️ ' + '{:,} RUNE'.format(tor_to_rune(int(remote_node['bond']))) + '\n' + \
                    'Slash Points: ' + '{:,}'.format(int(local_node['slash_points'])) + \
                    ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
@@ -511,6 +511,14 @@ def get_midgard_endpoint():
     """
 
     return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + NODE_IP + ':8080/v1/health'
+
+
+def tor_to_rune(tor):
+    """
+    1e8 Tor are 1 Rune
+    """
+
+    return tor / 100000000
 
 
 def error(update, context):
