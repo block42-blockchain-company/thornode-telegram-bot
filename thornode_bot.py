@@ -62,7 +62,7 @@ def start(update, context):
 
     # Start job for user
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(node_checks, interval=30, context={
+        context.job_queue.run_repeating(thornode_checks, interval=30, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })
@@ -105,7 +105,7 @@ def handle_input(update, context):
     # Assume text input is an address
     address = update.message.text
 
-    node = get_node_object(address=address)
+    node = get_thornode_object(address=address)
 
     if node is None:
         update.message.reply_text(
@@ -178,7 +178,7 @@ def show_stats(update, context):
 
     text = 'THORNode: ' + address + '\n' + \
            'Status: ' + node['status'].capitalize() + '\n' + \
-           'Bond: ' + '{:,} RUNE'.format(int(node['bond'])) + '\n' + \
+           'Bond: ' + '{:,} RUNE'.format(tor_to_rune(int(node['bond']))) + '\n' + \
            'Slash Points: ' + '{:,}'.format(int(node['slash_points']))
 
     # Send message
@@ -245,14 +245,15 @@ Jobs
 """
 
 
-def node_checks(context):
+def thornode_checks(context):
     """
     Periodic checks of various node stats
     """
 
     check_thornodes(context)
-    check_block_height(context)
-    check_midgard_api(context)
+    check_thorchain_block_height(context)
+    check_thorchain_catch_up_status(context)
+    check_thorchain_midgard_api(context)
 
 
 def check_thornodes(context):
@@ -271,7 +272,7 @@ def check_thornodes(context):
     
     # Iterate through all keys
     for address in user_data['nodes'].keys():
-        remote_node = get_node_object(address=address)
+        remote_node = get_thornode_object(address=address)
         local_node = user_data['nodes'][address]
 
         if remote_node is None:
@@ -294,8 +295,8 @@ def check_thornodes(context):
             text = 'THORNode: ' + address + '\n' + \
                    'Status: ' + local_node['status'].capitalize() + \
                    ' ➡️ ' + remote_node['status'].capitalize() + '\n' + \
-                   'Bond: ' + '{:,} RUNE'.format(int(local_node['bond'])) + \
-                   ' ➡️ ' + '{:,} RUNE'.format(int(remote_node['bond'])) + '\n' + \
+                   'Bond: ' + '{:,} RUNE'.format(tor_to_rune(int(local_node['bond']))) + \
+                   ' ➡️ ' + '{:,} RUNE'.format(tor_to_rune(int(remote_node['bond']))) + '\n' + \
                    'Slash Points: ' + '{:,}'.format(int(local_node['slash_points'])) + \
                    ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
@@ -315,7 +316,7 @@ def check_thornodes(context):
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
 
 
-def check_block_height(context):
+def check_thorchain_block_height(context):
     """
     Make sure the block height increases
     """
@@ -323,7 +324,7 @@ def check_block_height(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    block_height = get_block_height()
+    block_height = get_thorchain_block_height()
 
     # Check if block height got stuck
     if 'block_height' in user_data and block_height <= user_data['block_height']:
@@ -361,26 +362,57 @@ def check_block_height(context):
 
     if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+        
+        
+def check_thorchain_catch_up_status(context):
+    """
+    Check if node is some blocks behind with catch up status
+    """
 
+    chat_id = context.job.context['chat_id']
+    user_data = context.job.context['user_data']
+    
+    if 'is_catching_up' not in user_data:
+        user_data['is_catching_up'] = False
 
-def check_midgard_api(context):
+    is_currently_catching_up = is_thorchain_catching_up()
+    if user_data['is_catching_up'] == False and is_currently_catching_up:
+        user_data['is_catching_up'] = True
+        text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
+               'IP: ' + NODE_IP + '\n' + \
+               'Current block height: ' + get_thorchain_block_height() + '\n\n' + \
+               'Please check your Thornode immediately!'
+        context.bot.send_message(chat_id, text)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+    elif user_data['is_catching_up'] == True and not is_currently_catching_up:
+        user_data['is_catching_up'] = False
+        text = 'The node caught up to the latest block height again! 👌' + '\n' + \
+               'IP: ' + NODE_IP + '\n' + \
+               'Current block height: ' + get_thorchain_block_height()
+        context.bot.send_message(chat_id, text)
+        show_home_buttons(context, chat_id=chat_id, user_data=user_data)
+    
+
+def check_thorchain_midgard_api(context):
     """
     Check that Midgard API is ok
     """
+    
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
     if 'is_midgard_healthy' not in user_data:
         user_data['is_midgard_healthy'] = True
 
-    if user_data['is_midgard_healthy'] == True and not is_midgard_healthy():
+    is_midgard_currently_healthy = is_thorchain_midgard_healthy()
+    if user_data['is_midgard_healthy'] == True and not is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = False
         text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
                'IP: ' + NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
-    elif user_data['is_midgard_healthy'] == False and is_midgard_healthy():
+    elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + NODE_IP + '\n'
@@ -388,7 +420,7 @@ def check_midgard_api(context):
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
 
 
-def healthy(context):
+def update_health_check_file(context):
     """
     Write timestamp into health.check file for the health check
     """
@@ -443,13 +475,13 @@ def show_detail_buttons(query, address):
     return WAIT_FOR_DETAIL
 
 
-def get_node_object(address):
+def get_thornode_object(address):
     """
     Query nodeaccounts endpoints and return the Thornode object
     """
 
     while True:
-        response = requests.get(url=get_nodeaccounts_endpoint())
+        response = requests.get(url=get_thorchain_validators())
         if response.status_code == 200:
             break
 
@@ -460,13 +492,13 @@ def get_node_object(address):
     return node
 
 
-def get_block_height():
+def get_thorchain_block_height():
     """
     Return block height of your Thornode
     """
 
     while True:
-        response = requests.get(url=get_status_endpoint())
+        response = requests.get(url=get_thorchain_status())
         if response.status_code == 200:
             break
 
@@ -474,12 +506,21 @@ def get_block_height():
     return status['result']['sync_info']['latest_block_height']
 
 
-def is_midgard_healthy():
+def is_thorchain_catching_up():
+    response = requests.get(url=get_thorchain_status())
+    if response.status_code != 200:
+        return True
+
+    status = response.json()
+    return status['result']['sync_info']['catching_up']
+
+
+def is_thorchain_midgard_healthy():
     """
     Return status of Midgard API
     """
 
-    response = requests.get(url=get_midgard_endpoint())
+    response = requests.get(url=get_thorchain_midgard_endpoint())
     if response.status_code != 200:
         return False
 
@@ -489,7 +530,7 @@ def is_midgard_healthy():
         return False
 
 
-def get_nodeaccounts_endpoint():
+def get_thorchain_validators():
     """
     Return the nodeaccounts endpoint to query data from.
     """
@@ -497,7 +538,7 @@ def get_nodeaccounts_endpoint():
     return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + NODE_IP + ':1317/thorchain/nodeaccounts'
 
 
-def get_status_endpoint():
+def get_thorchain_status():
     """
     Return the endpoint for block height checks
     """
@@ -505,12 +546,20 @@ def get_status_endpoint():
     return 'http://localhost:8000/status.json' if DEBUG else 'http://' + NODE_IP + ':26657/status'
 
 
-def get_midgard_endpoint():
+def get_thorchain_midgard_endpoint():
     """
     Return the endpoint for Midgard API check
     """
 
     return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + NODE_IP + ':8080/v1/health'
+
+
+def tor_to_rune(tor):
+    """
+    1e8 Tor are 1 Rune
+    """
+
+    return tor / 100000000
 
 
 def error(update, context):
@@ -543,12 +592,12 @@ def main():
     # Restart jobs for all users
     chat_ids = dispatcher.user_data.keys()
     for chat_id in chat_ids:
-        dispatcher.job_queue.run_repeating(node_checks, interval=30, context={
+        dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
     # Start job for health check
-    dispatcher.job_queue.run_repeating(healthy, interval=5, context={})
+    dispatcher.job_queue.run_repeating(update_health_check_file, interval=5, context={})
 
     # Add command handlers
     dispatcher.add_handler(CommandHandler('start', start))
