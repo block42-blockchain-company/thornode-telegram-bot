@@ -28,7 +28,7 @@ Static & environment variables
 """
 
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
-NODE_IP = os.environ['NODE_IP'] if 'NODE_IP' in os.environ else 'localhost'
+THORCHAIN_NODE_IP = os.environ['THORCHAIN_NODE_IP'] if 'THORCHAIN_NODE_IP' in os.environ else 'localhost'
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 
 """
@@ -335,7 +335,7 @@ def check_thorchain_block_height(context):
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
-                   'IP: ' + NODE_IP + '\n' + \
+                   'IP: ' + THORCHAIN_NODE_IP + '\n' + \
                    'Block height now at: ' + block_height + '\n'
             context.bot.send_message(chat_id, text)
             user_data['block_height_stuck_count'] = -1
@@ -348,7 +348,7 @@ def check_thorchain_block_height(context):
     # If it just got stuck send a message
     if user_data['block_height_stuck_count'] == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
-               'IP: ' + NODE_IP + '\n' + \
+               'IP: ' + THORCHAIN_NODE_IP + '\n' + \
                'Block height stuck at: ' + block_height + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
@@ -408,14 +408,14 @@ def check_thorchain_midgard_api(context):
     if user_data['is_midgard_healthy'] == True and not is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = False
         text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
-               'IP: ' + NODE_IP + '\n\n' + \
+               'IP: ' + THORCHAIN_NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
     elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
-               'IP: ' + NODE_IP + '\n'
+               'IP: ' + THORCHAIN_NODE_IP + '\n'
         context.bot.send_message(chat_id, text)
         show_home_buttons(context, chat_id=chat_id, user_data=user_data)
 
@@ -535,7 +535,7 @@ def get_thorchain_validators():
     Return the nodeaccounts endpoint to query data from.
     """
 
-    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + NODE_IP + ':1317/thorchain/nodeaccounts'
+    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':1317/thorchain/nodeaccounts'
 
 
 def get_thorchain_status():
@@ -543,7 +543,7 @@ def get_thorchain_status():
     Return the endpoint for block height checks
     """
 
-    return 'http://localhost:8000/status.json' if DEBUG else 'http://' + NODE_IP + ':26657/status'
+    return 'http://localhost:8000/status.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':26657/status'
 
 
 def get_thorchain_midgard_endpoint():
@@ -551,7 +551,7 @@ def get_thorchain_midgard_endpoint():
     Return the endpoint for Midgard API check
     """
 
-    return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + NODE_IP + ':8080/v1/health'
+    return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':8080/v1/health'
 
 
 def tor_to_rune(tor):
