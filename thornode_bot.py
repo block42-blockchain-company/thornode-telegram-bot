@@ -2,8 +2,9 @@ import atexit
 import os
 import logging
 import requests
+import json
+import subprocess
 from datetime import datetime
-from subprocess import Popen
 
 from telegram.ext.dispatcher import run_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -30,8 +31,10 @@ Static & environment variables
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 THORCHAIN_NODE_IP = os.environ['THORCHAIN_NODE_IP'] if 'THORCHAIN_NODE_IP' in os.environ else 'localhost'
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
-ADMIN_USER_IDS = [int(admin_id) for admin_id in os.environ['ADMIN_USER_IDS'].split(", ")]
-
+ADMIN_USER_IDS = [int(admin_id) for admin_id in
+                  os.environ['ADMIN_USER_IDS'].split(", ")] if 'ADMIN_USER_IDS' in os.environ else []
+DOCKER_SOCKET = "/var/run/docker.sock"
+DOCKER_CURL_CMD = 'curl --max-time 30 --no-buffer -s --unix-socket ' + DOCKER_SOCKET
 
 """
 ######################################################################################################################################################
@@ -39,14 +42,16 @@ Debug Processes
 ######################################################################################################################################################
 """
 
-
 if DEBUG:
-    mock_api_process = Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'], cwd="test/")
-    increase_block_height_process = Popen(['python3', 'increase_block_height.py'], cwd="test/")
+    mock_api_process = subprocess.Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'], cwd="test/")
+    increase_block_height_process = subprocess.Popen(['python3', 'increase_block_height.py'], cwd="test/")
+
 
     def cleanup():
         mock_api_process.terminate()
         increase_block_height_process.terminate()
+
+
     atexit.register(cleanup)
 
 """
@@ -78,22 +83,6 @@ def start(update, context):
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
     show_home_menu(context=context, chat_id=update.message.chat.id)
-
-
-@run_async
-def admin_menu(update, context):
-    """
-    Display admin area buttons
-    """
-
-    query = update.callback_query
-
-    if query.from_user.id not in ADMIN_USER_IDS:
-        query.answer("❌ You are not an Admin! ❌", show_alert=True)
-    else:
-        query.answer()
-
-    return END
 
 
 @run_async
@@ -231,7 +220,7 @@ def thornode_details(update, context):
     address = query.data.split("-")[1]
     context.user_data['selected_node_address'] = address
 
-    return show_detail_buttons(query=query, address=address)
+    return show_detail_menu(query=query, address=address)
 
 
 @run_async
@@ -249,7 +238,7 @@ def back_to_home(update, context):
 
 
 @run_async
-def back_button(update, context):
+def back_to_thornode_menu(update, context):
     """
     Return to thornode menu
     """
@@ -281,7 +270,118 @@ def keep_thornode(update, context):
     query = update.callback_query
     # Answer so that the small clock when you click a button disappears
     query.answer()
-    return show_detail_buttons(query=query, address=context.user_data['selected_node_address'])
+    return show_detail_menu(query=query, address=context.user_data['selected_node_address'])
+
+
+@run_async
+def admin_menu(update, context):
+    """
+    Display admin area buttons
+    """
+
+    query = update.callback_query
+
+    if query.from_user.id not in ADMIN_USER_IDS:
+        query.answer("❌ You are not an Admin! ❌", show_alert=True)
+        return END
+    else:
+        query.answer()
+
+    show_admin_menu(context=None, chat_id=None, query=query)
+    return ADMIN_MENU
+
+
+@run_async
+def show_container(update, context):
+    """
+    Display running container, basically "docker ps"
+    """
+
+    query = update.callback_query
+
+    containers = get_running_docker_container(query)
+    if containers == "ERROR":
+        return ADMIN_MENU
+    else:
+        query.answer()
+
+    text = 'Running container:\n'
+    for container in containers:
+        text += '\n'
+        for name in container['Names']:
+            text += name.replace('/', '') + " "
+
+    query.edit_message_text(text)
+    show_admin_menu(context=context, chat_id=update.effective_chat.id)
+    return ADMIN_MENU
+
+
+def confirm_container_restart(update, context):
+    """
+    "Are you sure?" - "YES" | "NO"
+    """
+
+    query = update.callback_query
+    query.answer()
+
+    keyboard = [[
+        InlineKeyboardButton('YES ✅', callback_data='restart_container'),
+        InlineKeyboardButton('NO ❌', callback_data='keep_container_running')
+    ]]
+    text = '⚠️ Do you really want to restart the container XY? ⚠️\n'
+
+    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    return WAIT_FOR_CONFIRMATION
+
+
+def restart_container(update, context):
+    """
+    Restart the specified docker container
+    """
+
+    query = update.callback_query
+
+    containers = get_running_docker_container(query)
+    if containers == "ERROR":
+        return ADMIN_MENU
+    else:
+        query.answer()
+
+    container_id = ''
+    for container in containers:
+        for name in container['Names']:
+            if name == '/hahaha':
+                container_id = container['Id']
+                break
+
+    bash_command = DOCKER_CURL_CMD + ' -f -XPOST "http://localhost/containers/' + container_id + '/restart?t=3"'
+    print(bash_command)
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = process.communicate()
+    rc = process.returncode
+
+    if error or rc:
+        print(output)
+        print(error)
+        print(rc)
+        return
+
+    query.edit_message_text('Container\n' + container_id + '\nsuccessfully restarted!')
+    show_admin_menu(context=context, chat_id=update.effective_chat.id)
+    return ADMIN_MENU
+
+
+def keep_container_running(update, context):
+    """
+    Do nothing and return to Admin Area
+    """
+
+    query = update.callback_query
+    # Answer so that the small clock when you click a button disappears
+    query.answer()
+
+    show_admin_menu(context=None, chat_id=None, query=query)
+    return ADMIN_MENU
 
 
 """
@@ -315,7 +415,7 @@ def check_thornodes(context):
 
     # List to delete entries after loop
     delete_addresses = []
-    
+
     # Iterate through all keys
     for address in user_data['nodes'].keys():
         remote_node = get_thornode_object(address=address)
@@ -334,7 +434,8 @@ def check_thornodes(context):
             continue
 
         # Check which node fields have changed
-        changed_fields = [field for field in ['status', 'bond', 'slash_points'] if local_node[field] != remote_node[field]]
+        changed_fields = [field for field in ['status', 'bond', 'slash_points'] if
+                          local_node[field] != remote_node[field]]
 
         # Check if there are any changes
         if len(changed_fields) > 0:
@@ -516,14 +617,16 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
     keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
                      InlineKeyboardButton('<< Back', callback_data='back_button')])
 
-    # Edit message or write a new one depending on function call
+    # Edit query message. Write a new message instead after address input
     if query:
-        query.edit_message_text('Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
+        query.edit_message_text('Choose an address from the list below or add one:',
+                                reply_markup=InlineKeyboardMarkup(keyboard))
     else:
-        context.bot.send_message(chat_id, 'Choose an address from the list below or add one:', reply_markup=InlineKeyboardMarkup(keyboard))
+        context.bot.send_message(chat_id, 'Choose an address from the list below or add one:',
+                                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def show_detail_buttons(query, address):
+def show_detail_menu(query, address):
     """
     Show detail buttons for selected address
     """
@@ -531,7 +634,7 @@ def show_detail_buttons(query, address):
     keyboard = [[
         InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats'),
         InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion')
-        ],
+    ],
         [
             InlineKeyboardButton('<< Back', callback_data='back_button')
         ]]
@@ -540,6 +643,48 @@ def show_detail_buttons(query, address):
     text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     return WAIT_FOR_DETAIL
+
+
+def show_admin_menu(context, chat_id, query=None):
+    """
+    Show buttons of admin area
+    """
+
+    keyboard = [[
+        InlineKeyboardButton('Show Running container', callback_data='show_container'),
+        InlineKeyboardButton('Restart Container', callback_data='confirm_container_restart')
+    ],
+        [
+            InlineKeyboardButton('<< Back', callback_data='back_button')
+        ]]
+
+    # Send message
+    text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
+           "You can list all running docker container or restart one.\n" \
+           "What do you want to do?"
+    if query:
+        query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        context.bot.send_message(chat_id, text, reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+def get_running_docker_container(query):
+    """
+    Return Json of all running container on the host machine
+    """
+
+    bash_command = DOCKER_CURL_CMD + " http://localhost/containers/json"
+    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = process.communicate()
+    rc = process.returncode
+
+    if error or rc:
+        print(error)
+        query.answer(error, show_alert=True)
+        return "ERROR"
+
+    container_string = output.decode('utf8')
+    return json.loads(container_string)
 
 
 def get_thornode_object(address):
@@ -647,7 +792,7 @@ Application
 END = ConversationHandler.END
 
 # Conversation state(s)
-THORNODE_MENU, WAIT_FOR_ADDRESS, WAIT_FOR_DETAIL, WAIT_FOR_CONFIRMATION = range(4)
+THORNODE_MENU, WAIT_FOR_ADDRESS, WAIT_FOR_DETAIL, WAIT_FOR_CONFIRMATION, ADMIN_MENU = range(5)
 
 
 def main():
@@ -678,7 +823,7 @@ def main():
                 CallbackQueryHandler(show_stats, pattern='^show_stats$'),
                 CallbackQueryHandler(confirm_thornode_deletion, pattern='^confirm_thornode_deletion$',
                                      pass_chat_data=True),
-                CallbackQueryHandler(back_button, pattern='^back_button$')],
+                CallbackQueryHandler(back_to_thornode_menu, pattern='^back_button$')],
             WAIT_FOR_CONFIRMATION: [
                 CallbackQueryHandler(delete_thornode, pattern='^delete_thornode$'),
                 CallbackQueryHandler(keep_thornode, pattern='^keep_thornode$')]},
@@ -690,7 +835,7 @@ def main():
         }
     )
 
-    # Add Thornodd conversation handler
+    # Add Thornode conversation handler
     add_thornode_conversation = ConversationHandler(
         entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$')],
         states={WAIT_FOR_ADDRESS: [
@@ -720,15 +865,23 @@ def main():
     # Define Thornode conversation handler
     admin_conversation = ConversationHandler(
         entry_points=[CallbackQueryHandler(admin_menu, pattern='^admin_menu$')],
-        states={},
+        states={
+            ADMIN_MENU: [
+                CallbackQueryHandler(show_container, pattern='^show_container$'),
+                CallbackQueryHandler(confirm_container_restart, pattern='^confirm_container_restart$',
+                                     pass_chat_data=True),
+                CallbackQueryHandler(back_to_home, pattern='^back_button$')],
+            WAIT_FOR_CONFIRMATION: [
+                CallbackQueryHandler(restart_container, pattern='^restart_container$'),
+                CallbackQueryHandler(keep_container_running, pattern='^keep_container_running$')]
+        },
         fallbacks=[],
         allow_reentry=True,
     )
 
-
     # Add start commandHandler handlers
     dispatcher.add_handler(CommandHandler('start', start))
-    
+
     # Add conversationHandler
     dispatcher.add_handler(thornode_conversation)
     dispatcher.add_handler(admin_conversation)

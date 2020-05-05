@@ -1,6 +1,8 @@
 # thornode-telegram-bot ⚡🤖
 A telegram bot to monitor the status of THORNodes.
 
+If you have questions feel free to open a github issue or contact us in our Telegram Channel https://t.me/block42_crypto!
+
 ## Requirements
 * Telegram
 * Docker (if you want to run with docker or docker-compose)
@@ -11,8 +13,8 @@ A telegram bot to monitor the status of THORNodes.
 
 Open `variables.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
-- `NODE_IP` to any IP you want to monitor. Leave `NODE_IP=localhost` to monitor your own local Node.
-If you don't know any IP, set `NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+- `THORCHAIN_NODE_IP` to any IP you want to monitor. Leave `THORCHAIN_NODE_IP=localhost` to monitor your own local Node.
+If you don't know any IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
 
 Install `docker` and `docker-compose` and run:
 
@@ -44,11 +46,11 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 export TELEGRAM_BOT_TOKEN=XXX
 ```
 
-Next you can specify the IP of the Node that you want to watch in `NODE_IP` environment variable.
+Next you can specify the IP of the Node that you want to watch in `THORCHAIN_NODE_IP` environment variable.
 Leave this environment variable unset to listen on `localhost`.
 If you don't know any IPs of Nodes, take one of the seed nodes from https://testnet-seed.thorchain.info .
 ```
-export NODE_IP=3.228.22.197
+export THORCHAIN_NODE_IP=3.228.22.197
 ```
 
 Finally, if you want test the Thornode Telegram Bot with data from your local machine, you
@@ -112,14 +114,14 @@ docker volume create thornode-bot-volume
 Finally run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env THORCHAIN_NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
 
-Set the `-env NODE_IP` flag to an IP of a running node, or remove 
-`--env NODE_IP=XXX` to listen on localhost. 
-If you don't know any IP, set `NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+Set the `-env THORCHAIN_NODE_IP` flag to an IP of a running node, or remove 
+`--env THORCHAIN_NODE_IP=XXX` to listen on localhost. 
+If you don't know any IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
 
 Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. 
 This is the directory where your bot saves and retrieves the `session.data` file.
@@ -147,7 +149,7 @@ The explained steps in the Docker Standalone section are conveniently bundled in
 `docker-compose.yaml` file.
 
 First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`
-and `NODE_IP`.
+and `THORCHAIN_NODE_IP`.
 
 If you don't want to spin up the official docker image from our dockerhub, open 
 `docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:release-1.3"`
