@@ -3,22 +3,22 @@ A telegram bot to monitor the status of THORNodes.
 
 ## Requirements
 * Telegram
-* Docker (if you want to run with docker)
+* Docker (if you want to run with docker or docker-compose)
+* Docker Compose (if you want to run with docker-compose)
 * Python3 (if you want to run without docker)
 
 ## Quickstart
 
-Install `docker` and run:
+Open `variables.env` file and set
+- `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
+- `NODE_IP` to any IP you want to monitor. Leave `NODE_IP=localhost` to monitor your own local Node.
+If you don't know any IP, set `NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+
+Install `docker` and `docker-compose` and run:
 
 ```
-docker volume create thornode-bot-volume
-docker run -d --env TELEGRAM_BOT_TOKEN=XXX --mount source=thornode-bot-volume,target=/storage block42blockchaincompany/thornode_bot:release-1.3
-docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
+docker-compose up -d
 ```
-Make sure to set the correct value for `TELEGRAM_BOT_TOKEN`
-If you don't want the default behaviour to monitor your own Node on `localhost`, 
-add `--env NODE_IP=XXX` to `docker run` command of the thornode_bot.
-If you don't know any IP, set `NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
 
 ## Steps to run everything yourself
 * Install dependencies
@@ -92,10 +92,10 @@ If you want to reset your bot's data, simply delete the file `session.data` in t
 In production you do not want to use mock data from the local endpoint but real network data. 
 To get real data just set `DEBUG=False` in your environment variables and the bot will use available seed nodes for data retrieval.
 
-### Docker
+### Docker Standalone
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
 
-Navigate to the root directory of this reposiroty and execute the following commands:
+Navigate to the root directory of this repository and execute the following commands:
 
 Build the docker image as described in the `Dockerfile`:
 
@@ -115,10 +115,20 @@ Finally run the docker container:
 docker run --env TELEGRAM_BOT_TOKEN=XXX --env NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
-Replace the `--env` flag with your telegram bot token. Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. This is the directory where your bot saves and retrieves the `session.data` file.
+Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
+
+Set the `-env NODE_IP` flag to an IP of a running node, or remove 
+`--env NODE_IP=XXX` to listen on localhost. 
+If you don't know any IP, set `NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+
+Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. 
+This is the directory where your bot saves and retrieves the `session.data` file.
+
+*Please note that as docker is intended for production,
+there is not the possibility for the `DEBUG` mode when using docker.*
 
 
-### Healthcheck
+#### Healthcheck
 There is a health check in the Dockerfile that runs the `healthcheck.py` file.
 The script assures that `thornode_bot.py` is periodically updating the `health.check` file.
 
@@ -131,6 +141,47 @@ thornode_bot container:
 ```
 docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
+
+### Docker Compose
+The explained steps in the Docker Standalone section are conveniently bundled into a
+`docker-compose.yaml` file.
+
+First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`
+and `NODE_IP`.
+
+If you don't want to spin up the official docker image from our dockerhub, open 
+`docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:release-1.3"`
+and comment in the line `build: .`.
+
+Finally, start the Thornode Telegram Bot with:
+```
+docker-compose up -d
+```
+
+---
+
+If you have problems running 'docker-compose up' while using a VPN, 
+try to this:
+- First run in your console
+```
+docker network create vpnworkaround --subnet 10.0.1.0/24
+```
+* Then comment in the networks configuration in `docker-compose.yaml`
+```
+networks:
+  default:
+    external:
+      name: vpnworkaround
+```
+* Run again in your terminal
+```
+docker-compose up -d
+```
+
+This solution is taken from https://github.com/docker/for-linux/issues/418#issuecomment-491323611
+
+
+
 
 ## Testing
 To test the Thornode Bot, you need to impersonate your own Telegram Client programmatically.
@@ -156,5 +207,5 @@ To run the test open the `test/` folder in your terminal and run
 python3 integration_test.py
 ```
 
-The test should endure a few minutes.
+The test should endure several minutes.
 Every command succeded if you see `-----ALL TESTS PASSED-----` at the end.
