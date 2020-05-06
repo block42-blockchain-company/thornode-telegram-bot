@@ -34,7 +34,8 @@ DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 ADMIN_USER_IDS = [int(admin_id) for admin_id in
                   os.environ['ADMIN_USER_IDS'].split(", ")] if 'ADMIN_USER_IDS' in os.environ else []
 DOCKER_SOCKET = "/var/run/docker.sock"
-DOCKER_CURL_CMD = 'curl --max-time 30 --no-buffer -s --unix-socket ' + DOCKER_SOCKET
+#DOCKER_SOCKET = "${DOCKER_SOCK:-/var/run/docker.sock}"
+DOCKER_CURL_CMD = "curl --max-time 30 --no-buffer -s --unix-socket " + DOCKER_SOCKET
 
 """
 ######################################################################################################################################################
@@ -291,31 +292,6 @@ def admin_menu(update, context):
     return ADMIN_MENU
 
 
-@run_async
-def show_container(update, context):
-    """
-    Display running container, basically "docker ps"
-    """
-
-    query = update.callback_query
-
-    containers = get_running_docker_container(query)
-    if containers == "ERROR":
-        return ADMIN_MENU
-    else:
-        query.answer()
-
-    text = 'Running container:\n'
-    for container in containers:
-        text += '\n'
-        for name in container['Names']:
-            text += name.replace('/', '') + " "
-
-    query.edit_message_text(text)
-    show_admin_menu(context=context, chat_id=update.effective_chat.id)
-    return ADMIN_MENU
-
-
 def confirm_container_restart(update, context):
     """
     "Are you sure?" - "YES" | "NO"
@@ -324,13 +300,15 @@ def confirm_container_restart(update, context):
     query = update.callback_query
     query.answer()
 
+    container_name = query.data.split("-")[1]
+
     keyboard = [[
-        InlineKeyboardButton('YES ✅', callback_data='restart_container'),
+        InlineKeyboardButton('YES ✅', callback_data='restart_container-' + container_name),
         InlineKeyboardButton('NO ❌', callback_data='keep_container_running')
     ]]
-    text = '⚠️ Do you really want to restart the container XY? ⚠️\n'
+    text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'
 
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
     return WAIT_FOR_CONFIRMATION
 
 
@@ -340,9 +318,11 @@ def restart_container(update, context):
     """
 
     query = update.callback_query
+    container_name = query.data.split("-")[1]
 
-    containers = get_running_docker_container(query)
+    containers = get_running_docker_container()
     if containers == "ERROR":
+        query.answer("Error while getting running docker container", show_alert=True)
         return ADMIN_MENU
     else:
         query.answer()
@@ -350,23 +330,20 @@ def restart_container(update, context):
     container_id = ''
     for container in containers:
         for name in container['Names']:
-            if name == '/hahaha':
+            if name == "/" + container_name:
                 container_id = container['Id']
                 break
 
-    bash_command = DOCKER_CURL_CMD + ' -f -XPOST "http://localhost/containers/' + container_id + '/restart?t=3"'
-    print(bash_command)
+    bash_command = DOCKER_CURL_CMD + ' -f -v -XPOST http://localhost/containers/' + container_id + '/restart'
     process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = process.communicate()
-    rc = process.returncode
 
-    if error or rc:
-        print(output)
-        print(error)
-        print(rc)
+    if process.returncode:
+        print("Restart docker container error: ", error)
+        print("Return Code: ", process.returncode)
         return
 
-    query.edit_message_text('Container\n' + container_id + '\nsuccessfully restarted!')
+    query.edit_message_text('Container\n*' + container_name + '*\nsuccessfully restarted!', parse_mode='markdown')
     show_admin_menu(context=context, chat_id=update.effective_chat.id)
     return ADMIN_MENU
 
@@ -634,7 +611,7 @@ def show_detail_menu(query, address):
     keyboard = [[
         InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats'),
         InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion')
-    ],
+        ],
         [
             InlineKeyboardButton('<< Back', callback_data='back_button')
         ]]
@@ -650,25 +627,33 @@ def show_admin_menu(context, chat_id, query=None):
     Show buttons of admin area
     """
 
-    keyboard = [[
-        InlineKeyboardButton('Show Running container', callback_data='show_container'),
-        InlineKeyboardButton('Restart Container', callback_data='confirm_container_restart')
-    ],
-        [
-            InlineKeyboardButton('<< Back', callback_data='back_button')
-        ]]
+    containers = get_running_docker_container()
+    if containers == "ERROR":
+        if query:
+            query.answer("Error while getting running docker container", show_alert=True)
+        return END
+
+    # build keyboard with one button for every container
+    keyboard = [[]]
+    for container in containers:
+        for name in container['Names']:
+            container_name = name.replace('/', '')
+            keyboard.append([InlineKeyboardButton(container_name, callback_data='container-' + container_name)])
+
+    keyboard.append([InlineKeyboardButton('<< Back', callback_data='back_button')])
 
     # Send message
     text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
-           "You can list all running docker container or restart one.\n" \
-           "What do you want to do?"
+           "Below is a list of docker containers running on your system.\n" \
+           "Click on any container to restart it!"
     if query:
+        query.answer()
         query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     else:
         context.bot.send_message(chat_id, text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def get_running_docker_container(query):
+def get_running_docker_container():
     """
     Return Json of all running container on the host machine
     """
@@ -680,7 +665,6 @@ def get_running_docker_container(query):
 
     if error or rc:
         print(error)
-        query.answer(error, show_alert=True)
         return "ERROR"
 
     container_string = output.decode('utf8')
@@ -867,12 +851,10 @@ def main():
         entry_points=[CallbackQueryHandler(admin_menu, pattern='^admin_menu$')],
         states={
             ADMIN_MENU: [
-                CallbackQueryHandler(show_container, pattern='^show_container$'),
-                CallbackQueryHandler(confirm_container_restart, pattern='^confirm_container_restart$',
-                                     pass_chat_data=True),
+                CallbackQueryHandler(confirm_container_restart, pattern='^container'),
                 CallbackQueryHandler(back_to_home, pattern='^back_button$')],
             WAIT_FOR_CONFIRMATION: [
-                CallbackQueryHandler(restart_container, pattern='^restart_container$'),
+                CallbackQueryHandler(restart_container, pattern='^restart_container'),
                 CallbackQueryHandler(keep_container_running, pattern='^keep_container_running$')]
         },
         fallbacks=[],
