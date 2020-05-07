@@ -14,7 +14,9 @@ If you have questions feel free to open a github issue or contact us in our Tele
 Open `variables.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `THORCHAIN_NODE_IP` to any IP you want to monitor. Leave `THORCHAIN_NODE_IP=localhost` to monitor your own local Node.
-If you don't know any IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+- `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the Admin Area.
+
+If you don't know any ThorNode IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
 
 Install `docker` and `docker-compose` and run:
 
@@ -45,14 +47,27 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 ```
 export TELEGRAM_BOT_TOKEN=XXX
 ```
-
-Next you can specify the IP of the Node that you want to watch in `THORCHAIN_NODE_IP` environment variable.
+---
+Next you can specify the IP of the Thornode that you want to watch in `THORCHAIN_NODE_IP` environment variable.
 Leave this environment variable unset to listen on `localhost`.
 If you don't know any IPs of Nodes, take one of the seed nodes from https://testnet-seed.thorchain.info .
 ```
 export THORCHAIN_NODE_IP=3.228.22.197
 ```
+---
+Next set Telegram User IDs that are permissioned to access the Admin Area in the `ADMIN_USER_IDS` environment variable.
+Leave the default dummy values if you do not intend to use the Admin Area.
 
+To find out your Telegram, open your Telegram Client, and search for the Telegram Bot `@userinfobot`.
+Ensure that this is a Bot and not a Channel and has exactly the handle `@userinfobot`, as there
+are a lot of channels and bots with similar names.
+Start this Bot and it returns you your User ID that you need to export in `ADMIN_USER_IDS`.
+
+If you enter multiple User IDs, make sure to separate the IDs with `,` ` `, i.e. a comma and a whitespace.
+```
+export ADMIN_USER_IDS=12345, 56789, 42424
+```
+---
 Finally, if you want test the Thornode Telegram Bot with data from your local machine, you
 need to set the debug environment variable:
 ```
@@ -62,14 +77,15 @@ The DEBUG flag set to True will run a local web server as a separate process.
 This way the telegram bot can access the local files `nodeaccounts.json` und `status.json`
 in the `test/` folder.
 
-To test whether the bot actually notifies you about changes, the data the bot is quering needs to change. 
-You can simulate that by manually editing `test/nodeaccounts.json`.
+To test whether the bot actually notifies you about changes, the data the bot is querying needs to change. 
+You can simulate that by manually editing `test/nodeaccounts.json`, `test/status.json` and `test/midgard.json`.
 
 Futhermore in DEBUG mode a separate process runs `increase_block_height.py` which artificially increases
 the block height so that there are no notifications that the block height got stuck.
-
-
-If your using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run configuration which is very convenient for development (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
+---
+If your using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run 
+configuration which is very convenient for development 
+(see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
 
 ## Start the bot
@@ -79,7 +95,7 @@ Start the bot via:
 python3 thornode_bot.py
 ```
 
-Make sure to see a message in the console that the bot is running.
+Make sure that you see a message in the console which indicates that the bot is running.
 
 ## Run & test the bot
 When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram, open the chat and hit start!
@@ -92,7 +108,10 @@ If you want to reset your bot's data, simply delete the file `session.data` in t
 
 ## Production
 In production you do not want to use mock data from the local endpoint but real network data. 
-To get real data just set `DEBUG=False` in your environment variables and the bot will use available seed nodes for data retrieval.
+To get real data just set `DEBUG=False` and all other environment variables as 
+described in the 'Set environment variables' section.
+If you're using docker-compose to run this Bot, modify the existing variables in `variables.env` file (No need to
+set DEBUG as there's no DEBUG mode in the docker version). 
 
 ### Docker Standalone
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
@@ -114,7 +133,7 @@ docker volume create thornode-bot-volume
 Finally run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env THORCHAIN_NODE_IP=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env THORCHAIN_NODE_IP=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
@@ -122,6 +141,9 @@ Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token.
 Set the `-env THORCHAIN_NODE_IP` flag to an IP of a running node, or remove 
 `--env THORCHAIN_NODE_IP=XXX` to listen on localhost. 
 If you don't know any IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+
+The `-v` argument passes the dockersocket to the container so that we can restart docker containers from
+inside the Telegram Bot.
 
 Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. 
 This is the directory where your bot saves and retrieves the `session.data` file.
@@ -152,7 +174,7 @@ First, as before, you need to set the right values in the `variables.env` file f
 and `THORCHAIN_NODE_IP`.
 
 If you don't want to spin up the official docker image from our dockerhub, open 
-`docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:release-1.3"`
+`docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:release-1.4"`
 and comment in the line `build: .`.
 
 Finally, start the Thornode Telegram Bot with:
@@ -195,9 +217,15 @@ then choose any application (we chose Android) and follow the steps.
 
 Once you get access to api_id and api_hash, save them in the Environment variables
 `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` respectively.
+Also save the name of your Telegram Bot without the preceding `@` 
+in the `TELEGRAM_BOT_ID` environment variable (e.g. if your bot is named 
+`@thornode_test_bot`, save `thornode_test_bot` in `TELEGRAM_BOT_ID`).
 
 You also need to have set the `TELEGRAM_BOT_TOKEN` environment variable with your 
-telegram bot token and set `DEBUG=True` as explained in previous sections.
+telegram bot token, set `ADMIN_USER_IDS` with permissioned IDs and
+set `DEBUG=True` as explained in previous sections.
+If you want to test the restarting of docker containers, 
+do not forget to start at least one container on your system.
 
 Keep in mind that the test always deletes the `session.data` file inside `storage/`
 in order to have fresh starts for every integration test. If you wish to keep your

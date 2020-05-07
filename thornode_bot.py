@@ -34,7 +34,6 @@ DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 ADMIN_USER_IDS = [int(admin_id) for admin_id in
                   os.environ['ADMIN_USER_IDS'].split(", ")] if 'ADMIN_USER_IDS' in os.environ else []
 DOCKER_SOCKET = "/var/run/docker.sock"
-#DOCKER_SOCKET = "${DOCKER_SOCK:-/var/run/docker.sock}"
 DOCKER_CURL_CMD = "curl --max-time 30 --no-buffer -s --unix-socket " + DOCKER_SOCKET
 
 """
@@ -79,7 +78,8 @@ def start(update, context):
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
-           'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!'
+           'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!\n' \
+           'Moreover, in the Admin Area you can *restart any docker container* that runs alongside my container!'
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
@@ -199,7 +199,7 @@ def show_stats(update, context):
 
     text = 'THORNode: ' + address + '\n' + \
            'Status: ' + node['status'].capitalize() + '\n' + \
-           'Bond: ' + '{:,} RUNE'.format(tor_to_rune(int(node['bond']))) + '\n' + \
+           'Bond: ' + tor_to_rune(int(node['bond'])) + '\n' + \
            'Slash Points: ' + '{:,}'.format(int(node['slash_points']))
 
     # Send message
@@ -300,10 +300,10 @@ def confirm_container_restart(update, context):
     query = update.callback_query
     query.answer()
 
-    container_name = query.data.split("-")[1]
+    container_name = query.data.split("-#")[1]
 
     keyboard = [[
-        InlineKeyboardButton('YES ✅', callback_data='restart_container-' + container_name),
+        InlineKeyboardButton('YES ✅', callback_data='restart_container-#' + container_name),
         InlineKeyboardButton('NO ❌', callback_data='keep_container_running')
     ]]
     text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'
@@ -318,7 +318,7 @@ def restart_container(update, context):
     """
 
     query = update.callback_query
-    container_name = query.data.split("-")[1]
+    container_name = query.data.split("-#")[1]
 
     containers = get_running_docker_container()
     if containers == "ERROR":
@@ -419,8 +419,8 @@ def check_thornodes(context):
             text = 'THORNode: ' + address + '\n' + \
                    'Status: ' + local_node['status'].capitalize() + \
                    ' ➡️ ' + remote_node['status'].capitalize() + '\n' + \
-                   'Bond: ' + '{:,} RUNE'.format(tor_to_rune(int(local_node['bond']))) + \
-                   ' ➡️ ' + '{:,} RUNE'.format(tor_to_rune(int(remote_node['bond']))) + '\n' + \
+                   'Bond: ' + tor_to_rune(int(local_node['bond'])) + \
+                   ' ➡️ ' + tor_to_rune(int(remote_node['bond'])) + '\n' + \
                    'Slash Points: ' + '{:,}'.format(int(local_node['slash_points'])) + \
                    ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
@@ -503,7 +503,7 @@ def check_thorchain_catch_up_status(context):
     if user_data['is_catching_up'] == False and is_currently_catching_up:
         user_data['is_catching_up'] = True
         text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
-               'IP: ' + NODE_IP + '\n' + \
+               'IP: ' + THORCHAIN_NODE_IP + '\n' + \
                'Current block height: ' + get_thorchain_block_height() + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
@@ -511,7 +511,7 @@ def check_thorchain_catch_up_status(context):
     elif user_data['is_catching_up'] == True and not is_currently_catching_up:
         user_data['is_catching_up'] = False
         text = 'The node caught up to the latest block height again! 👌' + '\n' + \
-               'IP: ' + NODE_IP + '\n' + \
+               'IP: ' + THORCHAIN_NODE_IP + '\n' + \
                'Current block height: ' + get_thorchain_block_height()
         context.bot.send_message(chat_id, text)
         show_home_menu(context=context, chat_id=chat_id)
@@ -535,8 +535,6 @@ def check_thorchain_midgard_api(context):
                'IP: ' + THORCHAIN_NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         context.bot.send_message(chat_id, text)
-        show_home_menu(context, chat_id=chat_id)
-    elif user_data['is_midgard_healthy'] == False and is_thorchain_midgard_healthy():
         show_home_menu(context, chat_id=chat_id)
     elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = True
@@ -571,7 +569,7 @@ def show_home_menu(context, chat_id, query=None):
     keyboard = [[InlineKeyboardButton('My THORNodes', callback_data='thornode_menu'),
                  InlineKeyboardButton('Admin Area', callback_data='admin_menu')]]
 
-    text = 'Choose an action:'
+    text = 'I am your THORNode Bot. 🤖\nChoose an action:'
     # Edit message or write a new one depending on function call
     if query:
         query.edit_message_text(text,
@@ -631,6 +629,7 @@ def show_admin_menu(context, chat_id, query=None):
     if containers == "ERROR":
         if query:
             query.answer("Error while getting running docker container", show_alert=True)
+        print("Error while getting running docker container")
         return END
 
     # build keyboard with one button for every container
@@ -638,7 +637,9 @@ def show_admin_menu(context, chat_id, query=None):
     for container in containers:
         for name in container['Names']:
             container_name = name.replace('/', '')
-            keyboard.append([InlineKeyboardButton(container_name, callback_data='container-' + container_name)])
+            status = container['Status']
+            text = container_name + " - " + status
+            keyboard.append([InlineKeyboardButton(text, callback_data='container-#' + container_name)])
 
     keyboard.append([InlineKeyboardButton('<< Back', callback_data='back_button')])
 
@@ -753,9 +754,13 @@ def get_thorchain_midgard_endpoint():
 def tor_to_rune(tor):
     """
     1e8 Tor are 1 Rune
+    Format depending if RUNE > or < Zero
     """
 
-    return tor / 100000000
+    if tor >= 100000000:
+        return "{:,} RUNE".format(int(tor / 100000000))
+    else:
+        return '{:.8f} RUNE'.format(tor / 100000000)
 
 
 def error(update, context):
