@@ -63,9 +63,9 @@ Ensure that this is a Bot and not a Channel and has exactly the handle `@userinf
 are a lot of channels and bots with similar names.
 Start this Bot and it returns you your User ID that you need to export in `ADMIN_USER_IDS`.
 
-If you enter multiple User IDs, make sure to separate the IDs with `,` ` `, i.e. a comma and a whitespace.
+If you enter multiple User IDs, make sure to separate the IDs with `,` i.e. a comma.
 ```
-export ADMIN_USER_IDS=12345, 56789, 42424
+export ADMIN_USER_IDS=12345,56789,42424
 ```
 ---
 Finally, if you want test the Thornode Telegram Bot with data from your local machine, you

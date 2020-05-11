@@ -32,9 +32,8 @@ TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 THORCHAIN_NODE_IP = os.environ['THORCHAIN_NODE_IP'] if 'THORCHAIN_NODE_IP' in os.environ else 'localhost'
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 ADMIN_USER_IDS = [int(admin_id) for admin_id in
-                  os.environ['ADMIN_USER_IDS'].split(", ")] if 'ADMIN_USER_IDS' in os.environ else []
-DOCKER_SOCKET = "/var/run/docker.sock"
-DOCKER_CURL_CMD = "curl --max-time 30 --no-buffer -s --unix-socket " + DOCKER_SOCKET
+                  os.environ['ADMIN_USER_IDS'].split(",")] if 'ADMIN_USER_IDS' in os.environ else []
+DOCKER_CURL_CMD = "curl --max-time 30 --no-buffer -s --unix-socket /var/run/docker.sock"
 
 """
 ######################################################################################################################################################
