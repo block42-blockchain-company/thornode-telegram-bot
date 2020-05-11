@@ -6,7 +6,7 @@ services:
 
     # comment 'image:' in and 'build:' out to use official image from docker hub
     # comment 'image:' out and 'build:' in to build an image from your local directory
-    image: "block42blockchaincompany/thornode_bot:release-1.4"
+    image: "block42blockchaincompany/thornode_bot:latest"
     #build: .
 
     env_file:
