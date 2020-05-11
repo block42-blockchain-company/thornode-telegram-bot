@@ -174,7 +174,7 @@ First, as before, you need to set the right values in the `variables.env` file f
 and `THORCHAIN_NODE_IP`.
 
 If you don't want to spin up the official docker image from our dockerhub, open 
-`docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:release-1.4"`
+`docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
 and comment in the line `build: .`.
 
 Finally, start the Thornode Telegram Bot with:
