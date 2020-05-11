@@ -6,13 +6,14 @@ services:
 
     # comment 'image:' in and 'build:' out to use official image from docker hub
     # comment 'image:' out and 'build:' in to build an image from your local directory
-    image: "block42blockchaincompany/thornode_bot:release-1.3"
+    image: "block42blockchaincompany/thornode_bot:release-1.4"
     #build: .
 
     env_file:
       - variables.env
     volumes:
       - thornode-bot-volume:/storage
+      - /var/run/docker.sock:/var/run/docker.sock
   autoheal:
     container_name: autoheal
     image: "willfarrell/autoheal"
@@ -26,7 +27,7 @@ volumes:
 
 # If you have problems running 'docker-compose up' and you're using a VPN, try to run this command in the console:
 # docker network create vpnworkaround --subnet 10.0.1.0/24
-# ... and comment in the networks configuration below:
+# ... and uncomment the networks configuration below:
 # (solution from https://github.com/docker/for-linux/issues/418#issuecomment-491323611)
 
 #networks:
