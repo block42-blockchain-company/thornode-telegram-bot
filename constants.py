@@ -10,7 +10,7 @@ TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 # Set THORCHAIN_NODE_IP depending on mode (if None, certain node health jobs are not executed)
 if DEBUG:
     THORCHAIN_NODE_IP = 'localhost'
-elif 'THORCHAIN_NODE_IP' in os.environ:
+elif 'THORCHAIN_NODE_IP' in os.environ and os.environ['THORCHAIN_NODE_IP']:
     THORCHAIN_NODE_IP = os.environ['THORCHAIN_NODE_IP']
 else:
     THORCHAIN_NODE_IP = None

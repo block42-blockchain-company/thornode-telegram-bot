@@ -13,10 +13,9 @@ If you have questions feel free to open a github issue or contact us in our Tele
 
 Open `variables.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
-- `THORCHAIN_NODE_IP` to any IP you want to monitor. Leave `THORCHAIN_NODE_IP=localhost` to monitor your own local Node.
+- `THORCHAIN_NODE_IP` to any IP you want to monitor (or `localhost`). 
+Leave it empty or remove it to use testnet seed Node IPs.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the Admin Area.
-
-If you don't know any ThorNode IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
 
 Install `docker` and `docker-compose` and run:
 
@@ -48,8 +47,16 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 export TELEGRAM_BOT_TOKEN=XXX
 ```
 ---
-Next you can specify the IP of the Thornode that you want to watch in `THORCHAIN_NODE_IP` environment variable.
-Leave this environment variable unset to listen on `localhost`.
+Next you can specify the IP of the Thornode that you want to watch in the `THORCHAIN_NODE_IP` environment variable.
+
+Set it to `localhost` to listen a node on your own machine.
+
+Leave this environment variable empty or don't even set it 
+to use IPs of the testnet seed nodes from https://testnet-seed.thorchain.info.
+
+*Please note, if you leave `THORCHAIN_NODE_IP` empty, IP specific monitoring won't take effect (no check for 
+increasing block height, midgard API and catch up status). Because we rotate through available 
+testnet seed IPs, we would compare data of different nodes and send incorrect alerts.*
 If you don't know any IPs of Nodes, take one of the seed nodes from https://testnet-seed.thorchain.info .
 ```
 export THORCHAIN_NODE_IP=3.228.22.197
@@ -83,7 +90,7 @@ You can simulate that by manually editing `test/nodeaccounts.json`, `test/status
 Futhermore in DEBUG mode a separate process runs `increase_block_height.py` which artificially increases
 the block height so that there are no notifications that the block height got stuck.
 ---
-If your using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run 
+If you are using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run 
 configuration which is very convenient for development 
 (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
@@ -140,7 +147,7 @@ Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token.
 
 Set the `-env THORCHAIN_NODE_IP` flag to an IP of a running node, or remove 
 `--env THORCHAIN_NODE_IP=XXX` to listen on localhost. 
-If you don't know any IP, set `THORCHAIN_NODE_IP` to a seed node IP from https://testnet-seed.thorchain.info .
+If you don't know any IP leave this empty i.e. `--env THORCHAIN_NODE_IP=` or remove it completely.
 
 The `-v` argument passes the dockersocket to the container so that we can restart docker containers from
 inside the Telegram Bot.
@@ -170,8 +177,8 @@ docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/
 The explained steps in the Docker Standalone section are conveniently bundled into a
 `docker-compose.yaml` file.
 
-First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`
-and `THORCHAIN_NODE_IP`.
+First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`,
+`THORCHAIN_NODE_IP` and `ADMIN_USER_IDS`
 
 If you don't want to spin up the official docker image from our dockerhub, open 
 `docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`

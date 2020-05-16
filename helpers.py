@@ -54,21 +54,28 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
                                  reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def show_detail_menu(query, address):
+def show_detail_menu(update, context):
     """
     Show detail buttons for selected address
     """
 
+
+    query = update.callback_query
+    address = context.user_data['selected_node_address']
+    node = context.user_data['nodes'][address]
+
     keyboard = [[
-        InlineKeyboardButton('Show THORNode Stats', callback_data='show_stats'),
-        InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion')
-        ],
-        [
-            InlineKeyboardButton('<< Back', callback_data='back_button')
+        InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion'),
+        InlineKeyboardButton('<< Back', callback_data='back_button')
         ]]
 
-    # Send message
-    text = "You chose\n" + address + "\nWhat do you want to do with that Node?"
+    text = 'THORNode: ' + address + '\n' + \
+           'Status: ' + node['status'].capitalize() + '\n' + \
+           'Bond: ' + tor_to_rune(int(node['bond'])) + '\n' + \
+           'Slash Points: ' + '{:,}'.format(int(node['slash_points'])) + '\n\n' + \
+           "What do you want to do with that Node?"
+
+    # Modify message
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     return WAIT_FOR_DETAIL
 
@@ -217,6 +224,8 @@ def tor_to_rune(tor):
     Format depending if RUNE > or < Zero
     """
 
+    # Cast to int if tor is string
+    tor = int(tor)
     if tor >= 100000000:
         return "{:,} RUNE".format(int(tor / 100000000))
     else:
@@ -229,3 +238,4 @@ def error(update, context):
     """
 
     logger.warning('Update "%s" caused error: %s', update, context.error)
+

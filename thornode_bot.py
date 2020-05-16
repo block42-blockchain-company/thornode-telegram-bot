@@ -33,6 +33,31 @@ if DEBUG:
 
     atexit.register(cleanup)
 
+
+"""
+######################################################################################################################################################
+BOT RESTART SETUP
+######################################################################################################################################################
+"""
+
+
+def setup_existing_user(dispatcher):
+    """
+    Tasks to ensure smooth user experience for existing users upon Bot restart
+    """
+
+    chat_ids = dispatcher.user_data.keys()
+    for chat_id in chat_ids:
+        dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
+            'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
+        })
+        restart_message = 'Heil ok sæll!\n' \
+                          'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
+                          'To make sure you have the latest features, please start ' \
+                          'a fresh chat with me by typing /start.'
+        dispatcher.bot.send_message(chat_id, restart_message)
+
+
 """
 ######################################################################################################################################################
 Handlers
@@ -55,7 +80,7 @@ def start(update, context):
         context.user_data['job_started'] = True
         context.user_data['nodes'] = {}
 
-    text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' + \
+    text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
            'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!\n' \
            'Moreover, in the Admin Area you can *restart any docker container* that runs alongside my container!'
@@ -164,31 +189,6 @@ def delete_thornode(update, context):
 
 
 @run_async
-def show_stats(update, context):
-    """
-    Send thornode stats of the chosen address
-    """
-
-    # Enable message editing
-    query = update.callback_query
-    query.answer()
-    address = context.user_data['selected_node_address']
-
-    node = context.user_data['nodes'][address]
-
-    text = 'THORNode: ' + address + '\n' + \
-           'Status: ' + node['status'].capitalize() + '\n' + \
-           'Bond: ' + tor_to_rune(int(node['bond'])) + '\n' + \
-           'Slash Points: ' + '{:,}'.format(int(node['slash_points']))
-
-    # Send message
-    query.edit_message_text(text)
-
-    show_thornode_menu(context, chat_id=update.effective_chat.id, user_data=context.user_data)
-    return END
-
-
-@run_async
 def thornode_details(update, context):
     """
     Shows thornode detail buttons
@@ -200,7 +200,7 @@ def thornode_details(update, context):
     address = query.data.split("-")[1]
     context.user_data['selected_node_address'] = address
 
-    return show_detail_menu(query=query, address=address)
+    return show_detail_menu(update=update, context=context)
 
 
 @run_async
@@ -250,7 +250,7 @@ def keep_thornode(update, context):
     query = update.callback_query
     # Answer so that the small clock when you click a button disappears
     query.answer()
-    return show_detail_menu(query=query, address=context.user_data['selected_node_address'])
+    return show_detail_menu(update=update, context=context)
 
 
 @run_async
@@ -356,12 +356,7 @@ def main():
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
     dispatcher = bot.dispatcher
 
-    # Restart jobs for all users helpers
-    chat_ids = dispatcher.user_data.keys()
-    for chat_id in chat_ids:
-        dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
-            'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
-        })
+    setup_existing_user(dispatcher=dispatcher)
 
     # Start job for health check
     dispatcher.job_queue.run_repeating(update_health_check_file, interval=5, context={})
@@ -372,7 +367,6 @@ def main():
         states={
             WAIT_FOR_DETAIL: [
                 CommandHandler('cancel', cancel),
-                CallbackQueryHandler(show_stats, pattern='^show_stats$'),
                 CallbackQueryHandler(confirm_thornode_deletion, pattern='^confirm_thornode_deletion$',
                                      pass_chat_data=True),
                 CallbackQueryHandler(back_to_thornode_menu, pattern='^back_button$')],

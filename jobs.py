@@ -61,12 +61,15 @@ def check_thornodes(context):
         # Check if there are any changes
         if len(changed_fields) > 0:
             text = 'THORNode: ' + address + '\n' + \
-                   'Status: ' + local_node['status'].capitalize() + \
-                   ' ➡️ ' + remote_node['status'].capitalize() + '\n' + \
-                   'Bond: ' + tor_to_rune(int(local_node['bond'])) + \
-                   ' ➡️ ' + tor_to_rune(int(remote_node['bond'])) + '\n' + \
-                   'Slash Points: ' + '{:,}'.format(int(local_node['slash_points'])) + \
-                   ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
+                   'Status: ' + local_node['status'].capitalize()
+            if 'status' in changed_fields:
+                text += ' ➡️ ' + remote_node['status'].capitalize()
+            text += '\nBond: ' + tor_to_rune(int(local_node['bond']))
+            if 'bond' in changed_fields:
+                text += ' ➡️ ' + tor_to_rune(int(remote_node['bond']))
+            text += '\nSlash Points: ' + '{:,}'.format(int(local_node['slash_points']))
+            if 'slash_points' in changed_fields:
+                text += ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
             # Update data
             local_node['status'] = remote_node['status']
