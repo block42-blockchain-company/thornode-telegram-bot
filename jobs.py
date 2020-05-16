@@ -17,9 +17,10 @@ def thornode_checks(context):
     """
 
     check_thornodes(context)
-    check_thorchain_block_height(context)
-    check_thorchain_catch_up_status(context)
-    check_thorchain_midgard_api(context)
+    if THORCHAIN_NODE_IP:
+        check_thorchain_block_height(context)
+        check_thorchain_catch_up_status(context)
+        check_thorchain_midgard_api(context)
 
 
 def check_thornodes(context):

@@ -1,3 +1,4 @@
+import random
 import subprocess
 import requests
 import json
@@ -184,7 +185,14 @@ def get_thorchain_validators():
     Return the nodeaccounts endpoint to query data from.
     """
 
-    return 'http://localhost:8000/nodeaccounts.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':1317/thorchain/nodeaccounts'
+    if DEBUG:
+        return 'http://localhost:8000/nodeaccounts.json'
+    elif THORCHAIN_NODE_IP:
+        return 'http://' + THORCHAIN_NODE_IP + ':1317/thorchain/nodeaccounts'
+    else:
+        endpoints = requests.get('https://testnet-seed.thorchain.info').json()
+        random_endpoint = endpoints[random.randrange(0, len(endpoints))]
+        return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
 
 
 def get_thorchain_status():
