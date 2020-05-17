@@ -59,7 +59,9 @@ def test_my_thornodes():
     click_button("My THORNodes")
 
     response = next(telegram.iter_history(BOT_ID))
-    assert response.reply_markup.inline_keyboard[0][0].text == "Add THORNode", "Add THORNode not visible after clicking on My THORNodes"
+    assert response.reply_markup.inline_keyboard[0][0].text == "Add all THORNodes", "Add all THORNodes not visible after clicking on My THORNodes"
+    assert response.reply_markup.inline_keyboard[0][1].text == "Add THORNode", "Add THORNode not visible after clicking on My THORNodes"
+    assert response.reply_markup.inline_keyboard[1][0].text == "Delete all THORNodes", "Delete all THORNodes not visible after clicking on My THORNodes"
     assert response.reply_markup.inline_keyboard[0][1].text == "<< Back", "<< Back not visible after clicking on My THORNodes"
     print("My THORNodes ✅")
     print("------------------------")
@@ -143,11 +145,11 @@ def test_delete_address(confirm):
 
     first_response = next(telegram.iter_history(BOT_ID))
 
-    assert first_response.text == '⚠️ Do you really want to remove the address from your monitoring list? ⚠️\n' + VALID_ADDRESS, \
+    assert first_response.text == '⚠️ Do you really want to remove the address from your monitoring list? ⚠️' + VALID_ADDRESS, \
         "Delete THORNode button doesn't work!"
 
     if confirm:
-        first_response.click("YES ✅")
+        click_button("YES ✅")
         time.sleep(3)
         second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
         second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
@@ -155,16 +157,81 @@ def test_delete_address(confirm):
             "YES button on deletion confirmation does not yield deletion statement"
         assert second_response_2.text == "Choose an address from the list below or add one:", \
             "YES button on deletion confirmation does not go back to thornodes menu"
-        assert second_response_2.reply_markup.inline_keyboard[0][0].text == "Add THORNode", "Node is NOT deleted after deletion"
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == "Add all THORNodes", "Node is NOT deleted after deletion"
     else:
-        first_response.click("NO ❌")
+        click_button("NO ❌")
         time.sleep(3)
         second_response = next(telegram.iter_history(BOT_ID))
         assert second_response.text.find("THORNode: " + VALID_ADDRESS) != -1, \
-            "NO button on deletion confirmation does not go back to Thornode details"
+            "NO button on single address deletion confirmation does not go back to Thornode details"
     print("Delete Address with confirmation=" + str(confirm) + " ✅")
     print("------------------------")
 
+
+def test_add_all_addresses(confirm):
+    telegram.send_message(BOT_ID, "/start")
+    time.sleep(3)
+    click_button("My THORNodes")
+    click_button("Add all THORNodes")
+
+    first_response = next(telegram.iter_history(BOT_ID))
+
+    assert first_response.text == '⚠️ Do you really want to add all available THORNodes to your monitoring list? ⚠️', \
+        "Add all THORNodes button does not work!"
+
+    if confirm:
+        click_button("YES ✅")
+        second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+        second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+        assert second_response_1.text == "Added all THORNodes! 👌", \
+            "YES button on add all Thornodes confirmation does not yield addition statement"
+        assert second_response_2.text == "Choose an address from the list below or add one:", \
+            "YES button on add all Thornodes confirmation does not go back to My Thornodes menu"
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == VALID_ADDRESS and \
+               second_response_2.reply_markup.inline_keyboard[1][0].text.find('thor') != -1,\
+            "Nodes are not added after YES button on add all Thornodes confirmation"
+    else:
+        click_button("NO ❌")
+        time.sleep(3)
+        second_response = next(telegram.iter_history(BOT_ID))
+        assert second_response.text == "Choose an address from the list below or add one:", \
+            "NO button on add all Thornodes confirmation does not go back to My Thornodes menu"
+
+    print("Add all Thornodes with confirmation=" + str(confirm) + " ✅")
+    print("------------------------")
+
+
+def test_delete_all_addresses(confirm):
+    telegram.send_message(BOT_ID, "/start")
+    time.sleep(3)
+    click_button("My THORNodes")
+    click_button("Delete all THORNodes")
+
+    first_response = next(telegram.iter_history(BOT_ID))
+
+    assert first_response.text == '⚠️ Do you really want to remove all THORNodes from your monitoring list? ⚠️', \
+        "Delete all THORNodes button does not work!"
+
+    if confirm:
+        click_button("YES ✅")
+        second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+        second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+        assert second_response_1.text == "❌ Deleted all THORNodes! ❌", \
+            "YES button on delete all Thornodes confirmation does not yield deletion statement"
+        assert second_response_2.text == "Choose an address from the list below or add one:", \
+            "YES button on delete all Thornodes confirmation does not go back to My Thornodes menu"
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == 'Add all THORNodes' and \
+               second_response_2.reply_markup.inline_keyboard[0][1].text == 'Add THORNode', \
+            "Nodes are not deleted after YES button on delete all Thornodes confirmation"
+    else:
+        click_button("NO ❌")
+        time.sleep(3)
+        second_response = next(telegram.iter_history(BOT_ID))
+        assert second_response.text == "Choose an address from the list below or add one:", \
+            "NO button on delete all Thornodes confirmation does not go back to My Thornodes menu"
+
+    print("Delete all Thornodes with confirmation=" + str(confirm) + " ✅")
+    print("------------------------")
 
 def test_admin_area():
     telegram.send_message(BOT_ID, "/start")
@@ -432,6 +499,7 @@ with telegram:
         test_start()
         test_my_thornodes()
         test_back_button_my_thornodes()
+
         test_add_address(address="invalidAddress",
                          expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="⛔️ I have not found a THORNode with this address! Please try another one. "
@@ -442,10 +510,19 @@ with telegram:
         test_add_address(address=VALID_ADDRESS,
                          expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="Got it! 👌")
+
         test_thornode_detail()
         test_back_button_thornode_details()
+
         test_delete_address(confirm=False)
         test_delete_address(confirm=True)
+
+        test_add_all_addresses(confirm=False)
+        test_add_all_addresses(confirm=True)
+
+        test_delete_all_addresses(confirm=False)
+        test_delete_all_addresses(confirm=True)
+
         test_add_address(address=VALID_ADDRESS,
                          expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="Got it! 👌")

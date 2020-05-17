@@ -104,6 +104,36 @@ def thornode_menu(update, context):
 
 
 @run_async
+def confirm_add_all_thornodes(update, context):
+    """
+    Ask user if he really wants to add all available Thornodes
+    """
+
+    keyboard = [[
+        InlineKeyboardButton('YES ✅', callback_data='add_all_thornodes'),
+        InlineKeyboardButton('NO ❌', callback_data='back_to_thornode_menu')
+    ]]
+    text = '⚠️ Do you really want to *add all* available THORNodes to your monitoring list? ⚠️'
+
+    return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
+
+
+@run_async
+def confirm_delete_all_thornodes(update, context):
+    """
+    Ask user if he really wants to delete all available Thornodes
+    """
+
+    keyboard = [[
+        InlineKeyboardButton('YES ✅', callback_data='delete_all_thornodes'),
+        InlineKeyboardButton('NO ❌', callback_data='back_to_thornode_menu')
+    ]]
+    text = '⚠️ Do you really want to *remove all* THORNodes from your monitoring list? ⚠️'
+
+    return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
+
+
+@run_async
 def add_thornode(update, context):
     """
     Initiate a conversation and prompt for user input (thornode address).
@@ -155,8 +185,6 @@ def confirm_thornode_deletion(update, context):
     """
     Initiate process of thornode address removal
     """
-    query = update.callback_query
-    query.answer()
 
     address = context.user_data['selected_node_address']
 
@@ -164,10 +192,9 @@ def confirm_thornode_deletion(update, context):
         InlineKeyboardButton('YES ✅', callback_data='delete_thornode'),
         InlineKeyboardButton('NO ❌', callback_data='keep_thornode')
     ]]
-    text = '⚠️ Do you really want to remove the address from your monitoring list? ⚠️\n' + address
+    text = '⚠️ Do you really want to remove the address from your monitoring list? ⚠️' + address
 
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-    return WAIT_FOR_CONFIRMATION
+    return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
 
 
 @run_async
@@ -182,8 +209,8 @@ def delete_thornode(update, context):
     del context.user_data['nodes'][address]
 
     text = "❌ Thornode address got deleted! ❌\n" + address
-    query.answer(text, show_alert=True)
-    context.bot.send_message(update.effective_chat.id, text)
+    query.answer(text)
+    query.edit_message_text(text)
     show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
     return END
 
@@ -254,6 +281,56 @@ def keep_thornode(update, context):
 
 
 @run_async
+def add_all_thornodes(update, context):
+    """
+    Add all available Thornode addresses to users monitoring list
+    """
+
+    query = update.callback_query
+    query.answer()
+
+    nodes = get_thorchain_validators()
+
+    for node in nodes:
+        address = node['node_address']
+
+        context.user_data['nodes'][address] = {}
+        context.user_data['nodes'][address]['status'] = node['status']
+        context.user_data['nodes'][address]['bond'] = node['bond']
+        context.user_data['nodes'][address]['slash_points'] = node['slash_points']
+
+    # Send message
+    query.edit_message_text('Added all THORNodes! 👌')
+    show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
+
+    return END
+
+
+@run_async
+def delete_all_thornodes(update, context):
+    """
+    Delete all Thornode addresses from users monitoring list
+    """
+
+    query = update.callback_query
+    query.answer
+
+    addresses = []
+    for address in context.user_data['nodes']:
+        addresses.append(address)
+
+    for address in addresses:
+        del context.user_data['nodes'][address]
+
+    text = '❌ Deleted all THORNodes! ❌'
+    # Send message
+    query.answer(text)
+    query.edit_message_text(text)
+
+    show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
+
+
+@run_async
 def admin_menu(update, context):
     """
     Display admin area buttons
@@ -270,15 +347,13 @@ def admin_menu(update, context):
     show_admin_menu(context=None, chat_id=None, query=query)
     return ADMIN_MENU
 
-
+@run_async
 def confirm_container_restart(update, context):
     """
     "Are you sure?" - "YES" | "NO"
     """
 
     query = update.callback_query
-    query.answer()
-
     container_name = query.data.split("-#")[1]
 
     keyboard = [[
@@ -287,10 +362,9 @@ def confirm_container_restart(update, context):
     ]]
     text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'
 
-    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
-    return WAIT_FOR_CONFIRMATION
+    return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
 
-
+@run_async
 def restart_container(update, context):
     """
     Restart the specified docker container
@@ -326,7 +400,7 @@ def restart_container(update, context):
     show_admin_menu(context=context, chat_id=update.effective_chat.id)
     return ADMIN_MENU
 
-
+@run_async
 def keep_container_running(update, context):
     """
     Do nothing and return to Admin Area
@@ -396,12 +470,44 @@ def main():
         }
     )
 
+    # Add all Thornodes conversation handler
+    add_all_thornodes_conversation = ConversationHandler(
+        entry_points=[CallbackQueryHandler(confirm_add_all_thornodes, pattern='^confirm_add_all_thornodes$')],
+        states={
+            WAIT_FOR_CONFIRMATION: [
+                CallbackQueryHandler(add_all_thornodes, pattern='^add_all_thornodes$'),
+                CallbackQueryHandler(back_to_thornode_menu, pattern='^back_to_thornode_menu')]},
+        fallbacks=[],
+        allow_reentry=True,
+        map_to_parent={
+            # Return to parents thornode menu on END of child
+            END: THORNODE_MENU
+        }
+    )
+
+    # Delete all Thornodes conversation handler
+    delete_all_thornodes_conversation = ConversationHandler(
+        entry_points=[CallbackQueryHandler(confirm_delete_all_thornodes, pattern='^confirm_delete_all_thornodes$')],
+        states={
+            WAIT_FOR_CONFIRMATION: [
+                CallbackQueryHandler(delete_all_thornodes, pattern='^delete_all_thornodes$'),
+                CallbackQueryHandler(back_to_thornode_menu, pattern='^back_to_thornode_menu')]},
+        fallbacks=[],
+        allow_reentry=True,
+        map_to_parent={
+            # Return to parents thornode menu on END of child
+            END: THORNODE_MENU
+        }
+    )
+
     # Define Thornode conversation handler
     thornode_conversation = ConversationHandler(
         entry_points=[CallbackQueryHandler(thornode_menu, pattern='^thornode_menu$')],
         states={THORNODE_MENU: [
-            add_thornode_conversation,
             thornode_detail_conversation,
+            add_thornode_conversation,
+            add_all_thornodes_conversation,
+            delete_all_thornodes_conversation,
             CallbackQueryHandler(back_to_home, pattern='^back_button$')
         ]},
         fallbacks=[],
