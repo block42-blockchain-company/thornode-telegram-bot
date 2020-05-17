@@ -62,7 +62,7 @@ def test_my_thornodes():
     assert response.reply_markup.inline_keyboard[0][0].text == "Add all THORNodes", "Add all THORNodes not visible after clicking on My THORNodes"
     assert response.reply_markup.inline_keyboard[0][1].text == "Add THORNode", "Add THORNode not visible after clicking on My THORNodes"
     assert response.reply_markup.inline_keyboard[1][0].text == "Delete all THORNodes", "Delete all THORNodes not visible after clicking on My THORNodes"
-    assert response.reply_markup.inline_keyboard[0][1].text == "<< Back", "<< Back not visible after clicking on My THORNodes"
+    assert response.reply_markup.inline_keyboard[1][1].text == "<< Back", "<< Back not visible after clicking on My THORNodes"
     print("My THORNodes ✅")
     print("------------------------")
 
