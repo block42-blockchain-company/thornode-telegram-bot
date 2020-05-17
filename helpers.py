@@ -71,12 +71,16 @@ def show_detail_menu(update, context):
         return END
 
     text = 'THORNode: *' + address + '*\n' + \
-           'Version: *' + node['version'] + '*\n' + \
+           'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
-           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n' + \
-           "What do you want to do with that Node?"
+           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+
+    if THORCHAIN_NODE_IP:
+        text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(get_number_unconfirmed_txs())) + '\n\n'
+
+    text += "What do you want to do with that Node?"
 
     keyboard = [[
         InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion'),
@@ -195,6 +199,19 @@ def is_thorchain_midgard_healthy():
         return False
 
 
+def get_number_unconfirmed_txs():
+    """
+    Return number of unconfirmed transactions
+    """
+
+    while True:
+        response = requests.get(url=get_thorchain_number_unconfirmed_txs_endpoint())
+        if response.status_code == 200:
+            break
+
+    unconfirmed_txs_status = response.json()
+    return unconfirmed_txs_status['result']['n_txs']
+
 def get_thorchain_validators():
     """
     Return the nodeaccounts endpoint to query data from.
@@ -224,6 +241,14 @@ def get_thorchain_midgard_endpoint():
     """
 
     return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':8080/v1/health'
+
+
+def get_thorchain_number_unconfirmed_txs_endpoint():
+    """
+    Return the endpoint for number of unconfirmed transactions
+    """
+
+    return 'http://localhost:8000/unconfirmed_txs.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':26657/num_unconfirmed_txs'
 
 
 def tor_to_rune(tor):
