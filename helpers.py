@@ -59,24 +59,32 @@ def show_detail_menu(update, context):
     Show detail buttons for selected address
     """
 
-
     query = update.callback_query
     address = context.user_data['selected_node_address']
-    node = context.user_data['nodes'][address]
+
+    node = get_thornode_object(address=address)
+
+    if node is None:
+        text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
+        query.edit_message_text(text)
+        show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
+        return END
+
+    text = 'THORNode: *' + address + '*\n' + \
+           'Version: *' + node['version'] + '*\n' + \
+           'Status: *' + node['status'].capitalize() + '*\n' + \
+           'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
+           'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
+           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n' + \
+           "What do you want to do with that Node?"
 
     keyboard = [[
         InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion'),
         InlineKeyboardButton('<< Back', callback_data='back_button')
         ]]
 
-    text = 'THORNode: ' + address + '\n' + \
-           'Status: ' + node['status'].capitalize() + '\n' + \
-           'Bond: ' + tor_to_rune(int(node['bond'])) + '\n' + \
-           'Slash Points: ' + '{:,}'.format(int(node['slash_points'])) + '\n\n' + \
-           "What do you want to do with that Node?"
-
     # Modify message
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
     return WAIT_FOR_DETAIL
 
 
