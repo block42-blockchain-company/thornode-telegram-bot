@@ -97,26 +97,6 @@ def test_add_address(address, expected_response1, expected_response2):
     print("------------------------")
 
 
-def test_show_stats(expected_response):
-    telegram.send_message(BOT_ID, "/start")
-    time.sleep(3)
-    click_button("My THORNodes")
-    click_button(VALID_ADDRESS)
-
-    click_button("Show THORNode Stats")
-
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
-
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                     "'\n but got \n'" + first_response.text + "'"
-    assert second_response.text == "Choose an address from the list below or add one:", \
-        "Choose an address from the list below or add one: - not visible after Show THORNode Stats"
-
-    print("Show THORNode Stats with " + VALID_ADDRESS + " ✅")
-    print("------------------------")
-
-
 def test_thornode_detail():
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
@@ -126,11 +106,10 @@ def test_thornode_detail():
 
     response = next(telegram.iter_history(BOT_ID))
 
-    assert response.text == "You chose\n" + VALID_ADDRESS + "\nWhat do you want to do with that Node?", \
-        "Thornode Details not showing the right text"
-    assert response.reply_markup.inline_keyboard[0][0].text == "Show THORNode Stats", "Show THORNode Stats Button not in Thornode Details"
-    assert response.reply_markup.inline_keyboard[0][1].text == "Delete THORNode", "Delete THORNode Button not in Thornode Details"
-    assert response.reply_markup.inline_keyboard[1][0].text == "<< Back", "<< Back Show Button not in Thornode Details"
+    assert response.text.find("THORNode: " + VALID_ADDRESS) != -1, \
+        "Thornode Details not showing stats"
+    assert response.reply_markup.inline_keyboard[0][0].text == "Delete THORNode", "Delete THORNode Button not in Thornode Details"
+    assert response.reply_markup.inline_keyboard[0][1].text == "<< Back", "<< Back Show Button not in Thornode Details"
 
     print("Thornode Details with " + VALID_ADDRESS + " ✅")
     print("------------------------")
@@ -177,7 +156,7 @@ def test_delete_address(confirm):
         first_response.click("NO ❌")
         time.sleep(3)
         second_response = next(telegram.iter_history(BOT_ID))
-        assert second_response.text == "You chose\n" + VALID_ADDRESS + "\nWhat do you want to do with that Node?", \
+        assert second_response.text.find("THORNode: " + VALID_ADDRESS) != -1, \
             "NO button on deletion confirmation does not go back to Thornode details"
     print("Delete Address with confirmation=" + str(confirm) + " ✅")
     print("------------------------")
@@ -274,9 +253,15 @@ def test_thornode_notification(field):
                            'Please enter another THORNode address.'
     else:
         expected_response = 'THORNode: ' + node_data_original[0]['node_address'] + '\n' + \
-                   'Status: ' + node_data_original[0]['status'].capitalize() + ' ➡️ ' + node_data_new[0]['status'].capitalize() + '\n' + \
-                   'Bond: ' + tor_to_rune(node_data_original[0]['bond']) + ' ➡️ ' + tor_to_rune(node_data_new[0]['bond']) + '\n' + \
-                   'Slash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points'])) + ' ➡️ ' + '{:,}'.format(int(node_data_new[0]['slash_points']))
+                   'Status: ' + node_data_original[0]['status'].capitalize()
+        if field == 'status':
+            expected_response += ' ➡️ ' + node_data_new[0]['status'].capitalize()
+        expected_response += '\nBond: ' + tor_to_rune(node_data_original[0]['bond'])
+        if field == 'bond':
+            expected_response += ' ➡️ ' + tor_to_rune(node_data_new[0]['bond'])
+        expected_response += '\nSlash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points']))
+        if field == 'slash_points':
+            expected_response += ' ➡️ ' + '{:,}'.format(int(node_data_new[0]['slash_points']))
 
     assert first_response.text.find(expected_response) != -1, \
         "Expected '" + expected_response + "' but got '" + first_response.text + "'"
@@ -455,7 +440,6 @@ with telegram:
                          expected_response2="Got it! 👌")
         test_thornode_detail()
         test_back_button_thornode_details()
-        test_show_stats(expected_response="THORNode: " + VALID_ADDRESS)
         test_delete_address(confirm=False)
         test_delete_address(confirm=True)
         test_add_address(address=VALID_ADDRESS,
