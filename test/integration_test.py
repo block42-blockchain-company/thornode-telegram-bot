@@ -106,7 +106,7 @@ def test_thornode_detail():
 
     response = next(telegram.iter_history(BOT_ID))
 
-    number_of_unconfirmed_txs = json.load(open('unconfirmed_txs.json'))['result']['n_txs']
+    number_of_unconfirmed_txs = json.load(open('unconfirmed_txs.json'))['result']['total']
 
     assert response.text.find("THORNode: " + VALID_ADDRESS) != -1, "Thornode Details not showing stats"
     assert response.text.find("Number of Unconfirmed Txs: " + number_of_unconfirmed_txs) != -1, \

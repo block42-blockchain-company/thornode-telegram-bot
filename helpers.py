@@ -210,7 +210,7 @@ def get_number_unconfirmed_txs():
             break
 
     unconfirmed_txs_status = response.json()
-    return unconfirmed_txs_status['result']['n_txs']
+    return unconfirmed_txs_status['result']['total']
 
 def get_thorchain_validators():
     """
