@@ -414,6 +414,34 @@ def keep_container_running(update, context):
     return ADMIN_MENU
 
 
+@run_async
+def network_status(update, context):
+    """
+    Show the status of all Thornodes in the whole Thorchain network
+    """
+
+    query = update.callback_query
+    query.answer()
+
+    nodes = get_thorchain_validators()
+
+    text = "Status of all THORNodes in the THORChain network:\n\n"
+
+    for node in nodes:
+        text += 'THORNode: *' + node['node_address'] + '*\n' + \
+           'Version: *' + node['version'] + '*\n' + \
+           'Status: *' + node['status'].capitalize() + '*\n' + \
+           'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
+           'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
+           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+
+    # Send message
+    query.edit_message_text(text, parse_mode='markdown')
+    show_home_menu(context=context, chat_id=update.effective_chat.id)
+
+    return END
+
+
 """
 ######################################################################################################################################################
 Application
@@ -529,12 +557,21 @@ def main():
         allow_reentry=True,
     )
 
+    # Define Network status conversation handler
+    network_conversation = ConversationHandler(
+        entry_points=[CallbackQueryHandler(network_status, pattern='^network_status$')],
+        states={},
+        fallbacks=[],
+        allow_reentry=True,
+    )
+
     # Add start commandHandler handlers
     dispatcher.add_handler(CommandHandler('start', start))
 
     # Add conversationHandler
     dispatcher.add_handler(thornode_conversation)
     dispatcher.add_handler(admin_conversation)
+    dispatcher.add_handler(network_conversation)
 
     # Add error handler
     dispatcher.add_error_handler(error)
