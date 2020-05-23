@@ -42,7 +42,9 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
     for address in user_data['nodes'].keys():
         keyboard.append([InlineKeyboardButton(address, callback_data='thornode_details-' + address)])
 
-    keyboard.append([InlineKeyboardButton('Add THORNode', callback_data='add_thornode'),
+    keyboard.append([InlineKeyboardButton('Add all THORNodes', callback_data='confirm_add_all_thornodes'),
+                      InlineKeyboardButton('Add THORNode', callback_data='add_thornode')])
+    keyboard.append([InlineKeyboardButton('Delete all THORNodes', callback_data='confirm_delete_all_thornodes'),
                      InlineKeyboardButton('<< Back', callback_data='back_button')])
 
     # Edit query message. Write a new message instead after address input
@@ -126,6 +128,18 @@ def show_admin_menu(context, chat_id, query=None):
         context.bot.send_message(chat_id, text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
+def show_confirmation_menu(update, text, keyboard):
+    """
+    "Are you sure?" - "YES" | "NO"
+    """
+
+    query = update.callback_query
+    query.answer()
+
+    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
+    return WAIT_FOR_CONFIRMATION
+
+
 def get_running_docker_container():
     """
     Return Json of all running container on the host machine
@@ -149,16 +163,19 @@ def get_thornode_object(address):
     Query nodeaccounts endpoints and return the Thornode object
     """
 
-    while True:
-        response = requests.get(url=get_thorchain_validators())
-        if response.status_code == 200:
-            break
-
-    nodes = response.json()
-
+    nodes = get_thorchain_validators()
     # Get the right node
     node = next(filter(lambda node: node['node_address'] == address, nodes), None)
     return node
+
+
+def get_thorchain_validators():
+    while True:
+        response = requests.get(url=get_thorchain_validators_endpoint())
+        if response.status_code == 200:
+            break
+
+    return response.json()
 
 
 def get_thorchain_block_height():
@@ -212,7 +229,8 @@ def get_number_unconfirmed_txs():
     unconfirmed_txs_status = response.json()
     return unconfirmed_txs_status['result']['total']
 
-def get_thorchain_validators():
+
+def get_thorchain_validators_endpoint():
     """
     Return the nodeaccounts endpoint to query data from.
     """
