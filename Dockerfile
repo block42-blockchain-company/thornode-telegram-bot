@@ -7,6 +7,9 @@ ADD healthcheck.py/ /
 
 ADD thornode_bot.py/ /
 ADD requirements.txt/ /
+ADD constants.py/ /
+ADD helpers.py/ /
+ADD jobs.py/ /
 
 RUN apt-get update
 RUN apt-get install -y curl
