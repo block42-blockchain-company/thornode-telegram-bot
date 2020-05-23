@@ -47,7 +47,7 @@ def test_start():
 
     response = next(telegram.iter_history(BOT_ID))
     assert response.reply_markup.inline_keyboard[0][0].text == "My THORNodes", "My THORNodes not visible after /start"
-    assert response.reply_markup.inline_keyboard[1][0].text == "Network Status", "Network Status not visible after /start"
+    assert response.reply_markup.inline_keyboard[1][0].text == "Show all THORNodes", "Show all THORNodes not visible after /start"
     assert response.reply_markup.inline_keyboard[1][1].text == "Admin Area", "Admin Area not visible after /start"
     print("/start ✅")
     print("------------------------")
@@ -235,10 +235,10 @@ def test_delete_all_addresses(confirm):
     print("------------------------")
 
 
-def test_network_status():
+def test_show_all_thorchain_nodes():
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
-    click_button("Network Status")
+    click_button("Show all THORNodes")
 
     first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
@@ -250,8 +250,8 @@ def test_network_status():
     assert first_response.text.find(expected_response2) != -1, "Expected '" + expected_response2 + \
                                                                "'\nbut got\n'" + first_response.text + "'"
     assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible Network Status"
-    print("Network Status ✅")
+        "I am your THORNode Bot. 🤖\nChoose an action: - not visible Show all THORNodes"
+    print("Show all THORNodes ✅")
     print("------------------------")
 
 
@@ -551,8 +551,8 @@ with telegram:
                          expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="Got it! 👌")
 
-        # Test Network Status Area
-        test_network_status()
+        # Test Show all THORNodes Area
+        test_show_all_thorchain_nodes()
 
         # Test Admin Area
         test_admin_area()

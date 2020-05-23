@@ -20,7 +20,7 @@ def show_home_menu(context, chat_id, query=None):
     """
 
     keyboard = [[InlineKeyboardButton('My THORNodes', callback_data='thornode_menu')],
-                [InlineKeyboardButton('Network Status', callback_data='network_status'),
+                [InlineKeyboardButton('Show all THORNodes', callback_data='show_all_thorchain_nodes'),
                 InlineKeyboardButton('Admin Area', callback_data='admin_menu')]]
 
     text = 'I am your THORNode Bot. 🤖\nChoose an action:'

@@ -415,7 +415,7 @@ def keep_container_running(update, context):
 
 
 @run_async
-def network_status(update, context):
+def show_all_thorchain_nodes(update, context):
     """
     Show the status of all Thornodes in the whole Thorchain network
     """
@@ -558,8 +558,8 @@ def main():
     )
 
     # Define Network status conversation handler
-    network_conversation = ConversationHandler(
-        entry_points=[CallbackQueryHandler(network_status, pattern='^network_status$')],
+    all_thorchain_nodes_conversation = ConversationHandler(
+        entry_points=[CallbackQueryHandler(show_all_thorchain_nodes, pattern='^show_all_thorchain_nodes$')],
         states={},
         fallbacks=[],
         allow_reentry=True,
@@ -571,7 +571,7 @@ def main():
     # Add conversationHandler
     dispatcher.add_handler(thornode_conversation)
     dispatcher.add_handler(admin_conversation)
-    dispatcher.add_handler(network_conversation)
+    dispatcher.add_handler(all_thorchain_nodes_conversation)
 
     # Add error handler
     dispatcher.add_error_handler(error)
