@@ -59,24 +59,36 @@ def show_detail_menu(update, context):
     Show detail buttons for selected address
     """
 
-
     query = update.callback_query
     address = context.user_data['selected_node_address']
-    node = context.user_data['nodes'][address]
+
+    node = get_thornode_object(address=address)
+
+    if node is None:
+        text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
+        query.edit_message_text(text)
+        show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
+        return END
+
+    text = 'THORNode: *' + address + '*\n' + \
+           'Version: *' + node['version'] + '*\n\n' + \
+           'Status: *' + node['status'].capitalize() + '*\n' + \
+           'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
+           'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
+           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+
+    if THORCHAIN_NODE_IP:
+        text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(get_number_unconfirmed_txs())) + '\n\n'
+
+    text += "What do you want to do with that Node?"
 
     keyboard = [[
         InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion'),
         InlineKeyboardButton('<< Back', callback_data='back_button')
         ]]
 
-    text = 'THORNode: ' + address + '\n' + \
-           'Status: ' + node['status'].capitalize() + '\n' + \
-           'Bond: ' + tor_to_rune(int(node['bond'])) + '\n' + \
-           'Slash Points: ' + '{:,}'.format(int(node['slash_points'])) + '\n\n' + \
-           "What do you want to do with that Node?"
-
     # Modify message
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
     return WAIT_FOR_DETAIL
 
 
@@ -187,6 +199,19 @@ def is_thorchain_midgard_healthy():
         return False
 
 
+def get_number_unconfirmed_txs():
+    """
+    Return number of unconfirmed transactions
+    """
+
+    while True:
+        response = requests.get(url=get_thorchain_number_unconfirmed_txs_endpoint())
+        if response.status_code == 200:
+            break
+
+    unconfirmed_txs_status = response.json()
+    return unconfirmed_txs_status['result']['total']
+
 def get_thorchain_validators():
     """
     Return the nodeaccounts endpoint to query data from.
@@ -216,6 +241,14 @@ def get_thorchain_midgard_endpoint():
     """
 
     return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':8080/v1/health'
+
+
+def get_thorchain_number_unconfirmed_txs_endpoint():
+    """
+    Return the endpoint for number of unconfirmed transactions
+    """
+
+    return 'http://localhost:8000/unconfirmed_txs.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':26657/num_unconfirmed_txs'
 
 
 def tor_to_rune(tor):

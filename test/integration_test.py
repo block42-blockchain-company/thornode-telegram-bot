@@ -106,9 +106,13 @@ def test_thornode_detail():
 
     response = next(telegram.iter_history(BOT_ID))
 
-    assert response.text.find("THORNode: " + VALID_ADDRESS) != -1, \
-        "Thornode Details not showing stats"
-    assert response.reply_markup.inline_keyboard[0][0].text == "Delete THORNode", "Delete THORNode Button not in Thornode Details"
+    number_of_unconfirmed_txs = json.load(open('unconfirmed_txs.json'))['result']['total']
+
+    assert response.text.find("THORNode: " + VALID_ADDRESS) != -1, "Thornode Details not showing stats"
+    assert response.text.find("Number of Unconfirmed Txs: " + number_of_unconfirmed_txs) != -1, \
+        "Thornode Details not showing Number of unconfirmed Txs"
+    assert response.reply_markup.inline_keyboard[0][0].text == "Delete THORNode", \
+        "Delete THORNode Button not in Thornode Details"
     assert response.reply_markup.inline_keyboard[0][1].text == "<< Back", "<< Back Show Button not in Thornode Details"
 
     print("Thornode Details with " + VALID_ADDRESS + " ✅")
