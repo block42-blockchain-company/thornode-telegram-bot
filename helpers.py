@@ -19,8 +19,9 @@ def show_home_menu(context, chat_id, query=None):
     Show buttons of home menu
     """
 
-    keyboard = [[InlineKeyboardButton('My THORNodes', callback_data='thornode_menu'),
-                 InlineKeyboardButton('Admin Area', callback_data='admin_menu')]]
+    keyboard = [[InlineKeyboardButton('My THORNodes', callback_data='thornode_menu')],
+                [InlineKeyboardButton('Show all THORNodes', callback_data='show_all_thorchain_nodes'),
+                InlineKeyboardButton('Admin Area', callback_data='admin_menu')]]
 
     text = 'I am your THORNode Bot. 🤖\nChoose an action:'
     # Edit message or write a new one depending on function call
