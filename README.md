@@ -145,8 +145,7 @@ docker run --env TELEGRAM_BOT_TOKEN=XXX --env THORCHAIN_NODE_IP=XXX -v /var/run/
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
 
-Set the `-env THORCHAIN_NODE_IP` flag to an IP of a running node, or remove 
-`--env THORCHAIN_NODE_IP=XXX` to listen on localhost. 
+Set the `--env THORCHAIN_NODE_IP` flag to an IP of a running node (or `localhost`).
 If you don't know any IP leave this empty i.e. `--env THORCHAIN_NODE_IP=` or remove it completely.
 
 The `-v` argument passes the dockersocket to the container so that we can restart docker containers from

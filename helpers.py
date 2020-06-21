@@ -6,7 +6,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from constants import *
 
-
 """
 ######################################################################################################################################################
 Helpers
@@ -19,9 +18,9 @@ def show_home_menu(context, chat_id, query=None):
     Show buttons of home menu
     """
 
-    keyboard = [[InlineKeyboardButton('My THORNodes', callback_data='thornode_menu')],
-                [InlineKeyboardButton('Show all THORNodes', callback_data='show_all_thorchain_nodes'),
-                InlineKeyboardButton('Admin Area', callback_data='admin_menu')]]
+    keyboard = [[InlineKeyboardButton('📡 MY NODES', callback_data='thornode_menu')],
+                [InlineKeyboardButton('👀 SHOW ALL', callback_data='show_all_thorchain_nodes'),
+                 InlineKeyboardButton('🗝 ADMIN AREA', callback_data='admin_menu')]]
 
     text = 'I am your THORNode Bot. 🤖\nChoose an action:'
     # Edit message or write a new one depending on function call
@@ -41,12 +40,16 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
     keyboard = [[]]
 
     for address in user_data['nodes'].keys():
-        keyboard.append([InlineKeyboardButton(address, callback_data='thornode_details-' + address)])
+        try:
+            emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']]
+        except:
+            emoji = STATUS_EMOJIS["deactive"]
+        keyboard.append([InlineKeyboardButton(emoji + " " + address, callback_data='thornode_details-' + address)])
 
-    keyboard.append([InlineKeyboardButton('Add all THORNodes', callback_data='confirm_add_all_thornodes'),
-                      InlineKeyboardButton('Add THORNode', callback_data='add_thornode')])
-    keyboard.append([InlineKeyboardButton('Delete all THORNodes', callback_data='confirm_delete_all_thornodes'),
-                     InlineKeyboardButton('<< Back', callback_data='back_button')])
+    keyboard.append([InlineKeyboardButton('➕ ADD ALL', callback_data='confirm_add_all_thornodes'),
+                     InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
+    keyboard.append([InlineKeyboardButton('➖ REMOVE ALL', callback_data='confirm_delete_all_thornodes'),
+                     InlineKeyboardButton('⬅️ BACK', callback_data='back_button')])
 
     # Edit query message. Write a new message instead after address input
     if query:
@@ -78,7 +81,8 @@ def show_detail_menu(update, context):
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
-           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+                                                                           'Status Since: ' + '*{:,}*'.format(
+        int(node['status_since'])) + '\n\n'
 
     if THORCHAIN_NODE_IP:
         text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(get_number_unconfirmed_txs())) + '\n\n'
@@ -86,9 +90,9 @@ def show_detail_menu(update, context):
     text += "What do you want to do with that Node?"
 
     keyboard = [[
-        InlineKeyboardButton('Delete THORNode', callback_data='confirm_thornode_deletion'),
-        InlineKeyboardButton('<< Back', callback_data='back_button')
-        ]]
+        InlineKeyboardButton('➖ REMOVE', callback_data='confirm_thornode_deletion'),
+        InlineKeyboardButton('⬅️ BACK', callback_data='back_button')
+    ]]
 
     # Modify message
     query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
@@ -113,10 +117,10 @@ def show_admin_menu(context, chat_id, query=None):
         for name in container['Names']:
             container_name = name.replace('/', '')
             status = container['Status']
-            text = container_name + " - " + status
+            text = "🐳 " + container_name + " - " + status
             keyboard.append([InlineKeyboardButton(text, callback_data='container-#' + container_name)])
 
-    keyboard.append([InlineKeyboardButton('<< Back', callback_data='back_button')])
+    keyboard.append([InlineKeyboardButton('⬅️ BACK', callback_data='back_button')])
 
     # Send message
     text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
@@ -185,7 +189,7 @@ def get_thorchain_block_height():
     """
 
     while True:
-        response = requests.get(url=get_thorchain_status())
+        response = requests.get(url=get_thorchain_status_endpoint())
         if response.status_code == 200:
             break
 
@@ -194,7 +198,7 @@ def get_thorchain_block_height():
 
 
 def is_thorchain_catching_up():
-    response = requests.get(url=get_thorchain_status())
+    response = requests.get(url=get_thorchain_status_endpoint())
     if response.status_code != 200:
         return True
 
@@ -246,7 +250,7 @@ def get_thorchain_validators_endpoint():
         return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
 
 
-def get_thorchain_status():
+def get_thorchain_status_endpoint():
     """
     Return the endpoint for block height checks
     """
@@ -290,4 +294,3 @@ def error(update, context):
     """
 
     logger.warning('Update "%s" caused error: %s', update, context.error)
-
