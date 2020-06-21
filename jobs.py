@@ -21,6 +21,8 @@ def thornode_checks(context):
         check_thorchain_block_height(context)
         check_thorchain_catch_up_status(context)
         check_thorchain_midgard_api(context)
+    if BINANCE_NODE_IP:
+        check_binance_health(context)
 
 
 def check_thornodes(context):
@@ -187,6 +189,33 @@ def check_thorchain_midgard_api(context):
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + THORCHAIN_NODE_IP + '\n'
+        context.bot.send_message(chat_id, text)
+        show_home_menu(context, chat_id=chat_id)
+
+
+def check_binance_health(context):
+    """
+    Check if Binance Node is healthy
+    """
+
+    chat_id = context.job.context['chat_id']
+    user_data = context.job.context['user_data']
+
+    if 'is_binance_node_healthy' not in user_data:
+        user_data['is_binance_node_healthy'] = True
+
+    is_binance_node_currently_healthy = is_binance_node_healthy()
+    if user_data['is_binance_node_healthy'] == True and not is_binance_node_currently_healthy:
+        user_data['is_binance_node_healthy'] = False
+        text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
+               'IP: ' + BINANCE_NODE_IP + '\n\n' + \
+               'Please check your Binance Node immediately!'
+        context.bot.send_message(chat_id, text)
+        show_home_menu(context, chat_id=chat_id)
+    elif user_data['is_binance_node_healthy'] == False and is_binance_node_currently_healthy:
+        user_data['is_binance_node_healthy'] = True
+        text = 'Binance Node is healthy again! 👌' + '\n' + \
+               'IP: ' + BINANCE_NODE_IP + '\n'
         context.bot.send_message(chat_id, text)
         show_home_menu(context, chat_id=chat_id)
 

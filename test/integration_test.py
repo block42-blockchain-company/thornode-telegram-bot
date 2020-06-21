@@ -36,6 +36,8 @@ BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
 STATUS_EMOJIS = {"active": "💚", "standby": "📆", "deactive": "🔴"}
 
+THORCHAIN, BINANCE = range(2)
+
 """
 ######################################################################################################################################################
 TEST CASES
@@ -430,28 +432,11 @@ def test_catch_up_notification(catching_up):
     print("------------------------")
     
 
-def test_midgard_notification(health_status):
-    with open('midgard.json', 'w') as write_file:
-        write_file.write(health_status)
-    time.sleep(40)
-    
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+def test_midgard_notification(healthy):
+    assert_health_notification(THORCHAIN, healthy)
 
-    if health_status == '"FAIL"':
-        expected_response = 'Midgard API is not healthy anymore'
-    elif health_status == '"OK"':
-        expected_response = 'Midgard API is healthy again'
-    else:
-        assert False, 'Health status for Midgard API test is neither "FAIL" nor "OK"'
-        
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after block height notification"
-
-    print("Check Midgard API with health_status=" + health_status + " ✅")
-    print("------------------------")
+def test_binance_health_notification(healthy):
+    assert_health_notification(BINANCE, healthy)
 
 
 """
@@ -510,6 +495,39 @@ def are_container_running():
         return True
 
 
+def assert_health_notification(chain, healthy):
+    if chain == THORCHAIN:
+        file_name = "midgard"
+        messageContent = "Midgard API"
+    elif chain == BINANCE:
+        file_name = "binance_health"
+        messageContent = "Binance Node"
+    else:
+        assert False, "Chain in assert_health_notification is not recognized"
+
+    if healthy:
+        os.rename(file_name + '_404.json', file_name + '.json')
+    else:
+        os.rename(file_name + '.json', file_name + '_404.json')
+    time.sleep(40)
+
+    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+
+    if healthy:
+        expected_response = messageContent + ' is healthy again'
+    else:
+        expected_response = messageContent + ' is not healthy anymore'
+
+    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + first_response.text + "'"
+    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
+        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after block height notification"
+
+    print("Check " + messageContent + " with healthy==" + str(healthy) + " ✅")
+    print("------------------------")
+
+
 """
 ######################################################################################################################################################
 TESTING COLLAGE
@@ -556,7 +574,7 @@ with telegram:
         # Test Show all THORNodes Area
         test_show_all_thorchain_nodes()
 
-        # Test 🗝 ADMIN AREA
+        # Test Admin Area
         test_admin_area()
         test_back_button_admin_area()
         if are_container_running():
@@ -570,8 +588,10 @@ with telegram:
         test_block_height_notification()
         test_catch_up_notification(catching_up=True)
         test_catch_up_notification(catching_up=False)
-        test_midgard_notification(health_status='"FAIL"')
-        test_midgard_notification(health_status='"OK"')
+        test_midgard_notification(healthy=False)
+        test_midgard_notification(healthy=True)
+        test_binance_health_notification(healthy=False)
+        test_binance_health_notification(healthy=True)
 
         print("✅ -----ALL TESTS PASSED----- ✅")
 

@@ -82,8 +82,10 @@ def start(update, context):
 
     text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' \
            'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
-           'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!\n' \
-           'Moreover, in the Admin Area you can *restart any docker container* that runs alongside my container!'
+           'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!\n'
+    if BINANCE_NODE_IP:
+        text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n'
+    text += 'Moreover, in the Admin Area you can *restart any docker container* that runs alongside my container!'
 
     # Send message
     update.message.reply_text(text, parse_mode='markdown')
