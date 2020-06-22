@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from constants import *
 from helpers import *
@@ -56,31 +56,39 @@ def check_thornodes(context):
             message_sent = True
             continue
 
-        # Check which node fields have changed
-        changed_fields = [field for field in ['status', 'bond', 'slash_points'] if
-                          local_node[field] != remote_node[field]]
+        # isNotBlocked = lastTimestamp < currentTimestamp - timeout
+        if float(local_node['last_notification_timestamp']) < \
+                float(datetime.timestamp(datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))):
 
-        # Check if there are any changes
-        if len(changed_fields) > 0:
-            text = 'THORNode: ' + address + '\n' + \
-                   'Status: ' + local_node['status'].capitalize()
-            if 'status' in changed_fields:
-                text += ' ➡️ ' + remote_node['status'].capitalize()
-            text += '\nBond: ' + tor_to_rune(int(local_node['bond']))
-            if 'bond' in changed_fields:
-                text += ' ➡️ ' + tor_to_rune(int(remote_node['bond']))
-            text += '\nSlash Points: ' + '{:,}'.format(int(local_node['slash_points']))
-            if 'slash_points' in changed_fields:
-                text += ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
+            # Check which node fields have changed
+            changed_fields = [field for field in ['status', 'bond', 'slash_points'] if
+                              local_node[field] != remote_node[field]]
 
-            # Update data
-            local_node['status'] = remote_node['status']
-            local_node['bond'] = remote_node['bond']
-            local_node['slash_points'] = remote_node['slash_points']
+            # Check if there are any changes
+            if len(changed_fields) > 0:
+                text = 'THORNode: ' + address + '\n' + \
+                       'Status: ' + local_node['status'].capitalize()
+                if 'status' in changed_fields:
+                    text += ' ➡️ ' + remote_node['status'].capitalize()
+                text += '\nBond: ' + tor_to_rune(int(local_node['bond']))
+                if 'bond' in changed_fields:
+                    text += ' ➡️ ' + tor_to_rune(int(remote_node['bond']))
+                text += '\nSlash Points: ' + '{:,}'.format(int(local_node['slash_points']))
+                if 'slash_points' in changed_fields:
+                    text += ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
 
-            # Send message
-            context.bot.send_message(chat_id, text)
-            message_sent = True
+                # Update data
+                local_node['status'] = remote_node['status']
+                local_node['bond'] = remote_node['bond']
+                local_node['slash_points'] = remote_node['slash_points']
+                local_node['last_notification_timestamp'] = datetime.timestamp(datetime.now())
+                local_node['notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
+
+                # Send message
+                context.bot.send_message(chat_id, text)
+                message_sent = True
+            else:
+                local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
     for address in delete_addresses:
         del user_data['nodes'][address]

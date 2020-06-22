@@ -174,6 +174,8 @@ def handle_input(update, context):
     context.user_data['nodes'][address]['status'] = node['status']
     context.user_data['nodes'][address]['bond'] = node['bond']
     context.user_data['nodes'][address]['slash_points'] = node['slash_points']
+    context.user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
+    context.user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -300,6 +302,8 @@ def add_all_thornodes(update, context):
         context.user_data['nodes'][address]['status'] = node['status']
         context.user_data['nodes'][address]['bond'] = node['bond']
         context.user_data['nodes'][address]['slash_points'] = node['slash_points']
+        context.user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
+        context.user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
     # Send message
     query.edit_message_text('Added all THORNodes! 👌')
