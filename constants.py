@@ -33,6 +33,11 @@ END = ConversationHandler.END
 # Conversation state(s)
 THORNODE_MENU, WAIT_FOR_ADDRESS, WAIT_FOR_DETAIL, WAIT_FOR_CONFIRMATION, ADMIN_MENU = range(5)
 
+# By how much we multiply the notifiction timeout in case of continous Thornode attribute changes
+NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
+# Base notification timeout in seconds
+INITIAL_NOTIFICATION_TIMEOUT = 15
+
 # Emojis for status of THORNodes
 STATUS_EMOJIS = {"active": "💚", "standby": "📆", "deactive": "🔴"}
 
