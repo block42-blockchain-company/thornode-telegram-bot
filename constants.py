@@ -15,6 +15,15 @@ elif 'THORCHAIN_NODE_IP' in os.environ and os.environ['THORCHAIN_NODE_IP']:
 else:
     THORCHAIN_NODE_IP = None
 
+# Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
+if DEBUG:
+    BINANCE_NODE_IP = 'localhost'
+elif 'BINANCE_NODE_IP' in os.environ and os.environ['BINANCE_NODE_IP']:
+    BINANCE_NODE_IP = os.environ['BINANCE_NODE_IP']
+else:
+    BINANCE_NODE_IP = None
+
+
 ADMIN_USER_IDS = [int(admin_id) for admin_id in
                   os.environ['ADMIN_USER_IDS'].split(",")] if 'ADMIN_USER_IDS' in os.environ else []
 DOCKER_CURL_CMD = "curl --max-time 30 --no-buffer -s --unix-socket /var/run/docker.sock"

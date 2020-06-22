@@ -212,10 +212,7 @@ def is_thorchain_midgard_healthy():
     """
 
     response = requests.get(url=get_thorchain_midgard_endpoint())
-    if response.status_code != 200:
-        return False
-
-    if response.text.find('"OK"') != -1:
+    if response.status_code == 200:
         return True
     else:
         return False
@@ -233,6 +230,18 @@ def get_number_unconfirmed_txs():
 
     unconfirmed_txs_status = response.json()
     return unconfirmed_txs_status['result']['total']
+
+
+def is_binance_node_healthy():
+    """
+    Return if Binance Node is healthy
+    """
+
+    response = requests.get(url=get_binance_health_endpoint())
+    if response.status_code == 200:
+        return True
+    else:
+        return False
 
 
 def get_thorchain_validators_endpoint():
@@ -272,6 +281,14 @@ def get_thorchain_number_unconfirmed_txs_endpoint():
     """
 
     return 'http://localhost:8000/unconfirmed_txs.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':26657/num_unconfirmed_txs'
+
+
+def get_binance_health_endpoint():
+    """
+    Return the health endpoint of a binance node
+    """
+
+    return 'http://localhost:8000/binance_health.json' if DEBUG else 'http://' + BINANCE_NODE_IP + ':26657/health'
 
 
 def tor_to_rune(tor):
