@@ -373,7 +373,7 @@ def test_thornode_notification(field):
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
     if field == "node_address":
-        expected_response = 'THORNode is not active anymore! 💀' + '\n' + \
+        expected_response = 'THORNode Thor-1 is not active anymore! 💀' + '\n' + \
                            'Address: ' + node_data_original[0]['node_address'] + '\n\n' + \
                            'Please enter another THORNode address.'
     else:
@@ -395,6 +395,7 @@ def test_thornode_notification(field):
         "I am your THORNode Bot. 🤖\nChoose an action: - not visible after thornode value change notification."
     print("Notification Thornode data change with " + field + " ✅")
     print("------------------------")
+    time.sleep(20)
 
 
 def test_block_height_notification():
@@ -570,57 +571,57 @@ with telegram:
         test_start()
 
         # Test My Thornode Area
-        #test_my_thornodes()
-        #test_back_button_my_thornodes()
-#
-        #test_add_address(address="invalidAddress",
-        #                 expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
-        #                 expected_response2="⛔️ I have not found a THORNode with this address! Please try another one. "
-        #                                    "(enter /cancel to return to the menu)")
-        #test_add_address(address="/cancel",
-        #                 expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
-        #                 expected_response2="Choose an address from the list below or add one:")
-        #test_add_address(address=VALID_ADDRESS,
-        #                 expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
-        #                 expected_response2="Got it! 👌")
-#
-        #test_thornode_detail()
-        #test_back_button_thornode_details()
-#
-        #test_delete_address(confirm=False)
-        #test_delete_address(confirm=True)
-#
-        #test_add_all_addresses(confirm=False)
-        #test_add_all_addresses(confirm=True)
-#
-        #test_delete_all_addresses(confirm=False)
-        #test_delete_all_addresses(confirm=True)
-#
+        test_my_thornodes()
+        test_back_button_my_thornodes()
+
+        test_add_address(address="invalidAddress",
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="⛔️ I have not found a THORNode with this address! Please try another one. "
+                                            "(enter /cancel to return to the menu)")
+        test_add_address(address="/cancel",
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="Choose an address from the list below or add one:")
         test_add_address(address=VALID_ADDRESS,
                          expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="Got it! 👌")
-#
-        #test_change_alias(alias="/cancel",
-        #                  expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
-        #                  expected_response2="Choose an address from the list below or add one:")
-        #test_change_alias(alias="SomeNewAliasThatIsUnfortunatelyTooLong",
-        #                  expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
-        #                  expected_response2="⛔️ Alias cannot have more than 16 characters! Please try another one. (enter /cancel to return to the menu)")
-        #test_change_alias(alias="newAlias",
-        #                  expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
-        #                  expected_response2="Got it! 👌")
-#
-        #test_delete_all_addresses(True)
-#
-        ## Test Show all THORNodes Area
-        #test_show_all_thorchain_nodes()
+
+        test_thornode_detail()
+        test_back_button_thornode_details()
+
+        test_delete_address(confirm=False)
+        test_delete_address(confirm=True)
+
+        test_add_all_addresses(confirm=False)
+        test_add_all_addresses(confirm=True)
+
+        test_delete_all_addresses(confirm=False)
+        test_delete_all_addresses(confirm=True)
+
+        test_add_address(address=VALID_ADDRESS,
+                         expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
+                         expected_response2="Got it! 👌")
+
+        test_change_alias(alias="/cancel",
+                          expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
+                          expected_response2="Choose an address from the list below or add one:")
+        test_change_alias(alias="SomeNewAliasThatIsUnfortunatelyTooLong",
+                          expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
+                          expected_response2="⛔️ Alias cannot have more than 16 characters! Please try another one. (enter /cancel to return to the menu)")
+        test_change_alias(alias="newAlias",
+                          expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
+                          expected_response2="Got it! 👌")
+
+        test_delete_all_addresses(True)
+
+        # Test Show all THORNodes Area
+        test_show_all_thorchain_nodes()
 
         # Test Admin Area
-        #test_admin_area()
-        #test_back_button_admin_area()
-        #if are_container_running():
-        #    test_restart_container(confirm=False)
-        #    test_restart_container(confirm=True)
+        test_admin_area()
+        test_back_button_admin_area()
+        if are_container_running():
+            test_restart_container(confirm=False)
+            test_restart_container(confirm=True)
 
         test_thornode_notification(field="status")
         test_thornode_notification(field="bond")

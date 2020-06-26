@@ -27,10 +27,10 @@ docker-compose up -d
 
 ## Steps to run everything yourself
 * [Install dependencies](#install-dependencies)
-* [Create Telegram bot token](#create-telegram-bot-token) via [BotFather](https://t.me/BotFather)
+* [Create Telegram bot token via BotFather](#create-telegram-bot-token-via-botfather)
 * [Set environment variables](#set-environment-variables)
 * [Start the bot](#start-the-bot)
-* [Run & test the bot](#run-and-test-the-bot)
+* [Run and test the bot](#run-and-test-the-bot)
 * [Production](#production)
   * [Docker Standalone](#docker-standalone)
     * [Healthcheck](#healthcheck)
@@ -40,7 +40,7 @@ docker-compose up -d
 ## [Install dependencies](#install-dependencies)
 Install all required dependencies via: `pip install -r requirements.txt`
 
-## [Create Telegram bot token](#create-telegram-bot-token) via BotFather
+## [Create Telegram bot token via BotFather](#create-telegram-bot-token-via-botfather)
 Start a Telegram chat with [BotFather](https://t.me/BotFather) and click `start`.
 
 Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. Save this token, you will need it in a second.
@@ -117,7 +117,7 @@ python3 thornode_bot.py
 
 Make sure that you see a message in the console which indicates that the bot is running.
 
-## [Run & test the bot](#run-and-test-the-bot)
+## [Run and test the bot](#run-and-test-the-bot)
 When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram, open the chat and hit start!
 
 At this point, you can play with the bot, see what it does and check that everything works fine!
