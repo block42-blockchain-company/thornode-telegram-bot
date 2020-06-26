@@ -26,23 +26,26 @@ docker-compose up -d
 ```
 
 ## Steps to run everything yourself
-* Install dependencies
-* Create Telegram bot token via [BotFather](https://t.me/BotFather)
-* Set environment variables
-* Start the bot
-* Run & test the bot
-* Production
-* Testing
+* [Install dependencies](#install-dependencies)
+* [Create Telegram bot token](#create-telegram-bot-token) via [BotFather](https://t.me/BotFather)
+* [Set environment variables](#set-environment-variables)
+* [Start the bot](#start-the-bot)
+* [Run & test the bot](#run-and-test-the-bot)
+* [Production](#production)
+  * [Docker Standalone](#docker-standalone)
+    * [Healthcheck](#healthcheck)
+  * [Docker Compose](#docker-compose)
+* [Testing](#testing)
 
-## Install dependencies
+## [Install dependencies](#install-dependencies)
 Install all required dependencies via: `pip install -r requirements.txt`
 
-## Create Telegram bot token via BotFather
+## [Create Telegram bot token](#create-telegram-bot-token) via BotFather
 Start a Telegram chat with [BotFather](https://t.me/BotFather) and click `start`.
 
 Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. Save this token, you will need it in a second.
 
-## Set environment variables
+## [Set environment variables](#set-environment-variables)
 Set the telegram bot token you just created as an environment variable: `TELEGRAM_BOT_TOKEN`
 
 ```
@@ -105,7 +108,7 @@ configuration which is very convenient for development
 (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
 
-## Start the bot
+## [Start the bot](#start-the-bot)
 Start the bot via:
 
 ```
@@ -114,7 +117,7 @@ python3 thornode_bot.py
 
 Make sure that you see a message in the console which indicates that the bot is running.
 
-## Run & test the bot
+## [Run & test the bot](#run-and-test-the-bot)
 When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram, open the chat and hit start!
 
 At this point, you can play with the bot, see what it does and check that everything works fine!
@@ -123,14 +126,14 @@ The bot persistents all data, which means it stores its chat data in the file `s
 
 If you want to reset your bot's data, simply delete the file `session.data` in the `storage` directory before startup.
 
-## Production
+## [Production](#production)
 In production you do not want to use mock data from the local endpoint but real network data. 
 To get real data just set `DEBUG=False` and all other environment variables as 
 described in the 'Set environment variables' section.
 If you're using docker-compose to run this Bot, modify the existing variables in `variables.env` file (No need to
 set DEBUG as there's no DEBUG mode in the docker version). 
 
-### Docker Standalone
+### [Docker Standalone](#docker-standalone)
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
 
 Navigate to the root directory of this repository and execute the following commands:
@@ -174,7 +177,7 @@ This is the directory where your bot saves and retrieves the `session.data` file
 there is not the possibility for the `DEBUG` mode when using docker.*
 
 
-#### Healthcheck
+#### [Healthcheck](#healthcheck)
 There is a health check in the Dockerfile that runs the `healthcheck.py` file.
 The script assures that `thornode_bot.py` is periodically updating the `health.check` file.
 
@@ -188,7 +191,7 @@ thornode_bot container:
 docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
 
-### Docker Compose
+### [Docker Compose](#docker-compose)
 The explained steps in the Docker Standalone section are conveniently bundled into a
 `docker-compose.yaml` file.
 
@@ -228,8 +231,7 @@ This solution is taken from https://github.com/docker/for-linux/issues/418#issue
 
 
 
-
-## Testing
+## [Testing](#testing)
 To test the Thornode Bot, you need to impersonate your own Telegram Client programmatically.
 
 To do that, you need to obtain your API ID and API hash by creating a 
