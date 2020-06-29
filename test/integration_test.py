@@ -31,6 +31,7 @@ telegram = TelegramClient(
 # We got an address from our mock api json file.
 # This address will be recognized as valid by our bot and used throughout the tests.
 VALID_ADDRESS = json.load(open('nodeaccounts.json'))[0]['node_address']
+VALID_ADDRESS_TRUNCATED = VALID_ADDRESS[:9] + "..." + VALID_ADDRESS[-4:]
 
 BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
@@ -109,18 +110,20 @@ def test_thornode_detail():
     time.sleep(3)
     click_button("📡 MY NODES")
     
-    click_button(STATUS_EMOJIS["deactive"] + " " + VALID_ADDRESS)
+    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
 
     response = next(telegram.iter_history(BOT_ID))
 
     number_of_unconfirmed_txs = json.load(open('unconfirmed_txs.json'))['result']['total']
 
-    assert response.text.find("THORNode: " + VALID_ADDRESS) != -1, "Thornode Details not showing stats"
+    assert response.text.find("Address: " + VALID_ADDRESS) != -1, "Thornode Details not showing stats"
     assert response.text.find("Number of Unconfirmed Txs: " + number_of_unconfirmed_txs) != -1, \
         "Thornode Details not showing Number of unconfirmed Txs"
     assert response.reply_markup.inline_keyboard[0][0].text == "➖ REMOVE", \
         "➖ REMOVE Button not in Thornode Details"
-    assert response.reply_markup.inline_keyboard[0][1].text == "⬅️ BACK", "⬅️ BACK Show Button not in Thornode Details"
+    assert response.reply_markup.inline_keyboard[0][1].text == "✏️ CHANGE ALIAS", \
+        "✏️ CHANGE ALIAS Button not in Thornode Details"
+    assert response.reply_markup.inline_keyboard[1][0].text == "⬅️ BACK", "⬅️ BACK Show Button not in Thornode Details"
 
     print("Thornode Details with " + VALID_ADDRESS + " ✅")
     print("------------------------")
@@ -133,7 +136,7 @@ def test_back_button_thornode_details():
 
     response = next(telegram.iter_history(BOT_ID))
 
-    click_button(STATUS_EMOJIS["deactive"] + " " + VALID_ADDRESS)
+    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
     assert_back_button(response.text)
 
     print("Back button in Thornode Details ✅")
@@ -144,13 +147,14 @@ def test_delete_address(confirm):
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
     click_button("📡 MY NODES")
-    click_button(STATUS_EMOJIS["deactive"] + " " + VALID_ADDRESS)
+    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
 
     click_button("➖ REMOVE")
 
     first_response = next(telegram.iter_history(BOT_ID))
 
-    assert first_response.text == '⚠️ Do you really want to remove the address from your monitoring list? ⚠️' + VALID_ADDRESS, \
+    assert first_response.text.find('Do you really want to remove this node from your monitoring list?') != -1 and \
+        first_response.text.find(VALID_ADDRESS) != -1, \
         "➖ REMOVE button doesn't work!"
 
     if confirm:
@@ -158,7 +162,8 @@ def test_delete_address(confirm):
         time.sleep(3)
         second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
         second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
-        assert second_response_1.text == "❌ Thornode address got deleted! ❌\n" + VALID_ADDRESS, \
+        assert second_response_1.text.find("❌ Thornode got deleted! ❌\n") != -1 and \
+               second_response_1.text.find(VALID_ADDRESS) != -1, \
             "YES button on deletion confirmation does not yield deletion statement"
         assert second_response_2.text == "Choose an address from the list below or add one:", \
             "YES button on deletion confirmation does not go back to thornodes menu"
@@ -167,9 +172,32 @@ def test_delete_address(confirm):
         click_button("NO ❌")
         time.sleep(3)
         second_response = next(telegram.iter_history(BOT_ID))
-        assert second_response.text.find("THORNode: " + VALID_ADDRESS) != -1, \
+        assert second_response.text.find("Address: " + VALID_ADDRESS) != -1, \
             "NO button on single address deletion confirmation does not go back to Thornode details"
     print("➖ REMOVE Address with confirmation=" + str(confirm) + " ✅")
+    print("------------------------")
+
+
+def test_change_alias(alias, expected_response1, expected_response2):
+    pass
+
+    telegram.send_message(BOT_ID, "/start")
+    time.sleep(3)
+    click_button("📡 MY NODES")
+    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
+
+    click_button("✏️ CHANGE ALIAS")
+
+    first_response = next(telegram.iter_history(BOT_ID))
+    telegram.send_message(BOT_ID, alias)
+    time.sleep(3)
+    second_response_1 = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
+    second_response_2 = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+
+    assert first_response.text == expected_response1, "Expected '" + expected_response1 + "' but got '" + first_response.text + "'"
+    assert second_response_1.text == expected_response2 or second_response_2.text == expected_response2, \
+        "Expected '" + expected_response2 + "' but got '" + second_response_1.text + "' and '" + second_response_2.text + "'"
+    print("✏️ CHANGE ALIAS with " + alias + " ✅")
     print("------------------------")
 
 
@@ -192,7 +220,7 @@ def test_add_all_addresses(confirm):
             "YES button on ➕ ADD ALL confirmation does not yield addition statement"
         assert second_response_2.text == "Choose an address from the list below or add one:", \
             "YES button on ➕ ADD ALL confirmation does not go back to 📡 MY NODES menu"
-        assert second_response_2.reply_markup.inline_keyboard[0][0].text == STATUS_EMOJIS["deactive"] + " " + VALID_ADDRESS and \
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")" and \
                second_response_2.reply_markup.inline_keyboard[1][0].text.find('thor') != -1,\
             "Nodes are not added after YES button on ➕ ADD ALL confirmation"
     else:
@@ -248,7 +276,7 @@ def test_show_all_thorchain_nodes():
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
     expected_response1 = 'Status of all THORNodes in the THORChain network:'
-    expected_response2 = 'THORNode: ' + VALID_ADDRESS
+    expected_response2 = 'Address: ' + VALID_ADDRESS
     assert first_response.text.find(expected_response1) != -1, "Expected '" + expected_response1 + \
                                                               "'\nbut got\n'" + first_response.text + "'"
     assert first_response.text.find(expected_response2) != -1, "Expected '" + expected_response2 + \
@@ -345,12 +373,13 @@ def test_thornode_notification(field):
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
     if field == "node_address":
-        expected_response = 'THORNode is not active anymore! 💀' + '\n' + \
+        expected_response = 'THORNode Thor-1 is not active anymore! 💀' + '\n' + \
                            'Address: ' + node_data_original[0]['node_address'] + '\n\n' + \
                            'Please enter another THORNode address.'
     else:
-        expected_response = 'THORNode: ' + node_data_original[0]['node_address'] + '\n' + \
-                   'Status: ' + node_data_original[0]['status'].capitalize()
+        expected_response = 'THORNode: ' + 'Thor-1' + '\n' + \
+                            'Address: ' + node_data_original[0]['node_address'] + '\n' + \
+                            'Status: ' + node_data_original[0]['status'].capitalize()
         if field == 'status':
             expected_response += ' ➡️ ' + node_data_new[0]['status'].capitalize()
         expected_response += '\nBond: ' + tor_to_rune(node_data_original[0]['bond'])
@@ -366,6 +395,7 @@ def test_thornode_notification(field):
         "I am your THORNode Bot. 🤖\nChoose an action: - not visible after thornode value change notification."
     print("Notification Thornode data change with " + field + " ✅")
     print("------------------------")
+    time.sleep(20)
 
 
 def test_block_height_notification():
@@ -570,6 +600,18 @@ with telegram:
         test_add_address(address=VALID_ADDRESS,
                          expected_response1="What's the address of your THORNode? (enter /cancel to return to the menu)",
                          expected_response2="Got it! 👌")
+
+        test_change_alias(alias="/cancel",
+                          expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
+                          expected_response2="Choose an address from the list below or add one:")
+        test_change_alias(alias="SomeNewAliasThatIsUnfortunatelyTooLong",
+                          expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
+                          expected_response2="⛔️ Alias cannot have more than 16 characters! Please try another one. (enter /cancel to return to the menu)")
+        test_change_alias(alias="newAlias",
+                          expected_response1='How would you like to name your THORNode? (enter /cancel to return to the menu)',
+                          expected_response2="Got it! 👌")
+
+        test_delete_all_addresses(True)
 
         # Test Show all THORNodes Area
         test_show_all_thorchain_nodes()

@@ -1,4 +1,5 @@
 import atexit
+import copy
 
 from telegram.ext.dispatcher import run_async
 from telegram.ext import (
@@ -46,11 +47,23 @@ def setup_existing_user(dispatcher):
     Tasks to ensure smooth user experience for existing users upon Bot restart
     """
 
+    # Iterate over all existing users
     chat_ids = dispatcher.user_data.keys()
     for chat_id in chat_ids:
+
+        # Delete all nodes and add them again to ensure all user_data fields are up to date
+        current_user_data = copy.deepcopy(dispatcher.user_data[chat_id])
+        for address in current_user_data['nodes']:
+            del dispatcher.user_data[chat_id]['nodes'][address]
+        for address in current_user_data['nodes']:
+            add_thornode_to_user_data(dispatcher.user_data[chat_id], address, current_user_data['nodes'][address])
+
+        # Start monitoring jobs for all existing users
         dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
+
+        # Send a notification to existing users that the Bot got restarted
         restart_message = 'Heil ok sæll!\n' \
                           'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
                           'To make sure you have the latest features, please start ' \
@@ -141,20 +154,39 @@ def add_thornode(update, context):
     Initiate a conversation and prompt for user input (thornode address).
     """
 
-    # Enable message editing
-    query = update.callback_query
-    query.answer()
+    context.user_data['expected'] = 'add_node'
 
     text = 'What\'s the address of your THORNode? (enter /cancel to return to the menu)'
-
-    # Send message
-    query.edit_message_text(text)
-
-    return WAIT_FOR_ADDRESS
+    return show_text_input_message(update, text)
 
 
 @run_async
-def handle_input(update, context):
+def change_alias(update, context):
+    """
+    Initiate a conversation and prompt for user input (new alias).
+    """
+
+    context.user_data['expected'] = 'change_alias'
+
+    text = 'How would you like to name your THORNode? (enter /cancel to return to the menu)'
+    return show_text_input_message(update, text)
+
+
+@run_async
+def plain_input(update, context):
+    """
+    Handle if the users sends a message
+    """
+    expected = context.user_data['expected'] if 'expected' in context.user_data else None
+    if expected == 'add_node':
+        context.user_data['expected'] = None
+        return handle_add_node(update, context)
+    elif expected == 'change_alias':
+        context.user_data['expected'] = None
+        return handle_change_alias(update, context)
+
+
+def handle_add_node(update, context):
     """
     Handle text input after an user has asked to add a new thornode.
     """
@@ -167,15 +199,33 @@ def handle_input(update, context):
     if node is None:
         update.message.reply_text(
             '⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
+        context.user_data['expected'] = 'add_node'
         return WAIT_FOR_ADDRESS
 
-    # Update data
-    context.user_data['nodes'][address] = {}
-    context.user_data['nodes'][address]['status'] = node['status']
-    context.user_data['nodes'][address]['bond'] = node['bond']
-    context.user_data['nodes'][address]['slash_points'] = node['slash_points']
-    context.user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
-    context.user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+    add_thornode_to_user_data(context.user_data, address, node)
+
+    # Send message
+    update.message.reply_text('Got it! 👌')
+    show_thornode_menu(context=context, chat_id=update.message.chat.id, user_data=context.user_data)
+
+    return END
+
+
+def handle_change_alias(update, context):
+    """
+    Handle text input after the user clicked "change alias"
+    """
+
+    # Text input is the new alias
+    alias = update.message.text
+
+    if len(alias) > 16:
+        update.message.reply_text(
+            '⛔️ Alias cannot have more than 16 characters! Please try another one. (enter /cancel to return to the menu)')
+        context.user_data['expected'] = 'change_alias'
+        return WAIT_FOR_ADDRESS
+
+    context.user_data['nodes'][context.user_data['selected_node_address']]['alias'] = alias
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -196,7 +246,9 @@ def confirm_thornode_deletion(update, context):
         InlineKeyboardButton('YES ✅', callback_data='delete_thornode'),
         InlineKeyboardButton('NO ❌', callback_data='keep_thornode')
     ]]
-    text = '⚠️ Do you really want to remove the address from your monitoring list? ⚠️' + address
+    text = '⚠️ Do you really want to remove this node from your monitoring list? ⚠\n️' + \
+           "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
+           "*" + address + "*"
 
     return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
 
@@ -210,11 +262,14 @@ def delete_thornode(update, context):
     query = update.callback_query
     address = context.user_data['selected_node_address']
 
+    text = "❌ Thornode got deleted! ❌\n" + \
+           "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
+           "*" + address + "*"
+
     del context.user_data['nodes'][address]
 
-    text = "❌ Thornode address got deleted! ❌\n" + address
-    query.answer(text)
-    query.edit_message_text(text)
+    query.answer(text.replace("*", ""))
+    query.edit_message_text(text, parse_mode='markdown')
     show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
     return END
 
@@ -297,13 +352,8 @@ def add_all_thornodes(update, context):
 
     for node in nodes:
         address = node['node_address']
-
-        context.user_data['nodes'][address] = {}
-        context.user_data['nodes'][address]['status'] = node['status']
-        context.user_data['nodes'][address]['bond'] = node['bond']
-        context.user_data['nodes'][address]['slash_points'] = node['slash_points']
-        context.user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
-        context.user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+        if address not in context.user_data['nodes']:
+            add_thornode_to_user_data(context.user_data, address, node)
 
     # Send message
     query.edit_message_text('Added all THORNodes! 👌')
@@ -434,7 +484,14 @@ def show_all_thorchain_nodes(update, context):
     text = "Status of all THORNodes in the THORChain network:\n\n"
 
     for node in nodes:
-        text += 'THORNode: *' + node['node_address'] + '*\n' + \
+        monitored_address = next(filter(lambda monitored_address: monitored_address == node['node_address'], context.user_data['nodes']), None)
+        text += 'THORNode: *'
+        if monitored_address:
+            text += context.user_data['nodes'][monitored_address]['alias']
+        else:
+            text += "not monitored"
+        text += "*\n"
+        text += 'Address: *' + node['node_address'] + '*\n' + \
            'Version: *' + node['version'] + '*\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
@@ -469,6 +526,22 @@ def main():
     # Start job for health check
     dispatcher.job_queue.run_repeating(update_health_check_file, interval=5, context={})
 
+    # Text input conversation handler
+    input_conversation = ConversationHandler(
+        entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$'),
+                      CallbackQueryHandler(change_alias, pattern='^change_alias$')],
+        states={WAIT_FOR_ADDRESS: [
+            CommandHandler('cancel', cancel),
+            MessageHandler(Filters.text, plain_input, pass_job_queue=True, pass_chat_data=True)
+        ]},
+        fallbacks=[],
+        allow_reentry=True,
+        map_to_parent={
+            # Return on END of child to parents thornode menu
+            END: THORNODE_MENU
+        }
+    )
+
     # Thornode Detail conversation handler
     thornode_detail_conversation = ConversationHandler(
         entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details')],
@@ -477,6 +550,7 @@ def main():
                 CommandHandler('cancel', cancel),
                 CallbackQueryHandler(confirm_thornode_deletion, pattern='^confirm_thornode_deletion$',
                                      pass_chat_data=True),
+                input_conversation,
                 CallbackQueryHandler(back_to_thornode_menu, pattern='^back_button$')],
             WAIT_FOR_CONFIRMATION: [
                 CallbackQueryHandler(delete_thornode, pattern='^delete_thornode$'),
@@ -489,22 +563,8 @@ def main():
         }
     )
 
-    # Add Thornode conversation handler
-    add_thornode_conversation = ConversationHandler(
-        entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$')],
-        states={WAIT_FOR_ADDRESS: [
-            CommandHandler('cancel', cancel),
-            MessageHandler(Filters.text, handle_input, pass_job_queue=True, pass_chat_data=True)
-        ]},
-        fallbacks=[],
-        allow_reentry=True,
-        map_to_parent={
-            # Return on END of child to parents thornode menu
-            END: THORNODE_MENU
-        }
-    )
 
-    # Add all Thornodes conversation handler
+    # "Add all Thornodes" conversation handler
     add_all_thornodes_conversation = ConversationHandler(
         entry_points=[CallbackQueryHandler(confirm_add_all_thornodes, pattern='^confirm_add_all_thornodes$')],
         states={
@@ -519,7 +579,7 @@ def main():
         }
     )
 
-    # Delete all Thornodes conversation handler
+    # "Delete all Thornodes" conversation handler
     delete_all_thornodes_conversation = ConversationHandler(
         entry_points=[CallbackQueryHandler(confirm_delete_all_thornodes, pattern='^confirm_delete_all_thornodes$')],
         states={
@@ -539,7 +599,7 @@ def main():
         entry_points=[CallbackQueryHandler(thornode_menu, pattern='^thornode_menu$')],
         states={THORNODE_MENU: [
             thornode_detail_conversation,
-            add_thornode_conversation,
+            input_conversation,
             add_all_thornodes_conversation,
             delete_all_thornodes_conversation,
             CallbackQueryHandler(back_to_home, pattern='^back_button$')

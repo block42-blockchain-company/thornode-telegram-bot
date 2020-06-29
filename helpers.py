@@ -3,6 +3,7 @@ import subprocess
 import requests
 import json
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from datetime import datetime
 
 from constants import *
 
@@ -44,7 +45,10 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
             emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']]
         except:
             emoji = STATUS_EMOJIS["deactive"]
-        keyboard.append([InlineKeyboardButton(emoji + " " + address, callback_data='thornode_details-' + address)])
+
+        truncated_address = address[:9] + "..." + address[-4:]
+        button_text = emoji + " " + user_data['nodes'][address]['alias'] + " (" + truncated_address + ")"
+        keyboard.append([InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)])
 
     keyboard.append([InlineKeyboardButton('➕ ADD ALL', callback_data='confirm_add_all_thornodes'),
                      InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
@@ -76,23 +80,22 @@ def show_detail_menu(update, context):
         show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data)
         return END
 
-    text = 'THORNode: *' + address + '*\n' + \
+    text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
+           'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
-                                                                           'Status Since: ' + '*{:,}*'.format(
-        int(node['status_since'])) + '\n\n'
+           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
     if THORCHAIN_NODE_IP:
         text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(get_number_unconfirmed_txs())) + '\n\n'
 
     text += "What do you want to do with that Node?"
 
-    keyboard = [[
-        InlineKeyboardButton('➖ REMOVE', callback_data='confirm_thornode_deletion'),
-        InlineKeyboardButton('⬅️ BACK', callback_data='back_button')
-    ]]
+    keyboard = [[InlineKeyboardButton('➖ REMOVE', callback_data='confirm_thornode_deletion'),
+                 InlineKeyboardButton('✏️ CHANGE ALIAS', callback_data='change_alias')],
+                [InlineKeyboardButton('⬅️ BACK', callback_data='back_button')]]
 
     # Modify message
     query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
@@ -131,6 +134,44 @@ def show_admin_menu(context, chat_id, query=None):
         query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     else:
         context.bot.send_message(chat_id, text, reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+def show_text_input_message(update, text):
+    """
+    Initiate a conversation and prompt for user input.
+    """
+
+    # Enable message editing
+    query = update.callback_query
+    query.answer()
+
+    # Send message
+    query.edit_message_text(text)
+
+    return WAIT_FOR_ADDRESS
+
+
+def add_thornode_to_user_data(user_data, address, node):
+    """
+    Add a node in the user specific dictionary
+    """
+
+    # Find an alias that does not exist yet
+    i = 0
+    while True:
+        i += 1
+        alias = "Thor-" + str(i)
+        if not next(filter(
+                lambda current_address: user_data['nodes'][current_address]['alias'] == alias, user_data['nodes']), None):
+            break
+
+    user_data['nodes'][address] = {}
+    user_data['nodes'][address]['alias'] = alias
+    user_data['nodes'][address]['status'] = node['status']
+    user_data['nodes'][address]['bond'] = node['bond']
+    user_data['nodes'][address]['slash_points'] = node['slash_points']
+    user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
+    user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
 
 def show_confirmation_menu(update, text, keyboard):

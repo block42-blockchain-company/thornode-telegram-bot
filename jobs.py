@@ -45,7 +45,7 @@ def check_thornodes(context):
         local_node = user_data['nodes'][address]
 
         if remote_node is None:
-            text = 'THORNode is not active anymore! 💀' + '\n' + \
+            text = 'THORNode ' + user_data['nodes'][address]['alias'] + ' is not active anymore! 💀' + '\n' + \
                    'Address: ' + address + '\n\n' + \
                    'Please enter another THORNode address.'
 
@@ -66,7 +66,8 @@ def check_thornodes(context):
 
             # Check if there are any changes
             if len(changed_fields) > 0:
-                text = 'THORNode: ' + address + '\n' + \
+                text = 'THORNode: ' + user_data['nodes'][address]['alias'] + '\n' + \
+                       'Address: ' + address + '\n' + \
                        'Status: ' + local_node['status'].capitalize()
                 if 'status' in changed_fields:
                     text += ' ➡️ ' + remote_node['status'].capitalize()
