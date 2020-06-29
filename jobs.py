@@ -64,6 +64,11 @@ def check_thornodes(context):
             changed_fields = [field for field in ['status', 'bond', 'slash_points'] if
                               local_node[field] != remote_node[field]]
 
+            # If just slash_points changed, only send message if difference is min. 3 slash points
+            if len(changed_fields) == 1 and 'slash_points' in changed_fields and \
+                    abs(int(local_node['slash_points']) - int(remote_node['slash_points'])) < 5:
+                continue
+
             # Check if there are any changes
             if len(changed_fields) > 0:
                 text = 'THORNode: ' + user_data['nodes'][address]['alias'] + '\n' + \
