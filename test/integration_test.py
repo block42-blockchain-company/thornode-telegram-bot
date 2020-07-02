@@ -359,16 +359,18 @@ def test_thornode_notification(field):
         node_data_original = json.load(json_read_file)
         node_data_new = copy.deepcopy(node_data_original)
 
-    new_value = str(random.randrange(0, 100))
+    new_value = random.randrange(0, 100)
     if field == 'node_address':
-        new_value = 'thor' + new_value
+        new_value = 'thor' + str(new_value)
+    else:
+        new_value += int(node_data_new[0][field])
 
-    node_data_new[0][field] = new_value
+    node_data_new[0][field] = str(new_value)
 
     with open('nodeaccounts.json', 'w') as json_write_file:
         json.dump(node_data_new, json_write_file)
 
-    time.sleep(40)
+    time.sleep(60)
     first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
     second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
 
