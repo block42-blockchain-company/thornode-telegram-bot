@@ -2,7 +2,7 @@ import random
 import subprocess
 import requests
 import json
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 from datetime import datetime
 
 from constants import *
@@ -29,8 +29,7 @@ def show_home_menu(context, chat_id, query=None):
         query.edit_message_text(text,
                                 reply_markup=InlineKeyboardMarkup(keyboard))
     else:
-        context.bot.send_message(chat_id, text,
-                                 reply_markup=InlineKeyboardMarkup(keyboard))
+        try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_thornode_menu(context, chat_id, user_data, query=None):
@@ -60,8 +59,8 @@ def show_thornode_menu(context, chat_id, user_data, query=None):
         query.edit_message_text('Choose an address from the list below or add one:',
                                 reply_markup=InlineKeyboardMarkup(keyboard))
     else:
-        context.bot.send_message(chat_id, 'Choose an address from the list below or add one:',
-                                 reply_markup=InlineKeyboardMarkup(keyboard))
+        try_message(context=context, chat_id=chat_id, text='Choose an address from the list below or add one:',
+                    reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_detail_menu(update, context):
@@ -133,7 +132,7 @@ def show_admin_menu(context, chat_id, query=None):
         query.answer()
         query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
     else:
-        context.bot.send_message(chat_id, text, reply_markup=InlineKeyboardMarkup(keyboard))
+        try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_text_input_message(update, text):
@@ -149,6 +148,35 @@ def show_text_input_message(update, text):
     query.edit_message_text(text)
 
     return WAIT_FOR_ADDRESS
+
+
+def try_message(context, chat_id, text, reply_markup=None):
+    """
+    Send a message to a user.
+    """
+
+    if context.job and not context.job.enabled:
+        return
+
+    try:
+        context.bot.send_message(chat_id, text, parse_mode='markdown', reply_markup=reply_markup)
+    except TelegramError as e:
+        if 'bot was blocked by the user' in e.message:
+            print("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
+            del context.dispatcher.user_data[chat_id]
+            del context.dispatcher.chat_data[chat_id]
+            del context.dispatcher.persistence.user_data[chat_id]
+            del context.dispatcher.persistence.chat_data[chat_id]
+
+            # Somehow session.data does not get updated if all users block the bot.
+            # That makes problems on bot restart. That's why we delete the file ourselves.
+            if len(context.dispatcher.persistence.user_data) == 0:
+                if os.path.exists("storage/session.data"):
+                    os.remove("storage/session.data")
+            context.job.enabled = False
+            context.job.schedule_removal()
+        else:
+            print("Got Error\n" + str(e) + "\nwith telegram user " + str(chat_id))
 
 
 def add_thornode_to_user_data(user_data, address, node):
