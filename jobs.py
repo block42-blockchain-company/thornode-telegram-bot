@@ -100,7 +100,7 @@ def check_thornodes(context):
         del user_data['nodes'][address]
 
     if message_sent:
-        show_home_menu(context=context, chat_id=chat_id)
+        show_home_menu_new_msg(context=context, chat_id=chat_id)
 
 
 def check_thorchain_block_height(context):
@@ -148,7 +148,7 @@ def check_thorchain_block_height(context):
     # > 1 == still stuck
 
     if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
-        show_home_menu(context=context, chat_id=chat_id)
+        show_home_menu_new_msg(context=context, chat_id=chat_id)
 
 
 def check_thorchain_catch_up_status(context):
@@ -170,14 +170,14 @@ def check_thorchain_catch_up_status(context):
                'Current block height: ' + get_thorchain_block_height() + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu(context=context, chat_id=chat_id)
+        show_home_menu_new_msg(context=context, chat_id=chat_id)
     elif user_data['is_catching_up'] == True and not is_currently_catching_up:
         user_data['is_catching_up'] = False
         text = 'The node caught up to the latest block height again! 👌' + '\n' + \
                'IP: ' + THORCHAIN_NODE_IP + '\n' + \
                'Current block height: ' + get_thorchain_block_height()
         try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu(context=context, chat_id=chat_id)
+        show_home_menu_new_msg(context=context, chat_id=chat_id)
 
 
 def check_thorchain_midgard_api(context):
@@ -198,13 +198,13 @@ def check_thorchain_midgard_api(context):
                'IP: ' + THORCHAIN_NODE_IP + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu(context, chat_id=chat_id)
+        show_home_menu_new_msg(context, chat_id=chat_id)
     elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
                'IP: ' + THORCHAIN_NODE_IP + '\n'
         try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu(context, chat_id=chat_id)
+        show_home_menu_new_msg(context, chat_id=chat_id)
 
 
 def check_binance_health(context):
@@ -225,13 +225,13 @@ def check_binance_health(context):
                'IP: ' + BINANCE_NODE_IP + '\n\n' + \
                'Please check your Binance Node immediately!'
         try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu(context, chat_id=chat_id)
+        show_home_menu_new_msg(context, chat_id=chat_id)
     elif user_data['is_binance_node_healthy'] == False and is_binance_node_currently_healthy:
         user_data['is_binance_node_healthy'] = True
         text = 'Binance Node is healthy again! 👌' + '\n' + \
                'IP: ' + BINANCE_NODE_IP + '\n'
         try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu(context, chat_id=chat_id)
+        show_home_menu_new_msg(context, chat_id=chat_id)
 
 
 def update_health_check_file(context):
