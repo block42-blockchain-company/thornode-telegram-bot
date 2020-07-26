@@ -245,7 +245,6 @@ def show_text_input_message(update, text):
 
     # Enable message editing
     query = update.callback_query
-    query.answer()
 
     # Send message
     query.edit_message_text(text)
@@ -309,7 +308,6 @@ def show_confirmation_menu(update, text, keyboard):
     """
 
     query = update.callback_query
-    query.answer()
 
     query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
 

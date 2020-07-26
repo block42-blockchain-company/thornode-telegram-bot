@@ -51,26 +51,47 @@ def setup_existing_user(dispatcher):
 
     # Iterate over all existing users
     chat_ids = dispatcher.user_data.keys()
+    delete_chat_ids = []
     for chat_id in chat_ids:
-
-        # Delete all nodes and add them again to ensure all user_data fields are up to date
-        current_user_data = copy.deepcopy(dispatcher.user_data[chat_id])
-        for address in current_user_data['nodes']:
-            del dispatcher.user_data[chat_id]['nodes'][address]
-        for address in current_user_data['nodes']:
-            add_thornode_to_user_data(dispatcher.user_data[chat_id], address, current_user_data['nodes'][address])
-
-        # Start monitoring jobs for all existing users
-        dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
-            'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
-        })
-
         # Send a notification to existing users that the Bot got restarted
         restart_message = 'Heil ok sæll!\n' \
                           'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
                           'To make sure you have the latest features, please start ' \
                           'a fresh chat with me by typing /start.'
-        dispatcher.bot.send_message(chat_id, restart_message)
+        try:
+            dispatcher.bot.send_message(chat_id, restart_message)
+
+            # Delete all node addresses and add them again to ensure all user_data fields are up to date
+            current_user_data = copy.deepcopy(dispatcher.user_data[chat_id])
+            for address in current_user_data['nodes']:
+                del dispatcher.user_data[chat_id]['nodes'][address]
+            for address in current_user_data['nodes']:
+                add_thornode_to_user_data(dispatcher.user_data[chat_id], address, current_user_data['nodes'][address])
+
+            # Start monitoring jobs for all existing users
+            dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
+                'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
+            })
+        except TelegramError as e:
+            if 'bot was blocked by the user' in e.message:
+                delete_chat_ids.append(chat_id)
+                continue
+            else:
+                print("Got Error\n" + str(e) + "\nwith telegram user " + str(chat_id))
+
+    for chat_id in delete_chat_ids:
+        print("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
+        del dispatcher.user_data[chat_id]
+        del dispatcher.chat_data[chat_id]
+        del dispatcher.persistence.user_data[chat_id]
+        del dispatcher.persistence.chat_data[chat_id]
+
+        # Somehow session.data does not get updated if all users block the bot.
+        # That's why we delete the file ourselves.
+        if len(dispatcher.persistence.user_data) == 0:
+            if os.path.exists("./storage/session.data"):
+                os.remove("./storage/session.data")
+
 
 
 """
@@ -124,6 +145,7 @@ def dispatch_query(update, context):
     """
 
     query = update.callback_query
+    query.answer()
     data = query.data
 
     context.user_data['expected'] = None
@@ -212,7 +234,7 @@ def show_admin_menu_edit_msg(update, context):
         keyboard = get_admin_menu_buttons()
     except ProcessLookupError:
         text = "❌ Error while getting running docker container! ❌"
-        query.answer(text)
+        query.edit_message_text(text)
         show_home_menu_new_msg(context=context, chat_id=update.message.chat.id)
         return
 
@@ -221,7 +243,6 @@ def show_admin_menu_edit_msg(update, context):
            "Below is a list of docker containers running on your system.\n" \
            "Click on any container to restart it!"
 
-    query.answer()
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
@@ -325,7 +346,32 @@ def handle_add_node(update, context):
     add_thornode_to_user_data(context.user_data, address, node)
 
     # Send message
-    update.message.reply_text('Got it! 👌')
+    update.message.reply_text('Got it! 👌'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+)
     show_thornode_menu_new_msg(context=context, chat_id=update.message.chat.id)
 
 
@@ -341,6 +387,7 @@ def handle_change_alias(update, context):
         update.message.reply_text(
             '⛔️ Alias cannot have more than 16 characters! Please try another one. (enter /cancel to return to the menu)')
         context.user_data['expected'] = 'change_alias'
+        return
 
     context.user_data['nodes'][context.user_data['selected_node_address']]['alias'] = alias
 
@@ -358,7 +405,7 @@ def confirm_thornode_deletion(update, context):
 
     keyboard = [[
         InlineKeyboardButton('YES ✅', callback_data='delete_thornode'),
-        InlineKeyboardButton('NO ❌', callback_data='thornode_details')
+        InlineKeyboardButton('NO ❌', callback_data='thornode_details-' + address)
     ]]
     text = '⚠️ Do you really want to remove this node from your monitoring list? ⚠\n️' + \
            "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
@@ -381,7 +428,6 @@ def delete_thornode(update, context):
 
     del context.user_data['nodes'][address]
 
-    query.answer(text.replace("*", ""))
     query.edit_message_text(text, parse_mode='markdown')
     show_thornode_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
@@ -392,7 +438,6 @@ def thornode_details(update, context):
     """
 
     query = update.callback_query
-    query.answer()
 
     address = query.data.split("-")[1]
     context.user_data['selected_node_address'] = address
@@ -456,7 +501,6 @@ def add_all_thornodes(update, context):
     """
 
     query = update.callback_query
-    query.answer()
 
     nodes = get_thorchain_validators()
 
@@ -486,7 +530,6 @@ def delete_all_thornodes(update, context):
 
     text = '❌ Deleted all THORNodes! ❌'
     # Send message
-    query.answer(text)
     query.edit_message_text(text)
 
     show_thornode_menu_new_msg(context=context, chat_id=update.effective_chat.id)
@@ -500,7 +543,7 @@ def admin_menu(update, context):
     query = update.callback_query
 
     if query.from_user.id not in ADMIN_USER_IDS:
-        query.answer("❌ You are not an Admin! ❌", show_alert=True)
+        query.edit_message_text("❌ You are not an Admin! ❌")
         show_home_menu_new_msg(context, chat_id=update.effective_chat.id)
         return
 
@@ -535,7 +578,7 @@ def restart_container(update, context):
     try:
         containers = get_running_docker_container()
     except ProcessLookupError:
-        query.answer("Error while getting running docker container", show_alert=True)
+        query.edit_message_text("Error while getting running docker container")
         show_admin_menu_new_msg(context, chat_id=update.effective_chat.id)
         return
 
@@ -553,11 +596,10 @@ def restart_container(update, context):
     if process.returncode:
         print("Restart docker container error: ", error)
         print("Return Code: ", process.returncode)
-        query.answer("Error while restarting the docker container", show_alert=True)
+        query.edit_message_text("Error while restarting the docker container")
         show_admin_menu_new_msg(context, chat_id=update.effective_chat.id)
         return
 
-    query.answer()
     query.edit_message_text('Container\n*' + container_name + '*\nsuccessfully restarted!', parse_mode='markdown')
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
@@ -582,10 +624,7 @@ def show_all_thorchain_nodes(update, context):
     """
 
     query = update.callback_query
-    query.answer()
-
     nodes = get_thorchain_validators()
-
     text = "Status of all THORNodes in the THORChain network:\n\n"
 
     for node in nodes:
