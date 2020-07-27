@@ -37,54 +37,6 @@ def show_thornode_menu_new_msg(context, chat_id):
 
     try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
 
-#def show_home_menu(context, chat_id, query=None):
-#    """
-#    Show buttons of home menu
-#    """
-#
-#    keyboard = [[InlineKeyboardButton('📡 MY NODES', callback_data='thornode_menu')],
-#                [InlineKeyboardButton('👀 SHOW ALL', callback_data='show_all_thorchain_nodes'),
-#                 InlineKeyboardButton('🗝 ADMIN AREA', callback_data='admin_menu')]]
-#
-#    text = 'I am your THORNode Bot. 🤖\nChoose an action:'
-#    # Edit message or write a new one depending on function call
-#    if query:
-#        query.edit_message_text(text,
-#                                reply_markup=InlineKeyboardMarkup(keyboard))
-#    else:
-#        try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
-
-
-#def show_thornode_menu(context, chat_id, user_data, query=None):
-#    """
-#    Show buttons for supported actions.
-#    """
-#
-#    keyboard = [[]]
-#
-#    for address in user_data['nodes'].keys():
-#        try:
-#            emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']]
-#        except:
-#            emoji = STATUS_EMOJIS["deactive"]
-#
-#        truncated_address = address[:9] + "..." + address[-4:]
-#        button_text = emoji + " " + user_data['nodes'][address]['alias'] + " (" + truncated_address + ")"
-#        keyboard.append([InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)])
-#
-#    keyboard.append([InlineKeyboardButton('➕ ADD ALL', callback_data='confirm_add_all_thornodes'),
-#                     InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
-#    keyboard.append([InlineKeyboardButton('➖ REMOVE ALL', callback_data='confirm_delete_all_thornodes'),
-#                     InlineKeyboardButton('⬅️ BACK', callback_data='back_button')])
-#
-#    # Edit query message. Write a new message instead after address input
-#    if query:
-#        query.edit_message_text('Choose an address from the list below or add one:',
-#                                reply_markup=InlineKeyboardMarkup(keyboard))
-#    else:
-#        try_message(context=context, chat_id=chat_id, text='Choose an address from the list below or add one:',
-#                    reply_markup=InlineKeyboardMarkup(keyboard))
-
 
 def get_home_menu_buttons():
     """
@@ -157,40 +109,6 @@ def show_detail_menu(update, context):
 
     # Modify message
     query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
-
-
-#def show_admin_menu(context, chat_id, query=None):
-#    """
-#    Show buttons of admin area
-#    """
-#
-#    containers = get_running_docker_container()
-#    if containers == "ERROR":
-#        if query:
-#            query.answer("Error while getting running docker container", show_alert=True)
-#        print("Error while getting running docker container")
-#        return END
-#
-#    # build keyboard with one button for every container
-#    keyboard = [[]]
-#    for container in containers:
-#        for name in container['Names']:
-#            container_name = name.replace('/', '')
-#            status = container['Status']
-#            text = "🐳 " + container_name + " - " + status
-#            keyboard.append([InlineKeyboardButton(text, callback_data='container-#' + container_name)])
-#
-#    keyboard.append([InlineKeyboardButton('⬅️ BACK', callback_data='home')])
-#
-#    # Send message
-#    text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
-#           "Below is a list of docker containers running on your system.\n" \
-#           "Click on any container to restart it!"
-#    if query:
-#        query.answer()
-#        query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-#    else:
-#        try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_admin_menu_new_msg(context, chat_id):
