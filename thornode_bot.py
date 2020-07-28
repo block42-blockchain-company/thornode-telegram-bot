@@ -60,24 +60,31 @@ def setup_existing_user(dispatcher):
                           'a fresh chat with me by typing /start.'
         try:
             dispatcher.bot.send_message(chat_id, restart_message)
-
-            # Delete all node addresses and add them again to ensure all user_data fields are up to date
-            current_user_data = copy.deepcopy(dispatcher.user_data[chat_id])
-            for address in current_user_data['nodes']:
-                del dispatcher.user_data[chat_id]['nodes'][address]
-            for address in current_user_data['nodes']:
-                add_thornode_to_user_data(dispatcher.user_data[chat_id], address, current_user_data['nodes'][address])
-
-            # Start monitoring jobs for all existing users
-            dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
-                'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
-            })
         except TelegramError as e:
             if 'bot was blocked by the user' in e.message:
                 delete_chat_ids.append(chat_id)
                 continue
             else:
                 print("Got Error\n" + str(e) + "\nwith telegram user " + str(chat_id))
+
+        # Delete all node addresses and add them again to ensure all user_data fields are up to date
+        if 'nodes' not in dispatcher.user_data[chat_id]:
+            dispatcher.user_data[chat_id]['nodes'] = {}
+
+        current_user_data = copy.deepcopy(dispatcher.user_data[chat_id])
+
+        for address in current_user_data['nodes']:
+            del dispatcher.user_data[chat_id]['nodes'][address]
+        for address in current_user_data['nodes']:
+            add_thornode_to_user_data(dispatcher.user_data[chat_id], address,
+                                      current_user_data['nodes'][address])
+
+        # Start monitoring jobs for all existing users
+        if 'job_started' not in dispatcher.user_data[chat_id]:
+            dispatcher.user_data[chat_id]['job_started'] = True
+        dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
+            'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
+        })
 
     for chat_id in delete_chat_ids:
         print("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
@@ -91,7 +98,6 @@ def setup_existing_user(dispatcher):
         if len(dispatcher.persistence.user_data) == 0:
             if os.path.exists("./storage/session.data"):
                 os.remove("./storage/session.data")
-
 
 
 """
@@ -246,19 +252,6 @@ def show_admin_menu_edit_msg(update, context):
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-#@run_async
-#def thornode_menu(update, context):
-#    """
-#    Display all Buttons related to thornodes
-#    """
-#
-#    query = update.callback_query
-#    query.answer()
-#
-#    show_thornode_menu(context=None, chat_id=None, user_data=context.user_data, query=query)
-#    return THORNODE_MENU
-
-
 @run_async
 def confirm_add_all_thornodes(update, context):
     """
@@ -346,32 +339,7 @@ def handle_add_node(update, context):
     add_thornode_to_user_data(context.user_data, address, node)
 
     # Send message
-    update.message.reply_text('Got it! 👌'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-)
+    update.message.reply_text('Got it! 👌')
     show_thornode_menu_new_msg(context=context, chat_id=update.message.chat.id)
 
 
@@ -443,56 +411,6 @@ def thornode_details(update, context):
     context.user_data['selected_node_address'] = address
 
     return show_detail_menu(update=update, context=context)
-
-
-#@run_async
-#def back_to_home(update, context):
-#    """
-#    Return to home menu
-#    """
-#
-#    query = update.callback_query
-#    # Answer so that the small clock when you click a button disappears
-#    query.answer()
-#
-#    show_home_menu(context=context, chat_id=update.effective_chat.id, query=query)
-#    return END
-
-
-#@run_async
-#def back_to_thornode_menu(update, context):
-#    """
-#    Return to thornode menu
-#    """
-#
-#    query = update.callback_query
-#    # Answer so that the small clock when you click a button disappears
-#    query.answer()
-#
-#    show_thornode_menu(context=context, chat_id=update.effective_chat.id, user_data=context.user_data, query=query)
-#    return END
-
-
-#@run_async
-#def cancel(update, context):
-#    """
-#    Cancel any open conversation.
-#    """
-#
-#    show_thornode_menu(context, chat_id=update.message.chat.id, user_data=context.user_data)
-#    return END
-
-
-#@run_async
-#def keep_thornode(update, context):
-#    """
-#    Do not remove thornode addess and return to detail menu
-#    """
-#
-#    query = update.callback_query
-#    # Answer so that the small clock when you click a button disappears
-#    query.answer()
-#    return show_detail_menu(update=update, context=context)
 
 
 def add_all_thornodes(update, context):
@@ -604,20 +522,6 @@ def restart_container(update, context):
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
 
-#@run_async
-#def keep_container_running(update, context):
-#    """
-#    Do nothing and return to Admin Area
-#    """
-#
-#    query = update.callback_query
-#    # Answer so that the small clock when you click a button disappears
-#    query.answer()
-#
-#    show_admin_menu(context=None, chat_id=None, query=query)
-#    return ADMIN_MENU
-
-
 def show_all_thorchain_nodes(update, context):
     """
     Show the status of all Thornodes in the whole Thorchain network
@@ -667,119 +571,6 @@ def main():
 
     # Start job for health check
     dispatcher.job_queue.run_repeating(update_health_check_file, interval=5, context={})
-
-    ## Text input conversation handler
-    #input_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(add_thornode, pattern='^add_thornode$'),
-    #                  CallbackQueryHandler(change_alias, pattern='^change_alias$')],
-    #    states={WAIT_FOR_ADDRESS: [
-    #        CommandHandler('cancel', cancel),
-    #        MessageHandler(Filters.text, plain_input, pass_job_queue=True, pass_chat_data=True)
-    #    ]},
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #    map_to_parent={
-    #        # Return on END of child to parents thornode menu
-    #        END: THORNODE_MENU
-    #    }
-    #)
-#
-    ## Thornode Detail conversation handler
-    #thornode_detail_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(thornode_details, pattern='^thornode_details')],
-    #    states={
-    #        WAIT_FOR_DETAIL: [
-    #            CommandHandler('cancel', cancel),
-    #            CallbackQueryHandler(confirm_thornode_deletion, pattern='^confirm_thornode_deletion$',
-    #                                 pass_chat_data=True),
-    #            input_conversation,
-    #            CallbackQueryHandler(back_to_thornode_menu, pattern='^back_button$')],
-    #        WAIT_FOR_CONFIRMATION: [
-    #            CallbackQueryHandler(delete_thornode, pattern='^delete_thornode$'),
-    #            CallbackQueryHandler(keep_thornode, pattern='^keep_thornode$')]},
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #    map_to_parent={
-    #        # Return on END of child to parents thornode menu
-    #        END: THORNODE_MENU
-    #    }
-    #)
-#
-#
-    ## "Add all Thornodes" conversation handler
-    #add_all_thornodes_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(confirm_add_all_thornodes, pattern='^confirm_add_all_thornodes$')],
-    #    states={
-    #        WAIT_FOR_CONFIRMATION: [
-    #            CallbackQueryHandler(add_all_thornodes, pattern='^add_all_thornodes$'),
-    #            CallbackQueryHandler(back_to_thornode_menu, pattern='^back_to_thornode_menu')]},
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #    map_to_parent={
-    #        # Return to parents thornode menu on END of child
-    #        END: THORNODE_MENU
-    #    }
-    #)
-#
-    ## "Delete all Thornodes" conversation handler
-    #delete_all_thornodes_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(confirm_delete_all_thornodes, pattern='^confirm_delete_all_thornodes$')],
-    #    states={
-    #        WAIT_FOR_CONFIRMATION: [
-    #            CallbackQueryHandler(delete_all_thornodes, pattern='^delete_all_thornodes$'),
-    #            CallbackQueryHandler(back_to_thornode_menu, pattern='^back_to_thornode_menu')]},
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #    map_to_parent={
-    #        # Return to parents thornode menu on END of child
-    #        END: THORNODE_MENU
-    #    }
-    #)
-#
-    ## Define Thornode conversation handler
-    #thornode_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(thornode_menu, pattern='^thornode_menu$')],
-    #    states={THORNODE_MENU: [
-    #        thornode_detail_conversation,
-    #        input_conversation,
-    #        add_all_thornodes_conversation,
-    #        delete_all_thornodes_conversation,
-    #        CallbackQueryHandler(back_to_home, pattern='^back_button$')
-    #    ]},
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #)
-#
-    ## Define Thornode conversation handler
-    #admin_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(admin_menu, pattern='^admin_menu$')],
-    #    states={
-    #        ADMIN_MENU: [
-    #            CallbackQueryHandler(confirm_container_restart, pattern='^container'),
-    #            CallbackQueryHandler(back_to_home, pattern='^back_button$')],
-    #        WAIT_FOR_CONFIRMATION: [
-    #            CallbackQueryHandler(restart_container, pattern='^restart_container'),
-    #            CallbackQueryHandler(keep_container_running, pattern='^keep_container_running$')]
-    #    },
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #)
-
-    ## Define Network status conversation handler
-    #all_thorchain_nodes_conversation = ConversationHandler(
-    #    entry_points=[CallbackQueryHandler(show_all_thorchain_nodes, pattern='^show_all_thorchain_nodes$')],
-    #    states={},
-    #    fallbacks=[],
-    #    allow_reentry=True,
-    #)
-
-    # Add start commandHandler handlers
-    #dispatcher.add_handler(CommandHandler('start', start))
-
-    # Add conversationHandler
-    #dispatcher.add_handler(thornode_conversation)
-    #dispatcher.add_handler(admin_conversation)
-    #dispatcher.add_handler(all_thorchain_nodes_conversation)
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('cancel', cancel))
