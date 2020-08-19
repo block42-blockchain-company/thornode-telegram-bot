@@ -159,7 +159,7 @@ def test_delete_address(confirm):
             "YES button on deletion confirmation does not yield deletion statement"
         assert second_response_2.text == "Click an address from the list below or add a node:", \
             "YES button on deletion confirmation does not go back to thornodes menu"
-        assert second_response_2.reply_markup.inline_keyboard[0][0].text == "➕ ADD ALL", "Node is NOT deleted after deletion"
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == "1️⃣ ADD NODE", "Node is NOT deleted after deletion"
     else:
         click_button("NO ❌")
         time.sleep(3)
@@ -248,8 +248,7 @@ def test_delete_all_addresses(confirm):
             "YES button on ➖ REMOVE ALL confirmation does not yield deletion statement"
         assert second_response_2.text == "Click an address from the list below or add a node:", \
             "YES button on ➖ REMOVE ALL confirmation does not go back to 📡 MY NODES menu"
-        assert second_response_2.reply_markup.inline_keyboard[0][0].text == '➕ ADD ALL' and \
-               second_response_2.reply_markup.inline_keyboard[0][1].text == '1️⃣ ADD NODE', \
+        assert second_response_2.reply_markup.inline_keyboard[0][0].text == '1️⃣ ADD NODE' and \
             "Nodes are not deleted after YES button on ➖ REMOVE ALL confirmation"
     else:
         click_button("NO ❌")
@@ -268,17 +267,14 @@ def test_show_all_thorchain_nodes():
     telegram.send_message(BOT_ID, "👀 SHOW ALL")
     time.sleep(3)
 
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+    response = next(telegram.iter_history(BOT_ID))
 
     expected_response1 = 'Status of all THORNodes in the THORChain network:'
     expected_response2 = 'Address: ' + VALID_ADDRESS
-    assert first_response.text.find(expected_response1) != -1, "Expected '" + expected_response1 + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert first_response.text.find(expected_response2) != -1, "Expected '" + expected_response2 + \
-                                                               "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible 👀 SHOW ALL"
+    assert response.text.find(expected_response1) != -1, "Expected '" + expected_response1 + \
+                                                              "'\nbut got\n'" + response.text + "'"
+    assert response.text.find(expected_response2) != -1, "Expected '" + expected_response2 + \
+                                                               "'\nbut got\n'" + response.text + "'"
     print("👀 SHOW ALL ✅")
     print("------------------------")
 
@@ -306,8 +302,6 @@ def test_back_button_admin_area():
     response = next(telegram.iter_history(BOT_ID))
     telegram.send_message(BOT_ID, "🗝 ADMIN AREA")
     time.sleep(3)
-
-    assert_back_button(response.text)
 
     print("Back button in 🗝 ADMIN AREA ✅")
     print("------------------------")
@@ -365,8 +359,7 @@ def test_thornode_notification(field):
         json.dump(node_data_new, json_write_file)
 
     time.sleep(70)
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+    response = next(telegram.iter_history(BOT_ID))
 
     if field == "node_address":
         expected_response = 'THORNode Thor-1 is not active anymore! 💀' + '\n' + \
@@ -385,10 +378,8 @@ def test_thornode_notification(field):
         if field == 'slash_points':
             expected_response += ' ➡️ ' + '{:,}'.format(int(node_data_new[0]['slash_points']))
 
-    assert first_response.text.find(expected_response) != -1, \
-        "Expected '" + expected_response + "' but got '" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after thornode value change notification."
+    assert response.text.find(expected_response) != -1, \
+        "Expected '" + expected_response + "' but got '" + response.text + "'"
     print("Notification Thornode data change with " + field + " ✅")
     print("------------------------")
     time.sleep(50)
@@ -407,26 +398,18 @@ def test_block_height_notification():
         json.dump(node_data, json_write_file)
     time.sleep(30)
 
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+    response = next(telegram.iter_history(BOT_ID))
 
     expected_response = 'Block height is not increasing anymore!'
-
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after block height notification"
+    assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + response.text + "'"
 
     time.sleep(70)
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+    response = next(telegram.iter_history(BOT_ID))
 
     expected_response = 'Block height is increasing again!'
-
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after block height notification"
+    assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + response.text + "'"
     print("Check Blockchain Height ✅")
     print("------------------------")
 
@@ -441,18 +424,15 @@ def test_catch_up_notification(catching_up):
         json.dump(node_data, json_write_file)
     time.sleep(40)
 
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+    response = next(telegram.iter_history(BOT_ID))
 
     if catching_up:
         expected_response = 'The Node is behind the latest block height and catching up!'
     else:
         expected_response = 'The node caught up to the latest block height again!'
         
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after catching_up=" + catching_up + " notification"
+    assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + response.text + "'"
 
     print("Check catch up status with catching_up=" + str(catching_up) + " ✅")
     print("------------------------")
@@ -539,18 +519,15 @@ def assert_health_notification(chain, healthy):
         os.rename(file_name + '.json', file_name + '_404.json')
     time.sleep(40)
 
-    first_response = next(itertools.islice(telegram.iter_history(BOT_ID), 1, None))
-    second_response = next(itertools.islice(telegram.iter_history(BOT_ID), 0, None))
+    response = next(telegram.iter_history(BOT_ID))
 
     if healthy:
         expected_response = messageContent + ' is healthy again'
     else:
         expected_response = messageContent + ' is not healthy anymore'
 
-    assert first_response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                              "'\nbut got\n'" + first_response.text + "'"
-    assert second_response.text == "I am your THORNode Bot. 🤖\nChoose an action:", \
-        "I am your THORNode Bot. 🤖\nChoose an action: - not visible after block height notification"
+    assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                              "'\nbut got\n'" + response.text + "'"
 
     print("Check " + messageContent + " with healthy==" + str(healthy) + " ✅")
     print("------------------------")
