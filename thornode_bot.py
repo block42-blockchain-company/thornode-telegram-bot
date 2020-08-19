@@ -130,18 +130,16 @@ def start(update, context):
     text += 'Moreover, in the Admin Area you can *restart any docker container* that runs alongside my container!'
 
     # Send message
-    update.message.reply_text(text, parse_mode='markdown')
-    show_home_menu_new_msg(context=context, chat_id=update.message.chat.id)
+    try_message_with_home_menu(context=context, chat_id=update.message.chat.id, text=text)
 
 
 @run_async
-def cancel(update, context):
+def show_thornode_menu_handler(update, context):
     """
-    Go back to home menu
+    Thornode Menu Command handler
     """
 
-    context.user_data['expected'] = None
-    show_home_menu_new_msg(context=context, chat_id=update.effective_chat.id)
+    show_thornode_menu_new_msg(update, context)
 
 
 @run_async
@@ -230,26 +228,25 @@ def show_thornode_menu_edit_msg(update, context):
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def show_admin_menu_edit_msg(update, context):
-    """
-    Send a new message with the admin area
-    """
-    query = update.callback_query
-
-    try:
-        keyboard = get_admin_menu_buttons()
-    except ProcessLookupError:
-        text = "❌ Error while getting running docker container! ❌"
-        query.edit_message_text(text)
-        show_home_menu_new_msg(context=context, chat_id=update.message.chat.id)
-        return
-
-    # Send message
-    text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
-           "Below is a list of docker containers running on your system.\n" \
-           "Click on any container to restart it!"
-
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+#def show_admin_menu_edit_msg(update, context):
+#    """
+#    Send a new message with the admin area
+#    """
+#    query = update.callback_query
+#
+#    try:
+#        keyboard = get_admin_menu_buttons()
+#    except ProcessLookupError:
+#        text = "❌ Error while getting running docker container! ❌"
+#        try_message_with_home_menu(context=context, chat_id=update.message.chat.id, text=text)
+#        return
+#
+#    # Send message
+#    text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
+#           "Below is a list of docker containers running on your system.\n" \
+#           "Click on any container to restart it!"
+#
+#    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 @run_async
@@ -290,7 +287,7 @@ def add_thornode(update, context):
 
     context.user_data['expected'] = 'add_node'
 
-    text = 'What\'s the address of your THORNode? (enter /cancel to return to the menu)'
+    text = 'What\'s the address of your THORNode?'
     return show_text_input_message(update, text)
 
 
@@ -302,7 +299,7 @@ def change_alias(update, context):
 
     context.user_data['expected'] = 'change_alias'
 
-    text = 'How would you like to name your THORNode? (enter /cancel to return to the menu)'
+    text = 'How would you like to name your THORNode?'
     return show_text_input_message(update, text)
 
 
@@ -311,8 +308,15 @@ def plain_input(update, context):
     """
     Handle if the users sends a message
     """
+    message = update.message.text
     expected = context.user_data['expected'] if 'expected' in context.user_data else None
-    if expected == 'add_node':
+    if message == '📡 MY NODES':
+        return show_thornode_menu_handler(update, context)
+    elif message == '👀 SHOW ALL':
+        return show_all_thorchain_nodes(update, context)
+    elif message == '🗝 ADMIN AREA':
+        return admin_menu(update, context)
+    elif expected == 'add_node':
         context.user_data['expected'] = None
         return handle_add_node(update, context)
     elif expected == 'change_alias':
@@ -332,7 +336,7 @@ def handle_add_node(update, context):
 
     if node is None:
         update.message.reply_text(
-            '⛔️ I have not found a THORNode with this address! Please try another one. (enter /cancel to return to the menu)')
+            '⛔️ I have not found a THORNode with this address! Please try another one.')
         context.user_data['expected'] = 'add_node'
         return
 
@@ -340,7 +344,7 @@ def handle_add_node(update, context):
 
     # Send message
     update.message.reply_text('Got it! 👌')
-    show_thornode_menu_new_msg(context=context, chat_id=update.message.chat.id)
+    show_thornode_menu_new_msg(update, context)
 
 
 def handle_change_alias(update, context):
@@ -353,7 +357,7 @@ def handle_change_alias(update, context):
 
     if len(alias) > 16:
         update.message.reply_text(
-            '⛔️ Alias cannot have more than 16 characters! Please try another one. (enter /cancel to return to the menu)')
+            '⛔️ Alias cannot have more than 16 characters! Please try another one.')
         context.user_data['expected'] = 'change_alias'
         return
 
@@ -361,7 +365,7 @@ def handle_change_alias(update, context):
 
     # Send message
     update.message.reply_text('Got it! 👌')
-    show_thornode_menu_new_msg(context=context, chat_id=update.message.chat.id)
+    show_thornode_menu_new_msg(update, context)
 
 
 def confirm_thornode_deletion(update, context):
@@ -397,7 +401,7 @@ def delete_thornode(update, context):
     del context.user_data['nodes'][address]
 
     query.edit_message_text(text, parse_mode='markdown')
-    show_thornode_menu_new_msg(context=context, chat_id=update.effective_chat.id)
+    show_thornode_menu_new_msg(update, context)
 
 
 def thornode_details(update, context):
@@ -429,7 +433,7 @@ def add_all_thornodes(update, context):
 
     # Send message
     query.edit_message_text('Added all THORNodes! 👌')
-    show_thornode_menu_new_msg(context=context, chat_id=update.effective_chat.id)
+    show_thornode_menu_new_msg(update, context)
 
 
 def delete_all_thornodes(update, context):
@@ -450,22 +454,21 @@ def delete_all_thornodes(update, context):
     # Send message
     query.edit_message_text(text)
 
-    show_thornode_menu_new_msg(context=context, chat_id=update.effective_chat.id)
+    show_thornode_menu_new_msg(update, context)
 
 
+@run_async
 def admin_menu(update, context):
     """
     Display admin area buttons
     """
 
-    query = update.callback_query
-
-    if query.from_user.id not in ADMIN_USER_IDS:
-        query.edit_message_text("❌ You are not an Admin! ❌")
-        show_home_menu_new_msg(context, chat_id=update.effective_chat.id)
+    if update.effective_user.id not in ADMIN_USER_IDS:
+        text = "❌ You are not an Admin! ❌"
+        try_message_with_home_menu(context, chat_id=update.effective_chat.id, text=text)
         return
 
-    show_admin_menu_edit_msg(update, context)
+    show_admin_menu_new_msg(context, update.effective_chat.id)
 
 
 def confirm_container_restart(update, context):
@@ -522,12 +525,12 @@ def restart_container(update, context):
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
 
+@run_async
 def show_all_thorchain_nodes(update, context):
     """
     Show the status of all Thornodes in the whole Thorchain network
     """
 
-    query = update.callback_query
     nodes = get_thorchain_validators()
     text = "Status of all THORNodes in the THORChain network:\n\n"
 
@@ -547,8 +550,7 @@ def show_all_thorchain_nodes(update, context):
            'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
     # Send message
-    query.edit_message_text(text, parse_mode='markdown')
-    show_home_menu_new_msg(context=context, chat_id=update.effective_chat.id)
+    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 
 
 """
@@ -573,7 +575,6 @@ def main():
     dispatcher.job_queue.run_repeating(update_health_check_file, interval=5, context={})
 
     dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('cancel', cancel))
     dispatcher.add_handler(CallbackQueryHandler(dispatch_query))
     dispatcher.add_handler(MessageHandler(Filters.text, plain_input))
 

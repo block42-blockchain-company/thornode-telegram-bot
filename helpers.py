@@ -2,7 +2,7 @@ import random
 import subprocess
 import requests
 import json
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
+from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime
 
 from constants import *
@@ -14,17 +14,28 @@ Helpers
 """
 
 
-def show_home_menu_new_msg(context, chat_id):
+def try_message_with_home_menu(context, chat_id, text):
     """
     Send a new message with the home menu
     """
 
     keyboard = get_home_menu_buttons()
-    text = 'I am your THORNode Bot. 🤖\nChoose an action:'
-    try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
+    try_message(context=context, chat_id=chat_id, text=text, reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
 
 
-def show_thornode_menu_new_msg(context, chat_id):
+def get_home_menu_buttons():
+    """
+    Return keyboard buttons for the home menu
+    """
+
+    keyboard = [[KeyboardButton('📡 MY NODES', callback_data='thornode_menu')],
+                [KeyboardButton('👀 SHOW ALL', callback_data='show_all_thorchain_nodes'),
+                 KeyboardButton('🗝 ADMIN AREA', callback_data='admin_menu')]]
+
+    return keyboard
+
+
+def show_thornode_menu_new_msg(update, context):
     """
     Send a new message with the Thornode Menu
     """
@@ -34,20 +45,7 @@ def show_thornode_menu_new_msg(context, chat_id):
     keyboard = get_thornode_menu_buttons(user_data=user_data)
     text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
                                                                                            'THORNodes yet.\nAdd a Node!'
-
-    try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
-
-
-def get_home_menu_buttons():
-    """
-    Return keyboard buttons for the home menu
-    """
-
-    keyboard = [[InlineKeyboardButton('📡 MY NODES', callback_data='thornode_menu')],
-                [InlineKeyboardButton('👀 SHOW ALL', callback_data='show_all_thorchain_nodes'),
-                 InlineKeyboardButton('🗝 ADMIN AREA', callback_data='admin_menu')]]
-
-    return keyboard
+    try_message(context=context, chat_id=update.effective_message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_thornode_menu_buttons(user_data):
@@ -67,10 +65,9 @@ def get_thornode_menu_buttons(user_data):
         button_text = emoji + " " + user_data['nodes'][address]['alias'] + " (" + truncated_address + ")"
         keyboard.append([InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)])
 
+    keyboard.append([InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
     keyboard.append([InlineKeyboardButton('➕ ADD ALL', callback_data='confirm_add_all_thornodes'),
-                     InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
-    keyboard.append([InlineKeyboardButton('➖ REMOVE ALL', callback_data='confirm_delete_all_thornodes'),
-                     InlineKeyboardButton('⬅️ BACK', callback_data='home')])
+                     InlineKeyboardButton('➖ REMOVE ALL', callback_data='confirm_delete_all_thornodes')])
 
     return keyboard
 
@@ -88,7 +85,7 @@ def show_detail_menu(update, context):
     if node is None:
         text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
         query.edit_message_text(text)
-        show_thornode_menu_new_msg(context=context, chat_id=update.effective_chat.id)
+        show_thornode_menu_new_msg(update, context)
 
     text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
@@ -120,8 +117,7 @@ def show_admin_menu_new_msg(context, chat_id):
         keyboard = get_admin_menu_buttons()
     except ProcessLookupError:
         text = "❌ Error while getting running docker container! ❌"
-        try_message(context=context, chat_id=chat_id, text=text)
-        show_home_menu_new_msg(context=context, chat_id=chat_id)
+        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
         return
 
     # Send message
@@ -150,8 +146,6 @@ def get_admin_menu_buttons():
             status = container['Status']
             text = "🐳 " + container_name + " - " + status
             keyboard.append([InlineKeyboardButton(text, callback_data='container-#' + container_name)])
-
-    keyboard.append([InlineKeyboardButton('⬅️ BACK', callback_data='home')])
 
     return keyboard
 
