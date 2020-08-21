@@ -226,27 +226,6 @@ def show_thornode_menu_edit_msg(update, context):
     query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-#def show_admin_menu_edit_msg(update, context):
-#    """
-#    Send a new message with the admin area
-#    """
-#    query = update.callback_query
-#
-#    try:
-#        keyboard = get_admin_menu_buttons()
-#    except ProcessLookupError:
-#        text = "❌ Error while getting running docker container! ❌"
-#        try_message_with_home_menu(context=context, chat_id=update.message.chat.id, text=text)
-#        return
-#
-#    # Send message
-#    text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
-#           "Below is a list of docker containers running on your system.\n" \
-#           "Click on any container to restart it!"
-#
-#    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-
-
 @run_async
 def confirm_add_all_thornodes(update, context):
     """
@@ -310,9 +289,11 @@ def plain_input(update, context):
     expected = context.user_data['expected'] if 'expected' in context.user_data else None
     if message == '📡 MY NODES':
         return show_thornode_menu_handler(update, context)
+    elif message == '🌎 NETWORK':
+        return show_network_stats(update, context)
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
-    elif message == '🗝 ADMIN AREA':
+    elif message == '🔑 ADMIN AREA':
         return admin_menu(update, context)
     elif expected == 'add_node':
         context.user_data['expected'] = None
@@ -455,7 +436,6 @@ def delete_all_thornodes(update, context):
     show_thornode_menu_new_msg(update, context)
 
 
-@run_async
 def admin_menu(update, context):
     """
     Display admin area buttons
@@ -523,7 +503,67 @@ def restart_container(update, context):
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
 
-@run_async
+def show_network_stats(update, context):
+    """
+    Show summarized information of the whole network
+    """
+
+    network = get_network_json()
+    validators = get_thorchain_validators()
+
+    statuses = {}
+    versions = {}
+    for validator in validators:
+        statuses[validator['status']] = 1 if not validator['status'] in statuses else statuses[validator['status']] + 1
+        versions[validator['version']] = 1 if not validator['version'] in versions else versions[validator['version']] + 1
+
+    text = "Status of the whole THORChain network: \n"
+
+    text += "\n📡 Nodes:\n"
+    total_nodes = 0
+    for status in statuses.keys():
+        text += "  *" + str(statuses[status]) + "* (" + status + " " + STATUS_EMOJIS[status] + ")\n"
+        total_nodes += statuses[status]
+    text += "  *" + str(total_nodes) + "* (total)\n"
+
+    text += "\n💪🏼 Active Bond:\n  *" + \
+           network['bondMetrics']['totalActiveBond'] + "* (total)\n  *" + \
+           network['bondMetrics']['averageActiveBond'] + "* (avg)\n  *" + \
+           network['bondMetrics']['medianActiveBond'] + "* (median)\n  *" + \
+           network['bondMetrics']['maximumActiveBond'] + "* (max)\n  *" + \
+           network['bondMetrics']['minimumActiveBond'] + "* (min)\n"
+
+    text += "\n🦵🏼 Standby Bond:\n  *" + \
+           network['bondMetrics']['totalStandbyBond'] + "* (total)\n  *" + \
+           network['bondMetrics']['averageStandbyBond'] + "* (avg)\n  *" + \
+           network['bondMetrics']['medianStandbyBond'] + "* (median)\n  *" + \
+           network['bondMetrics']['maximumStandbyBond'] + "* (max)\n  *" + \
+           network['bondMetrics']['minimumStandbyBond'] + "* (min)\n"
+
+    text += "\n💰 Block Rewards:\n  *" + \
+            network['blockRewards']['blockReward'] + "* (total)\n  *" + \
+            network['blockRewards']['bondReward'] + "* (nodes)\n  *" + \
+            network['blockRewards']['stakeReward'] + "* (stakers)\n  *" + \
+            '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
+
+    text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
+
+    text += "\n↩️ Node ROI: *" + \
+            '{:.2f}'.format((float(network['blockRewards']['bondReward']) * THORCHAIN_BLOCKS_PER_YEAR) / float(network['bondMetrics']['totalActiveBond'])) \
+            + "*% APY\n"
+
+    text += "\n📀 Versions:\n"
+    total_versions = 0
+    for version in versions.keys():
+        total_versions += versions[version]
+    for version in versions.keys():
+        text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
+
+    text += '\n⛏ Block Height: *' + get_thorchain_block_height() + "*\n"
+
+    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
+
+
 def show_all_thorchain_nodes(update, context):
     """
     Show the status of all Thornodes in the whole Thorchain network

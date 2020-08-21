@@ -28,9 +28,10 @@ def get_home_menu_buttons():
     Return keyboard buttons for the home menu
     """
 
-    keyboard = [[KeyboardButton('📡 MY NODES', callback_data='thornode_menu')],
+    keyboard = [[KeyboardButton('📡 MY NODES', callback_data='thornode_menu'),
+                 KeyboardButton('🌎 NETWORK', callback_data='thornode_menu')],
                 [KeyboardButton('👀 SHOW ALL', callback_data='show_all_thorchain_nodes'),
-                 KeyboardButton('🗝 ADMIN AREA', callback_data='admin_menu')]]
+                 KeyboardButton('🔑 ADMIN AREA', callback_data='admin_menu')]]
 
     return keyboard
 
@@ -309,6 +310,40 @@ def get_number_of_unconfirmed_txs(node_ip):
 
     unconfirmed_txs_status = response.json()
     return unconfirmed_txs_status['result']['total']
+
+
+def get_network_json():
+    """
+    Return the json of the network endpoint
+    """
+
+    while True:
+        response = requests.get(url=get_thorchain_network_endpoint())
+        if response.status_code == 200:
+            break
+
+    return response.json()
+
+
+def get_network_security(network_json):
+    """
+    Returns the network security ratio in plain english
+    """
+
+    network_security_ratio = 1 - (int(network_json['totalStaked']) / int(network_json['bondMetrics']['totalActiveBond']))
+
+    if network_security_ratio > 0.9:
+        qualitative_security = "Inefficent"
+    elif network_security_ratio <= 0.9 and network_security_ratio > 0.75:
+        qualitative_security = "Overbonded"
+    elif network_security_ratio <= 0.75 and network_security_ratio >= 0.6:
+        qualitative_security = "Optimal"
+    elif network_security_ratio < 0.6 and network_security_ratio >= 0.5:
+        qualitative_security = "Underbonded"
+    elif network_security_ratio < 0.5 and network_security_ratio:
+        qualitative_security = "Underbonded"
+
+    return qualitative_security
 
 
 def is_binance_node_healthy():
