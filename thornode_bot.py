@@ -524,7 +524,7 @@ def show_network_stats(update, context):
     for status in statuses.keys():
         text += "  *" + str(statuses[status]) + "* (" + status + " " + STATUS_EMOJIS[status] + ")\n"
         total_nodes += statuses[status]
-    text += "  *" + str(total_nodes) + "* (total)\n"
+    text += "  = *" + str(total_nodes) + "* (total)\n"
 
     text += "\n💪🏼 Active Bond:\n  *" + \
            network['bondMetrics']['totalActiveBond'] + "* (total)\n  *" + \
@@ -549,7 +549,7 @@ def show_network_stats(update, context):
     text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
 
     text += "\n↩️ Node ROI: *" + \
-            '{:.2f}'.format((float(network['blockRewards']['bondReward']) * THORCHAIN_BLOCKS_PER_YEAR) / float(network['bondMetrics']['totalActiveBond'])) \
+            '{:.2f}'.format((float(network['blockRewards']['bondReward']) * THORCHAIN_BLOCKS_PER_YEAR) / float(network['bondMetrics']['totalActiveBond']) * 100) \
             + "*% APY\n"
 
     text += "\n📀 Versions:\n"
@@ -559,7 +559,7 @@ def show_network_stats(update, context):
     for version in versions.keys():
         text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
 
-    text += '\n⛏ Block Height: *' + get_thorchain_block_height() + "*\n"
+    text += '\n⛏ Block Height: *' + get_thorchain_block_height(node_ip=get_random_seed_node_ip()) + "*\n"
 
     try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 

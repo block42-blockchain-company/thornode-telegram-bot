@@ -28,7 +28,7 @@ INITIAL_NOTIFICATION_TIMEOUT = 15
 # Emojis for status of THORNodes
 STATUS_EMOJIS = {"active": "💚", "standby": "📆", "deactive": "🔴"}
 
-THORCHAIN_BLOCKS_PER_YEAR = 6307200
+THORCHAIN_BLOCKS_PER_YEAR = 6311390
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
