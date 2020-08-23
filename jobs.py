@@ -1,8 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from constants import *
 from helpers import *
-
 
 """
 ######################################################################################################################################################
@@ -17,10 +15,6 @@ def thornode_checks(context):
     """
 
     check_thornodes(context)
-    if THORCHAIN_NODE_IP:
-        check_thorchain_block_height(context)
-        check_thorchain_catch_up_status(context)
-        check_thorchain_midgard_api(context)
     if BINANCE_NODE_IP:
         check_binance_health(context)
 
@@ -34,31 +28,36 @@ def check_thornodes(context):
     user_data = context.job.context['user_data']
 
     # Flag to show home buttons or not
-    #message_sent = False
+    # message_sent = False
 
     # List to delete entries after loop
-    delete_addresses = []
+    inactive_nodes = []
 
-    # Iterate through all keys
-    for address in user_data['nodes'].keys():
-        remote_node = get_thornode_object(address=address)
-        local_node = user_data['nodes'][address]
+    for node_address, node_data in user_data['nodes'].items():
+        remote_node = get_thornode_object(address=node_address)
+        local_node = user_data['nodes'][node_address]
 
         if remote_node is None:
-            text = 'THORNode ' + user_data['nodes'][address]['alias'] + ' is not active anymore! 💀' + '\n' + \
-                   'Address: ' + address + '\n\n' + \
+            text = 'THORNode ' + user_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
+                   'Address: ' + node_address + '\n\n' + \
                    'Please enter another THORNode address.'
 
-            delete_addresses.append(address)
+            inactive_nodes.append(node_address)
 
             # Send message
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-            #message_sent = True
+            # message_sent = True
             continue
+
+        node_ip_address = node_data['ip_address']
+        check_thorchain_block_height(context, node_ip=node_ip_address)
+        check_thorchain_catch_up_status(context, node_ip=node_ip_address)
+        check_thorchain_midgard_api(context, node_ip=node_ip_address)
 
         # isNotBlocked = lastTimestamp < currentTimestamp - timeout
         if float(local_node['last_notification_timestamp']) < \
-                float(datetime.timestamp(datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))):
+                float(datetime.timestamp(
+                    datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))):
 
             # Check which node fields have changed
             changed_fields = [field for field in ['status', 'bond', 'slash_points'] if
@@ -71,8 +70,8 @@ def check_thornodes(context):
 
             # Check if there are any changes
             if len(changed_fields) > 0:
-                text = 'THORNode: ' + user_data['nodes'][address]['alias'] + '\n' + \
-                       'Address: ' + address + '\n' + \
+                text = 'THORNode: ' + user_data['nodes'][node_address]['alias'] + '\n' + \
+                       'Address: ' + node_address + '\n' + \
                        'Status: ' + local_node['status'].capitalize()
                 if 'status' in changed_fields:
                     text += ' ➡️ ' + remote_node['status'].capitalize()
@@ -92,18 +91,18 @@ def check_thornodes(context):
 
                 # Send message
                 try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-                #message_sent = True
+                # message_sent = True
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
-    for address in delete_addresses:
-        del user_data['nodes'][address]
+    for node_address in inactive_nodes:
+        del user_data['nodes'][node_address]
 
-    #if message_sent:
+    # if message_sent:
     #    try_message_with_home_menu(context=context, chat_id=chat_id)
 
 
-def check_thorchain_block_height(context):
+def check_thorchain_block_height(context, node_ip):
     """
     Make sure the block height increases
     """
@@ -111,7 +110,7 @@ def check_thorchain_block_height(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    block_height = get_thorchain_block_height()
+    block_height = get_thorchain_block_height(node_ip)
 
     # Check if block height got stuck
     if 'block_height' in user_data and block_height <= user_data['block_height']:
@@ -122,7 +121,7 @@ def check_thorchain_block_height(context):
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
-                   'IP: ' + THORCHAIN_NODE_IP + '\n' + \
+                   'IP: ' + node_ip + '\n' + \
                    'Block height now at: ' + block_height + '\n'
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
             user_data['block_height_stuck_count'] = -1
@@ -135,7 +134,7 @@ def check_thorchain_block_height(context):
     # If it just got stuck send a message
     if user_data['block_height_stuck_count'] == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
-               'IP: ' + THORCHAIN_NODE_IP + '\n' + \
+               'IP: ' + node_ip + '\n' + \
                'Block height stuck at: ' + block_height + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
@@ -147,11 +146,11 @@ def check_thorchain_block_height(context):
     # -1 == just got unstuck
     # > 1 == still stuck
 
-    #if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
+    # if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
     #    try_message_with_home_menu(context=context, chat_id=chat_id)
 
 
-def check_thorchain_catch_up_status(context):
+def check_thorchain_catch_up_status(context, node_ip):
     """
     Check if node is some blocks behind with catch up status
     """
@@ -162,23 +161,23 @@ def check_thorchain_catch_up_status(context):
     if 'is_catching_up' not in user_data:
         user_data['is_catching_up'] = False
 
-    is_currently_catching_up = is_thorchain_catching_up()
+    is_currently_catching_up = is_thorchain_catching_up(node_ip)
     if user_data['is_catching_up'] == False and is_currently_catching_up:
         user_data['is_catching_up'] = True
         text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
-               'IP: ' + THORCHAIN_NODE_IP + '\n' + \
-               'Current block height: ' + get_thorchain_block_height() + '\n\n' + \
+               'IP: ' + node_ip + '\n' + \
+               'Current block height: ' + get_thorchain_block_height(node_ip) + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
     elif user_data['is_catching_up'] == True and not is_currently_catching_up:
         user_data['is_catching_up'] = False
         text = 'The node caught up to the latest block height again! 👌' + '\n' + \
-               'IP: ' + THORCHAIN_NODE_IP + '\n' + \
-               'Current block height: ' + get_thorchain_block_height()
+               'IP: ' + node_ip + '\n' + \
+               'Current block height: ' + get_thorchain_block_height(node_ip)
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
 
 
-def check_thorchain_midgard_api(context):
+def check_thorchain_midgard_api(context, node_ip):
     """
     Check that Midgard API is ok
     """
@@ -189,17 +188,17 @@ def check_thorchain_midgard_api(context):
     if 'is_midgard_healthy' not in user_data:
         user_data['is_midgard_healthy'] = True
 
-    is_midgard_currently_healthy = is_thorchain_midgard_healthy()
+    is_midgard_currently_healthy = is_thorchain_midgard_healthy(node_ip)
     if user_data['is_midgard_healthy'] == True and not is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = False
         text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
-               'IP: ' + THORCHAIN_NODE_IP + '\n\n' + \
+               'IP: ' + node_ip + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message_with_home_menu(context, chat_id=chat_id, text=text)
     elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
         user_data['is_midgard_healthy'] = True
         text = 'Midgard API is healthy again! 👌' + '\n' + \
-               'IP: ' + THORCHAIN_NODE_IP + '\n'
+               'IP: ' + node_ip + '\n'
         try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 

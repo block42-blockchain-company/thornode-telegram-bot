@@ -1,19 +1,12 @@
 import os
 import logging
-from telegram.ext import (
-    ConversationHandler,
-)
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 
-# Set THORCHAIN_NODE_IP depending on mode (if None, certain node health jobs are not executed)
-if DEBUG:
-    THORCHAIN_NODE_IP = 'localhost'
-elif 'THORCHAIN_NODE_IP' in os.environ and os.environ['THORCHAIN_NODE_IP']:
-    THORCHAIN_NODE_IP = os.environ['THORCHAIN_NODE_IP']
-else:
-    THORCHAIN_NODE_IP = None
+STATUS_ENDPOINT_PATH = ":26657/status"
+UNCONFIRMED_TXS_ENDPOINT_PATH = ':26657/num_unconfirmed_txs'
+HEALTH_ENDPOINT_PATH = ':8080/v1/health'
 
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
