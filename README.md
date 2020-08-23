@@ -92,6 +92,7 @@ You can simulate that by manually editing `test/nodeaccounts.json`, `test/status
 
 Furthermore in DEBUG mode a separate process runs `increase_block_height.py` which artificially increases
 the block height so that there are no notifications that the block height got stuck.
+
 ---
 If you are using a Jetbrains IDE (e.g. Pycharm), you can set these environment variables for your run 
 configuration which is very convenient for development 
