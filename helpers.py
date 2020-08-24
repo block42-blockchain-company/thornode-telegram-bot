@@ -95,8 +95,8 @@ def show_detail_menu(update, context):
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
            'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
-    if THORCHAIN_NODE_IP:
-        text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(get_number_unconfirmed_txs())) + '\n\n'
+    unconfirmed_txs = get_number_of_unconfirmed_txs(node['ip_address'])
+    text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
 
     text += "What do you want to do with that Node?"
 
@@ -206,10 +206,11 @@ def add_thornode_to_user_data(user_data, address, node):
             break
 
     user_data['nodes'][address] = {}
-    user_data['nodes'][address]['alias'] = alias
     user_data['nodes'][address]['status'] = node['status']
     user_data['nodes'][address]['bond'] = node['bond']
     user_data['nodes'][address]['slash_points'] = node['slash_points']
+    user_data['nodes'][address]['ip_address'] = node['ip_address'].rstrip('/')
+    user_data['nodes'][address]['alias'] = alias
     user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
     user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
@@ -262,13 +263,11 @@ def get_thorchain_validators():
     return response.json()
 
 
-def get_thorchain_block_height():
-    """
-    Return block height of your Thornode
-    """
+def get_thorchain_block_height(node_ip):
+    url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
 
     while True:
-        response = requests.get(url=get_thorchain_status_endpoint())
+        response = requests.get(url=url)
         if response.status_code == 200:
             break
 
@@ -276,8 +275,10 @@ def get_thorchain_block_height():
     return status['result']['sync_info']['latest_block_height']
 
 
-def is_thorchain_catching_up():
-    response = requests.get(url=get_thorchain_status_endpoint())
+def is_thorchain_catching_up(node_ip):
+    url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
+
+    response = requests.get(url=url)
     if response.status_code != 200:
         return True
 
@@ -285,25 +286,24 @@ def is_thorchain_catching_up():
     return status['result']['sync_info']['catching_up']
 
 
-def is_thorchain_midgard_healthy():
+def is_thorchain_midgard_healthy(node_ip):
     """
-    Return status of Midgard API
+    Returns status of Midgard API
     """
 
-    response = requests.get(url=get_thorchain_midgard_endpoint())
+    url = 'http://' + node_ip + HEALTH_ENDPOINT_PATH
+    response = requests.get(url=url)
     if response.status_code == 200:
         return True
     else:
         return False
 
 
-def get_number_unconfirmed_txs():
-    """
-    Return number of unconfirmed transactions
-    """
+def get_number_of_unconfirmed_txs(node_ip):
+    url = 'http://' + node_ip + UNCONFIRMED_TXS_ENDPOINT_PATH
 
     while True:
-        response = requests.get(url=get_thorchain_number_unconfirmed_txs_endpoint())
+        response = requests.get(url=url)
         if response.status_code == 200:
             break
 
@@ -312,11 +312,9 @@ def get_number_unconfirmed_txs():
 
 
 def is_binance_node_healthy():
-    """
-    Return if Binance Node is healthy
-    """
+    url = 'http://' + BINANCE_NODE_IP + ':26657/health'
 
-    response = requests.get(url=get_binance_health_endpoint())
+    response = requests.get(url=url)
     if response.status_code == 200:
         return True
     else:
@@ -326,48 +324,15 @@ def is_binance_node_healthy():
 def get_thorchain_validators_endpoint():
     """
     Return the nodeaccounts endpoint to query data from.
+    Endpoint is chosen randomly from the seeding node.
     """
 
     if DEBUG:
-        return 'http://localhost:8000/nodeaccounts.json'
-    elif THORCHAIN_NODE_IP:
-        return 'http://' + THORCHAIN_NODE_IP + ':1317/thorchain/nodeaccounts'
+        return 'http://localhost:8080/nodeaccounts.json'
     else:
         endpoints = requests.get('https://testnet-seed.thorchain.info').json()
         random_endpoint = endpoints[random.randrange(0, len(endpoints))]
         return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
-
-
-def get_thorchain_status_endpoint():
-    """
-    Return the endpoint for block height checks
-    """
-
-    return 'http://localhost:8000/status.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':26657/status'
-
-
-def get_thorchain_midgard_endpoint():
-    """
-    Return the endpoint for Midgard API check
-    """
-
-    return 'http://localhost:8000/midgard.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':8080/v1/health'
-
-
-def get_thorchain_number_unconfirmed_txs_endpoint():
-    """
-    Return the endpoint for number of unconfirmed transactions
-    """
-
-    return 'http://localhost:8000/unconfirmed_txs.json' if DEBUG else 'http://' + THORCHAIN_NODE_IP + ':26657/num_unconfirmed_txs'
-
-
-def get_binance_health_endpoint():
-    """
-    Return the health endpoint of a binance node
-    """
-
-    return 'http://localhost:8000/binance_health.json' if DEBUG else 'http://' + BINANCE_NODE_IP + ':26657/health'
 
 
 def tor_to_rune(tor):

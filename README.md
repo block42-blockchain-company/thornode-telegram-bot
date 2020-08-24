@@ -13,8 +13,6 @@ If you have questions feel free to open a github issue or contact us in our Tele
 
 Open `variables.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
-- `THORCHAIN_NODE_IP` to any THORNode IP you want to monitor (or `localhost`). 
-Leave it empty or remove it to use testnet seed Node IPs.
 - `BINANCE_NODE_IP` to any Binance Node IP you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor a Binance Node.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the Admin Area.
@@ -52,20 +50,6 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 export TELEGRAM_BOT_TOKEN=XXX
 ```
 ---
-Next you can specify the IP of the Thornode that you want to watch in the `THORCHAIN_NODE_IP` environment variable.
-
-Set it to `localhost` to listen a node on your own machine.
-
-Leave this environment variable empty or don't even set it 
-to use IPs of the testnet seed nodes from https://testnet-seed.thorchain.info.
-
-*Please note, if you leave `THORCHAIN_NODE_IP` empty, IP specific monitoring won't take effect (no check for 
-increasing block height, midgard API and catch up status). Because we rotate through available 
-testnet seed IPs, we would compare data of different nodes and send incorrect alerts.*
-```
-export THORCHAIN_NODE_IP=3.228.22.197
-```
----
 If you have a Binance Node IP that you want to monitor, you can set `BINANCE_NODE_IP` to this 
 IP. Set it to `localhost` if the Binance Node runs on the same machine as the Telegram Bot.
 
@@ -94,8 +78,14 @@ need to set the debug environment variable:
 export DEBUG=True
 ```
 The DEBUG flag set to True will run a local web server as a separate process. 
-This way the telegram bot can access the local files `nodeaccounts.json` und `status.json`
-in the `test/` folder.
+This way the telegram bot can access the local files `nodeaccounts.json` and `status.json`
+in the `test/` folder. Verify that Python is available via command `python3` in your environment.
+Furthermore, the server mocks a few Thorchain specific endpoints, for this reason please make sure that the ports: 
+* `localhost:26657`
+* `localhost:8080`
+
+are not busy on your machine. Otherwise, mock server won't start.
+
 
 To test whether the bot actually notifies you about changes, the data the bot is querying needs to change. 
 You can simulate that by manually editing `test/nodeaccounts.json`, `test/status.json` and `test/midgard.json`.
@@ -153,15 +143,10 @@ docker volume create thornode-bot-volume
 Finally run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env THORCHAIN_NODE_IP=XXX --env BINANCE_NODE_IP=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IP=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
-
-Set the `--env THORCHAIN_NODE_IP` flag to an IP of a running THORNode, or to `localhost` if the THORNode runs on the
-same machine as the Telegram Bot. 
-If you don't know any IP leave this empty i.e. `--env THORCHAIN_NODE_IP=` or remove it completely - then the
-Telegram Bot works with testnet seed node IPs from https://testnet-seed.thorchain.info.
 
 Set the `--env BINANCE_NODE_IP` flag to an IP of a running Binance Node, or to `localhost` if Telegram Bot and Binance
 Node run on the same machine.
@@ -195,8 +180,8 @@ docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/
 The explained steps in the Docker Standalone section are conveniently bundled into a
 `docker-compose.yaml` file.
 
-First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`,
-`THORCHAIN_NODE_IP`, `BINANCE_NODE_IP` and `ADMIN_USER_IDS`
+First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`, 
+`BINANCE_NODE_IP` and `ADMIN_USER_IDS`
 
 If you don't want to spin up the official docker image from our dockerhub, open 
 `docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`

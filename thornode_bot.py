@@ -13,8 +13,6 @@ from telegram.ext import (
     Filters
 )
 
-from constants import *
-from helpers import *
 from jobs import *
 
 
@@ -25,8 +23,8 @@ Debug Processes
 """
 
 if DEBUG:
-    mock_api_process = subprocess.Popen(['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1'], cwd="test/")
     increase_block_height_process = subprocess.Popen(['python3', 'increase_block_height.py'], cwd="test/")
+    mock_api_process = subprocess.Popen(['python3', 'mock_api.py'], cwd="test/")
 
 
     def cleanup():
