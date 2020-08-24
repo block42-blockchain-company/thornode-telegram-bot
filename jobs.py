@@ -50,7 +50,7 @@ def check_thornodes(context):
             continue
 
         node_ip_address = node_data['ip_address']
-        check_thorchain_block_height(context, node_ip=node_ip_address)
+        check_thorchain_block_height(context, node_ip=node_ip_address, node_address=node_address)
         check_thorchain_catch_up_status(context, node_ip=node_ip_address)
         check_thorchain_midgard_api(context, node_ip=node_ip_address)
 
@@ -102,39 +102,43 @@ def check_thornodes(context):
     #    try_message_with_home_menu(context=context, chat_id=chat_id)
 
 
-def check_thorchain_block_height(context, node_ip):
+def check_thorchain_block_height(context, node_ip, node_address):
     """
     Make sure the block height increases
     """
 
     chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    node_data = context.job.context['user_data']['nodes'][node_address]
 
     block_height = get_thorchain_block_height(node_ip)
 
     # Check if block height got stuck
-    if 'block_height' in user_data and block_height <= user_data['block_height']:
+    if 'block_height' in node_data and block_height <= node_data['block_height']:
 
         # Increase stuck count to know if we already sent a notification
-        user_data['block_height_stuck_count'] += 1
+        node_data['block_height_stuck_count'] += 1
     else:
         # Check if we have to send a notification that the Height increases again
-        if 'block_height_stuck_count' in user_data and user_data['block_height_stuck_count'] > 0:
+        if 'block_height_stuck_count' in node_data and node_data['block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
                    'IP: ' + node_ip + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address + '\n' + \
                    'Block height now at: ' + block_height + '\n'
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-            user_data['block_height_stuck_count'] = -1
+            node_data['block_height_stuck_count'] = -1
         else:
-            user_data['block_height_stuck_count'] = 0
+            node_data['block_height_stuck_count'] = 0
 
     # Set current block height
-    user_data['block_height'] = block_height
+    node_data['block_height'] = block_height
 
     # If it just got stuck send a message
-    if user_data['block_height_stuck_count'] == 1:
+    if node_data['block_height_stuck_count'] == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
                'IP: ' + node_ip + '\n' + \
+               'THORNode: ' + node_data['alias'] + '\n' + \
+               'Node address: ' + node_address + '\n' + \
                'Block height stuck at: ' + block_height + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
