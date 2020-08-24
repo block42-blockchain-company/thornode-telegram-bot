@@ -35,7 +35,7 @@ VALID_ADDRESS_TRUNCATED = VALID_ADDRESS[:9] + "..." + VALID_ADDRESS[-4:]
 
 BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
-STATUS_EMOJIS = {"active": "💚", "standby": "📆", "deactive": "🔴"}
+STATUS_EMOJIS = {"active": "💚", "standby": "📆", "disabled": "🔴"}
 
 THORCHAIN, BINANCE = range(2)
 
@@ -52,8 +52,9 @@ def test_start():
 
     response = next(telegram.iter_history(BOT_ID))
     assert response.reply_markup.keyboard[0][0] == "📡 MY NODES", "📡 MY NODES not visible after /start"
+    assert response.reply_markup.keyboard[0][1] == "🌎 NETWORK", "🌎 NETWORK not visible after /start"
     assert response.reply_markup.keyboard[1][0] == "👀 SHOW ALL", "👀 SHOW ALL not visible after /start"
-    assert response.reply_markup.keyboard[1][1] == "🗝 ADMIN AREA", "🗝 ADMIN AREA not visible after /start"
+    assert response.reply_markup.keyboard[1][1] == "🔑 ADMIN AREA", "🔑 ADMIN AREA not visible after /start"
     print("/start ✅")
     print("------------------------")
 
@@ -99,8 +100,9 @@ def test_thornode_detail():
     time.sleep(3)
     telegram.send_message(BOT_ID, "📡 MY NODES")
     time.sleep(3)
-    
-    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
+
+    response = next(telegram.iter_history(BOT_ID))
+    click_button(response.reply_markup.inline_keyboard[0][0].text)
 
     response = next(telegram.iter_history(BOT_ID))
 
@@ -126,8 +128,8 @@ def test_back_button_thornode_details():
     time.sleep(3)
 
     response = next(telegram.iter_history(BOT_ID))
+    click_button(response.reply_markup.inline_keyboard[0][0].text)
 
-    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
     assert_back_button(response.text)
 
     print("Back button in Thornode Details ✅")
@@ -139,7 +141,8 @@ def test_delete_address(confirm):
     time.sleep(3)
     telegram.send_message(BOT_ID, "📡 MY NODES")
     time.sleep(3)
-    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
+    response = next(telegram.iter_history(BOT_ID))
+    click_button(response.reply_markup.inline_keyboard[0][0].text)
 
     click_button("➖ REMOVE")
 
@@ -177,7 +180,9 @@ def test_change_alias(alias, expected_response1, expected_response2):
     time.sleep(3)
     telegram.send_message(BOT_ID, "📡 MY NODES")
     time.sleep(3)
-    click_button(STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")")
+
+    response = next(telegram.iter_history(BOT_ID))
+    click_button(response.reply_markup.inline_keyboard[0][0].text)
 
     click_button("✏️ CHANGE ALIAS")
 
@@ -214,8 +219,7 @@ def test_add_all_addresses(confirm):
             "YES button on ➕ ADD ALL confirmation does not yield addition statement"
         assert second_response_2.text == "Click an address from the list below or add a node:", \
             "YES button on ➕ ADD ALL confirmation does not go back to 📡 MY NODES menu"
-        assert second_response_2.reply_markup.inline_keyboard[0][0].text == STATUS_EMOJIS["deactive"] + " Thor-1 (" + VALID_ADDRESS_TRUNCATED + ")" and \
-               second_response_2.reply_markup.inline_keyboard[1][0].text.find('thor') != -1,\
+        assert second_response_2.reply_markup.inline_keyboard[1][0].text.find('thor') != -1,\
             "Nodes are not added after YES button on ➕ ADD ALL confirmation"
     else:
         click_button("NO ❌")
@@ -261,12 +265,33 @@ def test_delete_all_addresses(confirm):
     print("------------------------")
 
 
+def test_network():
+    telegram.send_message(BOT_ID, "/start")
+    time.sleep(3)
+
+    telegram.send_message(BOT_ID, "🌎 NETWORK")
+
+    time.sleep(3)
+    response = next(telegram.iter_history(BOT_ID))
+
+    expected_response1 = 'Status of the whole THORChain network:'
+    expected_response2 = 'Network Security:'
+    assert response.text.find(expected_response1) != -1, "Expected '" + expected_response1 + \
+                                                         "'\nbut got\n'" + response.text + "'"
+    assert response.text.find(expected_response2) != -1, "Expected '" + expected_response2 + \
+                                                         "'\nbut got\n'" + response.text + "'"
+
+    print("🌎 NETWORK ✅")
+    print("------------------------")
+
+
 def test_show_all_thorchain_nodes():
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
-    telegram.send_message(BOT_ID, "👀 SHOW ALL")
-    time.sleep(3)
 
+    telegram.send_message(BOT_ID, "👀 SHOW ALL")
+
+    time.sleep(3)
     response = next(telegram.iter_history(BOT_ID))
 
     expected_response1 = 'Status of all THORNodes in the THORChain network:'
@@ -283,15 +308,15 @@ def test_admin_area():
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
 
-    telegram.send_message(BOT_ID, "🗝 ADMIN AREA")
+    telegram.send_message(BOT_ID, "🔑 ADMIN AREA")
     time.sleep(3)
 
     response = next(telegram.iter_history(BOT_ID))
 
     assert response.text.find("You're in the Admin Area - proceed with care") != -1, \
-        "🗝 ADMIN AREA Message not visible after clicking on 🗝 ADMIN AREA"
+        "🔑 ADMIN AREA Message not visible after clicking on 🔑 ADMIN AREA"
 
-    print("🗝 ADMIN AREA ✅")
+    print("🔑 ADMIN AREA ✅")
     print("------------------------")
 
 
@@ -300,17 +325,17 @@ def test_back_button_admin_area():
     time.sleep(3)
 
     response = next(telegram.iter_history(BOT_ID))
-    telegram.send_message(BOT_ID, "🗝 ADMIN AREA")
+    telegram.send_message(BOT_ID, "🔑 ADMIN AREA")
     time.sleep(3)
 
-    print("Back button in 🗝 ADMIN AREA ✅")
+    print("Back button in 🔑 ADMIN AREA ✅")
     print("------------------------")
 
 
 def test_restart_container(confirm):
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
-    telegram.send_message(BOT_ID, "🗝 ADMIN AREA")
+    telegram.send_message(BOT_ID, "🔑 ADMIN AREA")
     time.sleep(3)
     setup_response = next(telegram.iter_history(BOT_ID))
 
@@ -329,7 +354,7 @@ def test_restart_container(confirm):
         assert second_response_1.text.find("successfully restarted!") != -1, \
             "YES button on restart confirmation does not yield restart statement"
         assert second_response_2.text.find("You're in the Admin Area - proceed with care") != -1, \
-            "YES button on restart confirmation does not go back to 🗝 ADMIN AREA"
+            "YES button on restart confirmation does not go back to 🔑 ADMIN AREA"
         assert second_response_2.reply_markup.inline_keyboard[0][0].text.find("second") != -1, \
             "YES button on restart confirmation does not restart container"
     else:
@@ -337,7 +362,7 @@ def test_restart_container(confirm):
         time.sleep(3)
         second_response = next(telegram.iter_history(BOT_ID))
         assert second_response.text.find("You're in the Admin Area - proceed with care") != -1, \
-            "NO button on restart confirmation does not go back to 🗝 ADMIN AREA"
+            "NO button on restart confirmation does not go back to 🔑 ADMIN AREA"
     print("Restart container with confirmation=" + str(confirm) + " ✅")
     print("------------------------")
 
@@ -350,6 +375,11 @@ def test_thornode_notification(field):
     new_value = random.randrange(0, 100)
     if field == 'node_address':
         new_value = 'thor' + str(new_value)
+    elif field == 'status':
+        statuses = ['active', 'standby', 'disabled']
+        if statuses[new_value % 3] == node_data_original[0][field]:
+            new_value += 1
+        new_value = statuses[new_value % 3]
     else:
         new_value += int(node_data_new[0][field])
 
@@ -490,7 +520,7 @@ def assert_back_button(text):
 def are_container_running():
     telegram.send_message(BOT_ID, "/start")
     time.sleep(3)
-    telegram.send_message(BOT_ID, "🗝 ADMIN AREA")
+    telegram.send_message(BOT_ID, "🔑 ADMIN AREA")
     time.sleep(3)
 
     response = next(telegram.iter_history(BOT_ID))
@@ -582,6 +612,9 @@ with telegram:
 
         # Test Show all THORNodes Area
         test_show_all_thorchain_nodes()
+
+        # Test Network View
+        test_network()
 
         # Test Admin Area
         test_admin_area()
