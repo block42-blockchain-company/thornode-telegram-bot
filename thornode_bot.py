@@ -585,7 +585,7 @@ def show_all_thorchain_nodes(update, context):
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
-           'Accrued bond rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
+           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
            'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
     # Send message

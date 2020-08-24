@@ -94,7 +94,7 @@ def show_detail_menu(update, context):
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
-           'Accrued bond rewards: *' + tor_to_rune(node['current_award']) + '*\n' \
+           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' \
            'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
     unconfirmed_txs = get_number_of_unconfirmed_txs(node['ip_address'])
