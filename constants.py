@@ -7,6 +7,7 @@ TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 STATUS_ENDPOINT_PATH = ":26657/status"
 UNCONFIRMED_TXS_ENDPOINT_PATH = ':26657/num_unconfirmed_txs'
 HEALTH_ENDPOINT_PATH = ':8080/v1/health'
+NETWORK_ENDPOINT_PATH = ':8080/v1/network'
 
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
