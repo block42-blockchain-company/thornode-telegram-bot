@@ -271,7 +271,7 @@ def test_network():
 
     telegram.send_message(BOT_ID, "🌎 NETWORK")
 
-    time.sleep(3)
+    time.sleep(10)
     response = next(telegram.iter_history(BOT_ID))
 
     expected_response1 = 'Status of the whole THORChain network:'

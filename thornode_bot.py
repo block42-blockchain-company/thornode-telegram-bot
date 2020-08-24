@@ -559,7 +559,7 @@ def show_network_stats(update, context):
     for version in versions.keys():
         text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
 
-    text += '\n⛏ Block Height: *' + get_thorchain_block_height(node_ip=get_random_seed_node_ip()) + "*\n"
+    text += '\n⛏ Block Height: *' + get_thorchain_block_height(node_ip=get_random_seed_node_endpoint()) + "*\n"
 
     try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 

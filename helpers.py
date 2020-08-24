@@ -313,12 +313,10 @@ def get_number_of_unconfirmed_txs(node_ip):
 
 
 def get_network_json():
-    """
-    Return the json of the network endpoint
-    """
+    url = 'http://' + get_random_seed_node_endpoint() + NETWORK_ENDPOINT_PATH
 
     while True:
-        response = requests.get(url=get_thorchain_network_endpoint())
+        response = requests.get(url=url)
         if response.status_code == 200:
             break
 
@@ -362,7 +360,7 @@ def get_thorchain_blocks_per_year():
     """
 
     while True:
-        response = requests.get(url='http://' + get_random_seed_node_ip() + ':8080/v1/thorchain/constants')
+        response = requests.get(url='http://' + get_random_seed_node_endpoint() + ':8080/v1/thorchain/constants')
         if response.status_code == 200:
             break
 
@@ -372,15 +370,21 @@ def get_thorchain_blocks_per_year():
 def get_thorchain_validators_endpoint():
     """
     Return the nodeaccounts endpoint to query data from.
-    Endpoint is chosen randomly from the seeding node.
     """
 
     if DEBUG:
         return 'http://localhost:8080/nodeaccounts.json'
     else:
-        endpoints = requests.get('https://testnet-seed.thorchain.info').json()
-        random_endpoint = endpoints[random.randrange(0, len(endpoints))]
-        return 'http://' + random_endpoint + ':1317/thorchain/nodeaccounts'
+        return 'http://' + get_random_seed_node_endpoint() + ':1317/thorchain/nodeaccounts'
+
+
+def get_random_seed_node_endpoint():
+    """
+    Endpoint is chosen randomly from the seeding node.
+    """
+
+    endpoints = requests.get('https://testnet-seed.thorchain.info').json()
+    return endpoints[random.randrange(0, len(endpoints))]
 
 
 def tor_to_rune(tor):
