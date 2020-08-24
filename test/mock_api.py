@@ -3,7 +3,7 @@ import socketserver
 from threading import Thread
 
 MIDGARD_SERVER_PORT = 8080
-RCP_SERVER_PORT = 26657
+RPC_SERVER_PORT = 26657
 
 
 class RpcHttpServerHandler(http.server.SimpleHTTPRequestHandler):
@@ -29,8 +29,8 @@ def main():
     Thread(target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever).start()
     print('Midgard mock server is running on localhost:' + str(MIDGARD_SERVER_PORT))
 
-    Thread(target=socketserver.TCPServer(("", RCP_SERVER_PORT), RpcHttpServerHandler).serve_forever).start()
-    print('RCP mock server is running on localhost:' + str(RCP_SERVER_PORT))
+    Thread(target=socketserver.TCPServer(("", RPC_SERVER_PORT), RpcHttpServerHandler).serve_forever).start()
+    print('RPC mock server is running on localhost:' + str(RPC_SERVER_PORT))
 
 
 if __name__ == '__main__':
