@@ -209,7 +209,7 @@ def add_thornode_to_user_data(user_data, address, node):
     user_data['nodes'][address]['status'] = node['status']
     user_data['nodes'][address]['bond'] = node['bond']
     user_data['nodes'][address]['slash_points'] = node['slash_points']
-    user_data['nodes'][address]['ip_address'] = node['ip_address']
+    user_data['nodes'][address]['ip_address'] = node['ip_address'].rstrip('/')
     user_data['nodes'][address]['alias'] = alias
     user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
     user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
@@ -264,7 +264,7 @@ def get_thorchain_validators():
 
 
 def get_thorchain_block_height(node_ip):
-    url = 'http://' + node_ip.rstrip('/') + STATUS_ENDPOINT_PATH
+    url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
 
     while True:
         response = requests.get(url=url)
@@ -276,7 +276,7 @@ def get_thorchain_block_height(node_ip):
 
 
 def is_thorchain_catching_up(node_ip):
-    url = 'http://' + node_ip.rstrip('/') + STATUS_ENDPOINT_PATH
+    url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
 
     response = requests.get(url=url)
     if response.status_code != 200:
@@ -291,7 +291,7 @@ def is_thorchain_midgard_healthy(node_ip):
     Returns status of Midgard API
     """
 
-    url = 'http://' + node_ip.rstrip('/') + HEALTH_ENDPOINT_PATH
+    url = 'http://' + node_ip + HEALTH_ENDPOINT_PATH
     response = requests.get(url=url)
     if response.status_code == 200:
         return True
