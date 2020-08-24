@@ -60,7 +60,7 @@ def get_thornode_menu_buttons(user_data):
         try:
             emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']]
         except:
-            emoji = STATUS_EMOJIS["deactive"]
+            emoji = STATUS_EMOJIS["disabled"]
 
         truncated_address = address[:9] + "..." + address[-4:]
         button_text = emoji + " " + user_data['nodes'][address]['alias'] + " (" + truncated_address + ")"
@@ -92,7 +92,7 @@ def show_detail_menu(update, context):
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
-           'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
+           'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
            'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
@@ -341,7 +341,7 @@ def get_network_security(network_json):
     elif network_security_ratio < 0.6 and network_security_ratio >= 0.5:
         qualitative_security = "Underbonded"
     elif network_security_ratio < 0.5 and network_security_ratio:
-        qualitative_security = "Underbonded"
+        qualitative_security = "Insecure"
 
     return qualitative_security
 
@@ -354,6 +354,19 @@ def is_binance_node_healthy():
         return True
     else:
         return False
+
+
+def get_thorchain_blocks_per_year():
+    """
+    Return blocks per year of thorchain network
+    """
+
+    while True:
+        response = requests.get(url='http://' + get_random_seed_node_ip() + ':8080/v1/thorchain/constants')
+        if response.status_code == 200:
+            break
+
+    return response.json()['int_64_values']['BlocksPerYear']
 
 
 def get_thorchain_validators_endpoint():
@@ -376,12 +389,14 @@ def tor_to_rune(tor):
     Format depending if RUNE > or < Zero
     """
 
-    # Cast to int if tor is string
-    tor = int(tor)
-    if tor >= 100000000:
+    # Cast to float first if string is float
+    tor = int(float(tor))
+    if tor == 0:
+        return "0 RUNE"
+    elif tor >= 100000000:
         return "{:,} RUNE".format(int(tor / 100000000))
     else:
-        return '{:.8f} RUNE'.format(tor / 100000000)
+        return '{:.4f} RUNE'.format(tor / 100000000)
 
 
 def error(update, context):

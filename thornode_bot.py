@@ -526,30 +526,30 @@ def show_network_stats(update, context):
         total_nodes += statuses[status]
     text += "  = *" + str(total_nodes) + "* (total)\n"
 
-    text += "\n💪🏼 Active Bond:\n  *" + \
-           network['bondMetrics']['totalActiveBond'] + "* (total)\n  *" + \
-           network['bondMetrics']['averageActiveBond'] + "* (avg)\n  *" + \
-           network['bondMetrics']['medianActiveBond'] + "* (median)\n  *" + \
-           network['bondMetrics']['maximumActiveBond'] + "* (max)\n  *" + \
-           network['bondMetrics']['minimumActiveBond'] + "* (min)\n"
+    text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
+           tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
+           tor_to_rune(network['bondMetrics']['averageActiveBond']) + "* (avg)\n  *" + \
+           tor_to_rune(network['bondMetrics']['medianActiveBond']) + "* (median)\n  *" + \
+           tor_to_rune(network['bondMetrics']['maximumActiveBond']) + "* (max)\n  *" + \
+           tor_to_rune(network['bondMetrics']['minimumActiveBond']) + "* (min)\n"
 
-    text += "\n🦵🏼 Standby Bond:\n  *" + \
-           network['bondMetrics']['totalStandbyBond'] + "* (total)\n  *" + \
-           network['bondMetrics']['averageStandbyBond'] + "* (avg)\n  *" + \
-           network['bondMetrics']['medianStandbyBond'] + "* (median)\n  *" + \
-           network['bondMetrics']['maximumStandbyBond'] + "* (max)\n  *" + \
-           network['bondMetrics']['minimumStandbyBond'] + "* (min)\n"
+    text += "\n" + STATUS_EMOJIS["standby"] + "  Standby Bonds:\n  *" + \
+           tor_to_rune(network['bondMetrics']['totalStandbyBond']) + "* (total)\n  *" + \
+           tor_to_rune(network['bondMetrics']['averageStandbyBond']) + "* (avg)\n  *" + \
+           tor_to_rune(network['bondMetrics']['medianStandbyBond']) + "* (median)\n  *" + \
+           tor_to_rune(network['bondMetrics']['maximumStandbyBond']) + "* (max)\n  *" + \
+           tor_to_rune(network['bondMetrics']['minimumStandbyBond']) + "* (min)\n"
 
     text += "\n💰 Block Rewards:\n  *" + \
-            network['blockRewards']['blockReward'] + "* (total)\n  *" + \
-            network['blockRewards']['bondReward'] + "* (nodes)\n  *" + \
-            network['blockRewards']['stakeReward'] + "* (stakers)\n  *" + \
+            tor_to_rune(network['blockRewards']['blockReward']) + "* (total)\n  *" + \
+            tor_to_rune(network['blockRewards']['bondReward']) + "* (nodes)\n  *" + \
+            tor_to_rune(network['blockRewards']['stakeReward']) + "* (stakers)\n  *" + \
             '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
     text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
 
     text += "\n↩️ Node ROI: *" + \
-            '{:.2f}'.format((float(network['blockRewards']['bondReward']) * THORCHAIN_BLOCKS_PER_YEAR) / float(network['bondMetrics']['totalActiveBond']) * 100) \
+            '{:.2f}'.format((float(network['blockRewards']['bondReward']) * get_thorchain_blocks_per_year()) / float(network['bondMetrics']['totalActiveBond']) * 100) \
             + "*% APY\n"
 
     text += "\n📀 Versions:\n"
@@ -583,7 +583,7 @@ def show_all_thorchain_nodes(update, context):
         text += 'Address: *' + node['node_address'] + '*\n' + \
            'Version: *' + node['version'] + '*\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
-           'Bond: *' + tor_to_rune(int(node['bond'])) + '*\n' + \
+           'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
            'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 

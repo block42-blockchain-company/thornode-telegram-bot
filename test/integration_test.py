@@ -35,7 +35,7 @@ VALID_ADDRESS_TRUNCATED = VALID_ADDRESS[:9] + "..." + VALID_ADDRESS[-4:]
 
 BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
-STATUS_EMOJIS = {"active": "💚", "standby": "📆", "deactive": "🔴"}
+STATUS_EMOJIS = {"active": "💚", "standby": "📆", "disabled": "🔴"}
 
 THORCHAIN, BINANCE = range(2)
 
@@ -376,7 +376,7 @@ def test_thornode_notification(field):
     if field == 'node_address':
         new_value = 'thor' + str(new_value)
     elif field == 'status':
-        statuses = ['active', 'standby', 'deactive']
+        statuses = ['active', 'standby', 'disabled']
         if statuses[new_value % 3] == node_data_original[0][field]:
             new_value += 1
         new_value = statuses[new_value % 3]
