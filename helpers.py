@@ -264,7 +264,7 @@ def get_thorchain_validators():
 
 
 def get_thorchain_block_height(node_ip):
-    url = "http://" + node_ip.rstrip('/') + STATUS_ENDPOINT_PATH
+    url = 'http://' + node_ip.rstrip('/') + STATUS_ENDPOINT_PATH
 
     while True:
         response = requests.get(url=url)
@@ -276,7 +276,7 @@ def get_thorchain_block_height(node_ip):
 
 
 def is_thorchain_catching_up(node_ip):
-    url = "http://" + node_ip.rstrip('/') + STATUS_ENDPOINT_PATH
+    url = 'http://' + node_ip.rstrip('/') + STATUS_ENDPOINT_PATH
 
     response = requests.get(url=url)
     if response.status_code != 200:
@@ -324,7 +324,7 @@ def is_binance_node_healthy():
 def get_thorchain_validators_endpoint():
     """
     Return the nodeaccounts endpoint to query data from.
-    Endpoint is chosen randomly from seeding node.
+    Endpoint is chosen randomly from the seeding node.
     """
 
     if DEBUG:

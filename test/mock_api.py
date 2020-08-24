@@ -27,10 +27,10 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     Thread(target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever).start()
-    print("Midgard server is running on localhost:" + str(MIDGARD_SERVER_PORT))
+    print('Midgard mock server is running on localhost:' + str(MIDGARD_SERVER_PORT))
 
     Thread(target=socketserver.TCPServer(("", RCP_SERVER_PORT), RpcHttpServerHandler).serve_forever).start()
-    print("RCP server is running on localhost:" + str(RCP_SERVER_PORT))
+    print('RCP mock server is running on localhost:' + str(RCP_SERVER_PORT))
 
 
 if __name__ == '__main__':

@@ -23,8 +23,8 @@ Debug Processes
 """
 
 if DEBUG:
-    increase_block_height_process = subprocess.Popen(['python', 'increase_block_height.py'], cwd="test/")
-    mock_api_process = subprocess.Popen(['python', 'mock_api.py'], cwd="test/")
+    increase_block_height_process = subprocess.Popen(['python3', 'increase_block_height.py'], cwd="test/")
+    mock_api_process = subprocess.Popen(['python3', 'mock_api.py'], cwd="test/")
 
 
     def cleanup():
