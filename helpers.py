@@ -265,16 +265,18 @@ def get_thorchain_validators():
     return response.json()
 
 
-def get_thorchain_block_height(node_ip):
+def get_thorchain_latest_block_height(node_ip=None):
+    if node_ip is None:
+        node_ip = get_random_seed_node_endpoint()
+
     url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
+    response = requests.get(url=url)
 
-    while True:
-        response = requests.get(url=url)
-        if response.status_code == 200:
-            break
+    if response.status_code != 200:
+        raise Exception("Error while getting status")
 
-    status = response.json()
-    return status['result']['sync_info']['latest_block_height']
+    body = response.json()
+    return body['result']['sync_info']['latest_block_height']
 
 
 def is_thorchain_catching_up(node_ip):
