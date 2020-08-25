@@ -3,7 +3,6 @@ import subprocess
 import requests
 import json
 
-import telegram
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime
 
