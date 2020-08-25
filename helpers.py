@@ -2,6 +2,8 @@ import random
 import subprocess
 import requests
 import json
+
+import telegram
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime
 
@@ -88,6 +90,11 @@ def show_detail_menu(update, context):
         query.edit_message_text(text)
         show_thornode_menu_new_msg(update, context)
 
+    latest_block_height = get_thorchain_latest_block_height()
+    blocks_per_second = get_thorchain_blocks_per_second()
+    status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
+    status_since_in_days = status_since_in_seconds / (60 * 60 * 24)
+
     text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
@@ -95,7 +102,8 @@ def show_detail_menu(update, context):
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
            'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' \
-           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+           'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n' + \
+           node['status'].capitalize() + ' for *' + '{:,.2f}'.format(status_since_in_days) + ' days*\n\n'
 
     unconfirmed_txs = get_number_of_unconfirmed_txs(node['ip_address'])
     text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
@@ -368,6 +376,10 @@ def get_thorchain_blocks_per_year():
             break
 
     return response.json()['int_64_values']['BlocksPerYear']
+
+
+def get_thorchain_blocks_per_second():
+    return get_thorchain_blocks_per_year() / (365 * 24 * 60 * 60)
 
 
 def get_thorchain_validators_endpoint():

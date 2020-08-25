@@ -596,8 +596,8 @@ def show_all_thorchain_nodes(update, context):
                     'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
                     'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
                     'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-                    'Current status since: *~' + '{:,.2f}'.format(status_since_in_days) + ' days*\n' + \
-                    'Status Since block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+                    node['status'].capitalize() + ' for *' + '{:,.2f}'.format(status_since_in_days) + ' days*\n' + \
+                    'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
             try_message(context=context, chat_id=update.effective_chat.id, text=text)
             text = ''
@@ -606,9 +606,6 @@ def show_all_thorchain_nodes(update, context):
             text += '\nError while getting more data about this node.\n'
             try_message(context=context, chat_id=update.effective_chat.id, text=text)
             text = ''
-
-    # Send message
-    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text='')
 
 
 """
