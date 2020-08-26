@@ -1,6 +1,8 @@
+import asyncio
 import atexit
 import copy
 import re
+from collections import defaultdict
 
 from telegram.error import BadRequest
 from telegram.ext.dispatcher import run_async
@@ -165,6 +167,10 @@ def dispatch_query(update, context):
         call = show_thornode_menu_edit_msg
     elif data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
+    elif data == 'show-network-stats':
+        call = show_network_stats
+    elif data == 'vault_key_addresses':
+        call = show_vault_key_addresses
     elif data == 'add_thornode':
         call = add_thornode
     elif data == 'confirm_add_all_thornodes':
@@ -295,7 +301,7 @@ def plain_input(update, context):
     if message == '📡 MY NODES':
         return show_thornode_menu_handler(update, context)
     elif message == '🌎 NETWORK':
-        return show_network_stats(update, context)
+        return show_network_menu(update, context)
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
     elif message == '🔑 ADMIN AREA':
@@ -508,6 +514,15 @@ def restart_container(update, context):
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
 
+def show_network_menu(update, context):
+    keyboard = [[]]
+    keyboard.append([InlineKeyboardButton('📊 NETWORK STATS', callback_data='show-network-stats')])
+    keyboard.append([InlineKeyboardButton('🔒 VAULT KEY ADDRESS', callback_data='vault_key_addresses')])
+
+    try_message(context=context, chat_id=update.effective_message.chat_id, text='Choose an option:',
+                reply_markup=InlineKeyboardMarkup(keyboard))
+
+
 def show_network_stats(update, context):
     """
     Show summarized information of the whole network
@@ -580,6 +595,51 @@ def show_network_stats(update, context):
         text += NETWORK_ERROR_MSG
     finally:
         try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
+
+
+def show_vault_key_addresses(update, context):
+    try:
+        node_accounts = get_thorchain_validators()
+    except Exception as e:
+        logger.exception(e)
+        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id,
+                                   text="Can't get node addresses. Please check the internet connection and try again.")
+        return
+
+    ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))
+
+    chain_to_node_addresses = defaultdict(list)
+
+    for node_ip in ip_addresses[:3]:
+        try:
+            pool_addresses = get_pool(node_ip)
+        except Exception as e:
+            logger.exception(e)
+            continue
+
+        for chain in pool_addresses['current']:
+            chain_to_node_addresses[chain['chain']].append(chain['address'])
+
+    message = ''
+    for chain, nodes_to_pointed_address in chain_to_node_addresses.items():
+        message += "Chain: " + chain
+        address_to_nodes_agreeing = defaultdict(int)
+        for address in nodes_to_pointed_address:
+            address_to_nodes_agreeing[address] += 1
+
+        print(address_to_nodes_agreeing)
+
+    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=str(chain_to_node_addresses))
+
+
+def get_pool(ip_address: str):
+    response = requests.get(url='http://' + ip_address + ':8080/v1/thorchain/pool_addresses')
+
+    if response.status_code != 200:
+        raise Exception("Error while getting pool address." +
+                        " Endpoint responded with: " + response.text + "\nCode: " + str(response.status_code) + '')
+
+    return response.json()
 
 
 def show_all_thorchain_nodes(update, context):
