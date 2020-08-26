@@ -15,7 +15,6 @@ from telegram.ext import (
 
 from jobs import *
 
-
 """
 ######################################################################################################################################################
 Debug Processes
@@ -33,7 +32,6 @@ if DEBUG:
 
 
     atexit.register(cleanup)
-
 
 """
 ######################################################################################################################################################
@@ -588,7 +586,6 @@ def show_all_thorchain_nodes(update, context):
             text += "*\n"
 
             status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
-            status_since_in_days = status_since_in_seconds / (60 * 60 * 24)
 
             text += 'Address: *' + node['node_address'] + '*\n' + \
                     'Version: *' + node['version'] + '*\n' + \
@@ -596,7 +593,8 @@ def show_all_thorchain_nodes(update, context):
                     'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
                     'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
                     'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-                    node['status'].capitalize() + ' for *' + '{:,.2f}'.format(status_since_in_days) + ' days*\n' + \
+                    node['status'].capitalize() + ' for *' + \
+                    format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n' + \
                     'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
             try_message(context=context, chat_id=update.effective_chat.id, text=text)
