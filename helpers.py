@@ -421,15 +421,17 @@ def tor_to_rune(tor):
 
 def format_to_days_and_hours(duration: timedelta):
     result = ""
+    hours = duration.seconds // 3600
 
     if duration.days > 0:
         result += str(duration.days)
         if duration.days == 1:
-            result += ' day '
+            result += ' day'
         else:
-            result += " days "
+            result += " days"
 
-    hours = duration.seconds // 3600
+        if hours > 0:
+            result += " "
 
     if hours <= 0:
         if duration.days <= 0:
