@@ -2,8 +2,9 @@ import random
 import subprocess
 import requests
 import json
+
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from constants import *
 
@@ -20,7 +21,8 @@ def try_message_with_home_menu(context, chat_id, text):
     """
 
     keyboard = get_home_menu_buttons()
-    try_message(context=context, chat_id=chat_id, text=text, reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
+    try_message(context=context, chat_id=chat_id, text=text,
+                reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
 
 
 def get_home_menu_buttons():
@@ -46,7 +48,8 @@ def show_thornode_menu_new_msg(update, context):
     keyboard = get_thornode_menu_buttons(user_data=user_data)
     text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
                                                                                            'THORNodes yet.\nAdd a Node!'
-    try_message(context=context, chat_id=update.effective_message.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
+    try_message(context=context, chat_id=update.effective_message.chat_id, text=text,
+                reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_thornode_menu_buttons(user_data):
@@ -88,14 +91,20 @@ def show_detail_menu(update, context):
         query.edit_message_text(text)
         show_thornode_menu_new_msg(update, context)
 
+    latest_block_height = get_thorchain_latest_block_height()
+    blocks_per_second = get_thorchain_blocks_per_second()
+    status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
+
     text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
-           'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' \
-           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' \
-           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+           'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
+           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
+           'Status Since Block: ' + '*{ :,}*'.format(int(node['status_since'])) + '\n' + \
+           node['status'].capitalize() + ' for *' + \
+           format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
 
     unconfirmed_txs = get_number_of_unconfirmed_txs(node['ip_address'])
     text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
@@ -265,16 +274,18 @@ def get_thorchain_validators():
     return response.json()
 
 
-def get_thorchain_block_height(node_ip):
+def get_thorchain_latest_block_height(node_ip=None):
+    if node_ip is None:
+        node_ip = get_random_seed_node_endpoint()
+
     url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
+    response = requests.get(url=url)
 
-    while True:
-        response = requests.get(url=url)
-        if response.status_code == 200:
-            break
+    if response.status_code != 200:
+        raise Exception("Error while getting status")
 
-    status = response.json()
-    return status['result']['sync_info']['latest_block_height']
+    body = response.json()
+    return body['result']['sync_info']['latest_block_height']
 
 
 def is_thorchain_catching_up(node_ip):
@@ -368,6 +379,10 @@ def get_thorchain_blocks_per_year():
     return response.json()['int_64_values']['BlocksPerYear']
 
 
+def get_thorchain_blocks_per_second():
+    return get_thorchain_blocks_per_year() / (365 * 24 * 60 * 60)
+
+
 def get_thorchain_validators_endpoint():
     """
     Return the nodeaccounts endpoint to query data from.
@@ -402,6 +417,33 @@ def tor_to_rune(tor):
         return "{:,} RUNE".format(int(tor / 100000000))
     else:
         return '{:.4f} RUNE'.format(tor / 100000000)
+
+
+def format_to_days_and_hours(duration: timedelta):
+    result = ""
+    hours = duration.seconds // 3600
+
+    if duration.days > 0:
+        result += str(duration.days)
+        if duration.days == 1:
+            result += ' day'
+        else:
+            result += " days"
+
+        if hours > 0:
+            result += " "
+
+    if hours <= 0:
+        if duration.days <= 0:
+            result += "< 1 hour"
+    else:
+        result += str(hours)
+        if hours == 1:
+            result += ' hour'
+        else:
+            result += ' hours'
+
+    return result
 
 
 def error(update, context):

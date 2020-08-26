@@ -15,7 +15,6 @@ from telegram.ext import (
 
 from jobs import *
 
-
 """
 ######################################################################################################################################################
 Debug Processes
@@ -33,7 +32,6 @@ if DEBUG:
 
 
     atexit.register(cleanup)
-
 
 """
 ######################################################################################################################################################
@@ -559,7 +557,7 @@ def show_network_stats(update, context):
     for version in versions.keys():
         text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
 
-    text += '\n⛏ Block Height: *' + get_thorchain_block_height(node_ip=get_random_seed_node_endpoint()) + "*\n"
+    text += '\n⛏ Block Height: *' + get_thorchain_latest_block_height(node_ip=get_random_seed_node_endpoint()) + "*\n"
 
     try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 
@@ -570,26 +568,42 @@ def show_all_thorchain_nodes(update, context):
     """
 
     nodes = get_thorchain_validators()
+    latest_block_height = get_thorchain_latest_block_height()
+    blocks_per_second = get_thorchain_blocks_per_year() / (365 * 24 * 60 * 60)
     text = "Status of all THORNodes in the THORChain network:\n\n"
 
     for node in nodes:
-        monitored_address = next(filter(lambda monitored_address: monitored_address == node['node_address'], context.user_data['nodes']), None)
-        text += 'THORNode: *'
-        if monitored_address:
-            text += context.user_data['nodes'][monitored_address]['alias']
-        else:
-            text += "not monitored"
-        text += "*\n"
-        text += 'Address: *' + node['node_address'] + '*\n' + \
-           'Version: *' + node['version'] + '*\n' + \
-           'Status: *' + node['status'].capitalize() + '*\n' + \
-           'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
-           'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
-           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-           'Status Since: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+        try:
+            monitored_address = next(
+                filter(lambda monitored_address: monitored_address == node['node_address'], context.user_data['nodes']),
+                None)
+            text += 'THORNode: *'
 
-    # Send message
-    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
+            if monitored_address:
+                text += context.user_data['nodes'][monitored_address]['alias']
+            else:
+                text += "not monitored"
+            text += "*\n"
+
+            status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
+
+            text += 'Address: *' + node['node_address'] + '*\n' + \
+                    'Version: *' + node['version'] + '*\n' + \
+                    'Status: *' + node['status'].capitalize() + '*\n' + \
+                    'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
+                    'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
+                    'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
+                    node['status'].capitalize() + ' for *' + \
+                    format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n' + \
+                    'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
+
+            try_message(context=context, chat_id=update.effective_chat.id, text=text)
+            text = ''
+        except Exception as e:
+            logger.exception(e)
+            text += '\nError while getting more data about this node.\n'
+            try_message(context=context, chat_id=update.effective_chat.id, text=text)
+            text = ''
 
 
 """

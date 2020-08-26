@@ -110,7 +110,7 @@ def check_thorchain_block_height(context, node_ip, node_address):
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
-    block_height = get_thorchain_block_height(node_ip)
+    block_height = get_thorchain_latest_block_height(node_ip)
 
     # Check if block height got stuck
     if 'block_height' in node_data and block_height <= node_data['block_height']:
@@ -170,14 +170,14 @@ def check_thorchain_catch_up_status(context, node_ip):
         user_data['is_catching_up'] = True
         text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
                'IP: ' + node_ip + '\n' + \
-               'Current block height: ' + get_thorchain_block_height(node_ip) + '\n\n' + \
+               'Current block height: ' + get_thorchain_latest_block_height(node_ip) + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
     elif user_data['is_catching_up'] == True and not is_currently_catching_up:
         user_data['is_catching_up'] = False
         text = 'The node caught up to the latest block height again! 👌' + '\n' + \
                'IP: ' + node_ip + '\n' + \
-               'Current block height: ' + get_thorchain_block_height(node_ip)
+               'Current block height: ' + get_thorchain_latest_block_height(node_ip)
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
 
 
