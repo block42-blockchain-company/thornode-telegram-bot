@@ -88,7 +88,7 @@ export DEBUG=True
 ```
 The DEBUG flag set to True will run a local web server as a separate process. 
 This way the telegram bot can access the local files `nodeaccounts.json` and `status.json`
-in the `test/` folder. Verify that Python is available via command `python3` in your environment.
+in the `test/mock_files` folder. Verify that Python is available via command `python3` in your environment.
 Furthermore, the server mocks a few Thorchain specific endpoints, for this reason please make sure that the ports: 
 * `localhost:26657`
 * `localhost:8080`
@@ -97,9 +97,10 @@ are not busy on your machine. Otherwise, mock server won't start.
 
 
 To test whether the bot actually notifies you about changes, the data the bot is querying needs to change. 
-You can simulate that by manually editing `test/nodeaccounts.json`, `test/status.json` and `test/midgard.json`.
+You can simulate that by manually editing `nodeaccounts.json`, `status.json`
+ and `midgard.json` in `test/mock_files` directory.
 
-Furthermore in DEBUG mode a separate process runs `increase_block_height.py` which artificially increases
+Furthermore, in DEBUG mode a separate process runs `test/increase_block_height.py` which artificially increases
 the block height so that there are no notifications that the block height got stuck.
 
 ---
@@ -118,16 +119,18 @@ python3 thornode_bot.py
 Make sure that you see a message in the console which indicates that the bot is running.
 
 ## [Run and test the bot](#run-and-test-the-bot)
-When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram, open the chat and hit start!
+When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram,
+ open the chat and hit start!
 
 At this point, you can play with the bot, see what it does and check that everything works fine!
 
-The bot persistents all data, which means it stores its chat data in the file `storage/session.data`.  Once you stop and restart the bot, everything should continue as if the bot was never stopped.
+The bot persists all data, which means it stores its chat data in the file `storage/session.data`.  Once you stop and restart the bot,
+everything should continue as if the bot was never stopped.
 
 If you want to reset your bot's data, simply delete the file `session.data` in the `storage` directory before startup.
 
 ## [Production](#production)
-In production you do not want to use mock data from the local endpoint but real network data. 
+In production, you do not want to use mock data from the local endpoint but real network data. 
 To get real data just set `DEBUG=False` and all other environment variables as 
 described in the 'Set environment variables' section.
 If you're using docker-compose to run this Bot, modify the existing variables in `variables.env` file (No need to
@@ -144,13 +147,14 @@ Build the docker image as described in the `Dockerfile`:
 docker build -t thornode-bot .
 ```
 
-To make the bot's data persistent, you need to create a docker volume. If the bot crashes or restarts the volume won't be affected and keeps all the session data:
+To make the bot's data persistent, you need to create a docker volume.
+If the bot crashes or restarts the volume won't be affected and keeps all the session data:
 
 ```
 docker volume create thornode-bot-volume
 ```
 
-Finally run the docker container:
+Finally, run the docker container:
 
 ```
 docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IP=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
@@ -176,15 +180,15 @@ there is not the possibility for the `DEBUG` mode when using docker.*
 
 
 #### [Healthcheck](#healthcheck)
-There is a health check in the Dockerfile that runs the `healthcheck.py` file.
+There is a health check in the Dockerfile that runs the `scrips/healthcheck.py` file.
 The script assures that `thornode_bot.py` is periodically updating the `health.check` file.
 
 If the docker health check fails, the docker container is marked as "unhealthy". 
 However, when using docker standalone (without docker compose or docker swarm) this doesn't do anything.
 To restart unhealthy containers, we have to use the autoheal image https://hub.docker.com/r/willfarrell/autoheal/ .
 
-To make sure a potentially unhealthy thorbot_node container is restarted, run the autoheal container alongside the
-thornode_bot container:
+To make sure a potentially unhealthy `thorbot_node` container is restarted, run the autoheal container alongside the
+`thornode_bot` container:
 ```
 docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
 ```
@@ -237,6 +241,7 @@ telegram application that uses your user identity on https://my.telegram.org .
 Simply login in with your phone number that is registered on telegram, 
 then choose any application (we chose Android) and follow the steps. 
 
+Once you get access to `api_id` and `api_hash`, save them in the Environment variables
 Afterwards run `python3 test/sign_in_telegram.py`. This asks
 you to put in your phone number, verifies your telegram client and creates the verification
 file `test/telegram_session.string`. This file is needed by the testing suite
@@ -244,7 +249,7 @@ to impersonate your telegram client.
 
 Once you get access to api_id and api_hash, save them in the Environment variables
 `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` respectively.
-Also save the name of your Telegram Bot without the preceding `@` 
+Also, save the name of your Telegram Bot without the preceding `@` 
 in the `TELEGRAM_BOT_ID` environment variable (e.g. if your bot is named 
 `@thornode_test_bot`, save `thornode_test_bot` in `TELEGRAM_BOT_ID`).
 
@@ -257,7 +262,7 @@ do not forget to start at least one container on your system.
 Keep in mind that the test always deletes the `session.data` file inside `storage/`
 in order to have fresh starts for every integration test. If you wish to keep your
 persistent data, don't run the integration test or comment out 
-the line `os.remove("../storage/session.data")` in integration_test.py
+the line `os.remove(session_data_path)` in `test/integration_test.py`
 
 To run the test open the `test/` folder in your terminal and run
 ```
