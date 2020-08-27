@@ -40,7 +40,7 @@ JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# paths
+# Paths
 constants_dir = os.path.dirname(__file__)
 storage_path = os.sep.join([constants_dir, os.path.pardir, 'storage'])
 session_data_path = os.sep.join([storage_path, 'session.data'])

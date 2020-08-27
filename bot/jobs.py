@@ -1,11 +1,5 @@
-
 from bot.helpers import *
-
-"""
-######################################################################################################################################################
-Jobs
-######################################################################################################################################################
-"""
+from bot.service.thorchain_network_service import *
 
 
 def thornode_checks(context):
@@ -26,14 +20,13 @@ def check_thornodes(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    # Flag to show home buttons or not
-    # message_sent = False
-
-    # List to delete entries after loop
     inactive_nodes = []
 
     for node_address, node_data in user_data['nodes'].items():
+
+        # todo: handle exception
         remote_node = get_thornode_object(address=node_address)
+
         local_node = user_data['nodes'][node_address]
 
         if remote_node is None:
@@ -43,12 +36,12 @@ def check_thornodes(context):
 
             inactive_nodes.append(node_address)
 
-            # Send message
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-            # message_sent = True
             continue
 
         node_ip_address = node_data['ip_address']
+
+        # todo: handle exceptions
         check_thorchain_block_height(context, node_ip=node_ip_address, node_address=node_address)
         check_thorchain_catch_up_status(context, node_ip=node_ip_address)
         check_thorchain_midgard_api(context, node_ip=node_ip_address)
@@ -88,17 +81,12 @@ def check_thornodes(context):
                 local_node['last_notification_timestamp'] = datetime.timestamp(datetime.now())
                 local_node['notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
 
-                # Send message
                 try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-                # message_sent = True
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
     for node_address in inactive_nodes:
         del user_data['nodes'][node_address]
-
-    # if message_sent:
-    #    try_message_with_home_menu(context=context, chat_id=chat_id)
 
 
 def check_thorchain_block_height(context, node_ip, node_address):
@@ -109,7 +97,9 @@ def check_thorchain_block_height(context, node_ip, node_address):
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
-    block_height = get_thorchain_latest_block_height(node_ip)
+    # todo: handle exceptions
+    block_height = get_latest_block_height(node_ip)
+    # todo: handle exceptions
 
     # Check if block height got stuck
     if 'block_height' in node_data and block_height <= node_data['block_height']:
@@ -161,23 +151,31 @@ def check_thorchain_catch_up_status(context, node_ip):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
+    # todo: initialize somewhere else
     if 'is_catching_up' not in user_data:
         user_data['is_catching_up'] = False
 
+    # Todo: handle exceptions
     is_currently_catching_up = is_thorchain_catching_up(node_ip)
-    if user_data['is_catching_up'] == False and is_currently_catching_up:
-        user_data['is_catching_up'] = True
-        text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
-               'IP: ' + node_ip + '\n' + \
-               'Current block height: ' + get_thorchain_latest_block_height(node_ip) + '\n\n' + \
-               'Please check your Thornode immediately!'
-        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-    elif user_data['is_catching_up'] == True and not is_currently_catching_up:
-        user_data['is_catching_up'] = False
-        text = 'The node caught up to the latest block height again! 👌' + '\n' + \
-               'IP: ' + node_ip + '\n' + \
-               'Current block height: ' + get_thorchain_latest_block_height(node_ip)
-        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+    # Todo: handle exceptions
+
+    if user_data['is_catching_up'] != is_currently_catching_up:
+        block_height = get_latest_block_height(node_ip)
+        # TODO: handle exception
+        # TODO: make sure it is the same
+        if is_currently_catching_up:
+            user_data['is_catching_up'] = True
+            text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
+                   'IP: ' + node_ip + '\n' + \
+                   'Current block height: ' + block_height + '\n\n' + \
+                   'Please check your Thornode immediately!'
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+        else:
+            user_data['is_catching_up'] = False
+            text = 'The node caught up to the latest block height again! 👌' + '\n' + \
+                   'IP: ' + node_ip + '\n' + \
+                   'Current block height: ' + block_height
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
 
 
 def check_thorchain_midgard_api(context, node_ip):
@@ -188,21 +186,24 @@ def check_thorchain_midgard_api(context, node_ip):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
+    # todo: initialize somewhere else
     if 'is_midgard_healthy' not in user_data:
         user_data['is_midgard_healthy'] = True
 
-    is_midgard_currently_healthy = is_thorchain_midgard_healthy(node_ip)
-    if user_data['is_midgard_healthy'] == True and not is_midgard_currently_healthy:
-        user_data['is_midgard_healthy'] = False
-        text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
-               'IP: ' + node_ip + '\n\n' + \
-               'Please check your Thornode immediately!'
-        try_message_with_home_menu(context, chat_id=chat_id, text=text)
-    elif user_data['is_midgard_healthy'] == False and is_midgard_currently_healthy:
-        user_data['is_midgard_healthy'] = True
-        text = 'Midgard API is healthy again! 👌' + '\n' + \
-               'IP: ' + node_ip + '\n'
-        try_message_with_home_menu(context, chat_id=chat_id, text=text)
+    is_midgard_healthy = is_midgard_api_healthy(node_ip)
+
+    if user_data['is_midgard_healthy'] != is_midgard_healthy:
+        if is_midgard_healthy:
+            user_data['is_midgard_healthy'] = True
+            text = 'Midgard API is healthy again! 👌' + '\n' + \
+                   'IP: ' + node_ip + '\n'
+            try_message_with_home_menu(context, chat_id=chat_id, text=text)
+        else:
+            user_data['is_midgard_healthy'] = False
+            text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
+                   'IP: ' + node_ip + '\n\n' + \
+                   'Please check your Thornode immediately!'
+            try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 
 def check_binance_health(context):
@@ -213,21 +214,26 @@ def check_binance_health(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
+    # todo: initialize somewhere else
     if 'is_binance_node_healthy' not in user_data:
         user_data['is_binance_node_healthy'] = True
 
+    # todo: handle exceptions
     is_binance_node_currently_healthy = is_binance_node_healthy()
-    if user_data['is_binance_node_healthy'] == True and not is_binance_node_currently_healthy:
-        user_data['is_binance_node_healthy'] = False
-        text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
-               'IP: ' + BINANCE_NODE_IP + '\n\n' + \
-               'Please check your Binance Node immediately!'
-        try_message_with_home_menu(context, chat_id=chat_id, text=text)
-    elif user_data['is_binance_node_healthy'] == False and is_binance_node_currently_healthy:
-        user_data['is_binance_node_healthy'] = True
-        text = 'Binance Node is healthy again! 👌' + '\n' + \
-               'IP: ' + BINANCE_NODE_IP + '\n'
-        try_message_with_home_menu(context, chat_id=chat_id, text=text)
+    # todo: handle exceptions
+
+    if user_data['is_binance_node_healthy'] != is_binance_node_currently_healthy:
+        if is_binance_node_currently_healthy:
+            user_data['is_binance_node_healthy'] = True
+            text = 'Binance Node is healthy again! 👌' + '\n' + \
+                   'IP: ' + BINANCE_NODE_IP + '\n'
+            try_message_with_home_menu(context, chat_id=chat_id, text=text)
+        else:
+            user_data['is_binance_node_healthy'] = False
+            text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
+                   'IP: ' + BINANCE_NODE_IP + '\n\n' + \
+                   'Please check your Binance Node immediately!'
+            try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 
 def update_health_check_file(context):
