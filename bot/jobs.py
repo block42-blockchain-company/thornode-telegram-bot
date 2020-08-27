@@ -1,6 +1,5 @@
-from datetime import timedelta
 
-from helpers import *
+from bot.helpers import *
 
 """
 ######################################################################################################################################################
@@ -236,6 +235,9 @@ def update_health_check_file(context):
     Write timestamp into health.check file for the health check
     """
 
-    with open('storage/health.check', 'w') as healthcheck_file:
+    current_dir = os.path.dirname(__file__)
+    path = os.sep.join([current_dir, os.path.pardir, "storage", "health.check"])
+
+    with open(path, 'w') as healthcheck_file:
         timestamp = datetime.timestamp(datetime.now())
         healthcheck_file.write(str(timestamp))

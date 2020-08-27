@@ -6,7 +6,7 @@ import json
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime, timedelta
 
-from constants import *
+from bot.constants import *
 
 """
 ######################################################################################################################################################
@@ -193,8 +193,8 @@ def try_message(context, chat_id, text, reply_markup=None):
             # Somehow session.data does not get updated if all users block the bot.
             # That makes problems on bot restart. That's why we delete the file ourselves.
             if len(context.dispatcher.persistence.user_data) == 0:
-                if os.path.exists("storage/session.data"):
-                    os.remove("storage/session.data")
+                if os.path.exists(session_data_path):
+                    os.remove(session_data_path)
             context.job.enabled = False
             context.job.schedule_removal()
         else:

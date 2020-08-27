@@ -10,18 +10,23 @@ class RpcHttpServerHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         endpoint = self.path.rstrip('/')
         if endpoint == '/status':
-            self.path = 'status.json'
+            self.path = 'mock_files/status.json'
         elif endpoint == '/num_unconfirmed_txs':
-            self.path = 'unconfirmed_txs.json'
+            self.path = 'mock_files/unconfirmed_txs.json'
         elif endpoint == '/health':
-            self.path = 'binance_health.json'
+            self.path = 'mock_files/binance_health.json'
+        else:
+            self.path = 'mock_files' + endpoint
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 
 class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path.rstrip('/') == '/v1/health':
-            self.path = 'midgard.json'
+        endpoint = self.path.rstrip('/')
+        if endpoint == '/v1/health':
+            self.path = 'mock_files/midgard.json'
+        else:
+            self.path = 'mock_files' + endpoint
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 

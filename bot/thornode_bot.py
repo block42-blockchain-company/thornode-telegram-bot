@@ -13,7 +13,7 @@ from telegram.ext import (
     Filters
 )
 
-from jobs import *
+from bot.jobs import *
 
 """
 ######################################################################################################################################################
@@ -22,8 +22,12 @@ Debug Processes
 """
 
 if DEBUG:
-    increase_block_height_process = subprocess.Popen(['python3', 'increase_block_height.py'], cwd="test/")
-    mock_api_process = subprocess.Popen(['python3', 'mock_api.py'], cwd="test/")
+    current_dir = os.path.dirname(__file__)
+    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "scripts", "increase_block_height.py"])
+    mock_api_path = os.sep.join([current_dir, os.path.pardir, "test", "mock_api.py"])
+
+    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd="test/")
+    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd="test/")
 
 
     def cleanup():
@@ -92,8 +96,8 @@ def setup_existing_user(dispatcher):
         # Somehow session.data does not get updated if all users block the bot.
         # That's why we delete the file ourselves.
         if len(dispatcher.persistence.user_data) == 0:
-            if os.path.exists("./storage/session.data"):
-                os.remove("./storage/session.data")
+            if os.path.exists(session_data_path):
+                os.remove(session_data_path)
 
 
 """
@@ -620,7 +624,8 @@ def main():
     """
 
     # Init telegram bot
-    bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename='storage/session.data'), use_context=True)
+    bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path),
+                  use_context=True)
     dispatcher = bot.dispatcher
 
     setup_existing_user(dispatcher=dispatcher)

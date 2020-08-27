@@ -162,5 +162,3 @@ $RECYCLE.BIN/
 .idea
 storage/session.data
 storage/health.check
-/test/status.json
-/test/nodeaccounts.json
