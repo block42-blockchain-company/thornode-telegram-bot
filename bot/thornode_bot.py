@@ -23,11 +23,12 @@ Debug Processes
 
 if DEBUG:
     current_dir = os.path.dirname(__file__)
-    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "scripts", "increase_block_height.py"])
-    mock_api_path = os.sep.join([current_dir, os.path.pardir, "test", "mock_api.py"])
+    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
+    test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
+    mock_api_path = os.sep.join([test_dir, "mock_api.py"])
 
-    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd="test/")
-    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd="test/")
+    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd=test_dir)
+    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd=test_dir)
 
 
     def cleanup():

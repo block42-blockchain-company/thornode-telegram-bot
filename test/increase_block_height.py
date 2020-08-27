@@ -9,14 +9,14 @@ def increase_block_height():
     """
     print("Increasing local Block Height ...")
     while True:
-        with open('../test/mock_files/status.json') as json_read_file:
+        with open('mock_files/status.json') as json_read_file:
             node_data = json.load(json_read_file)
 
         block_height = node_data['result']['sync_info']['latest_block_height']
         new_block_height = int(block_height) + 1
         node_data['result']['sync_info']['latest_block_height'] = str(new_block_height)
 
-        with open('../test/mock_files/status.json', 'w') as json_write_file:
+        with open('mock_files/status.json', 'w') as json_write_file:
             json.dump(node_data, json_write_file)
         time.sleep(2)
 

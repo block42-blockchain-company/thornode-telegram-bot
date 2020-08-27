@@ -120,7 +120,7 @@ Make sure that you see a message in the console which indicates that the bot is 
 
 ## [Run and test the bot](#run-and-test-the-bot)
 When you created the telegram bot token via BotFather, you gave your bot a certain name (e.g. `thornode_bot`). Now search for this name in Telegram,
- open the chat and hit start!
+open the chat and hit start!
 
 At this point, you can play with the bot, see what it does and check that everything works fine!
 
