@@ -90,6 +90,7 @@ def show_detail_menu(update, context):
         text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
         query.edit_message_text(text)
         show_thornode_menu_new_msg(update, context)
+        return
 
     latest_block_height = get_thorchain_latest_block_height()
     blocks_per_second = get_thorchain_blocks_per_second()
@@ -102,7 +103,7 @@ def show_detail_menu(update, context):
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
            'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-           'Status Since Block: ' + '*{ :,}*'.format(int(node['status_since'])) + '\n' + \
+           'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n' + \
            node['status'].capitalize() + ' for *' + \
            format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
 

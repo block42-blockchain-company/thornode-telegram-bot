@@ -26,11 +26,18 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
-    Thread(target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever).start()
+    midgard_process = Thread(target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever)
+    midgard_process.daemon = True
+    midgard_process.start()
     print('Midgard mock server is running on localhost:' + str(MIDGARD_SERVER_PORT))
 
-    Thread(target=socketserver.TCPServer(("", RPC_SERVER_PORT), RpcHttpServerHandler).serve_forever).start()
+    rpc_process = Thread(target=socketserver.TCPServer(("", RPC_SERVER_PORT), RpcHttpServerHandler).serve_forever)
+    rpc_process.daemon = True
+    rpc_process.start()
     print('RPC mock server is running on localhost:' + str(RPC_SERVER_PORT))
+
+    while True:
+        pass
 
 
 if __name__ == '__main__':
