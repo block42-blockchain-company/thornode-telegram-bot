@@ -5,6 +5,7 @@ from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, 
 from datetime import datetime, timedelta
 
 from bot.constants import *
+from bot.messages import NETWORK_ERROR_MSG
 from bot.service.thorchain_network_service import *
 
 
@@ -67,19 +68,19 @@ def show_detail_menu(update, context):
     query = update.callback_query
     address = context.user_data['selected_node_address']
 
-    node = get_thornode_object(address=address)
+    try:
+        node = get_thornode_object_or_none(address=address)
+    except Exception as e:
+        logger.exception(e)
+        query.edit_message_text(NETWORK_ERROR_MSG)
+        show_thornode_menu_new_msg(update, context)
+        return
 
     if node is None:
         text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
         query.edit_message_text(text)
         show_thornode_menu_new_msg(update, context)
         return
-
-    # TODO: handle exceptions + cache it
-    latest_block_height = get_latest_block_height()
-    blocks_per_second = get_thorchain_blocks_per_second()
-    status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
-    # TODO: handle exceptions + cache it
 
     text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
@@ -88,15 +89,25 @@ def show_detail_menu(update, context):
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
            'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-           'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n' + \
-           node['status'].capitalize() + ' for *' + \
-           format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
+           'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n'
 
-    # TODO: handle exceptions
-    unconfirmed_txs = get_number_of_unconfirmed_transactions(node['ip_address'])
-    # TODO: handle exceptions
+    try:
+        latest_block_height = get_latest_block_height()
+        blocks_per_second = get_thorchain_blocks_per_second()
+        status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
 
-    text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+        text += node['status'].capitalize() + ' for *' + \
+                format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
+    except Exception as e:
+        logger.exception(e)
+        text += 'More data about status currently unavailable\n\n'
+
+    try:
+        unconfirmed_txs = get_number_of_unconfirmed_transactions(node['ip_address'])
+        text += 'Number of Unconfirmed Transactions: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+    except Exception as e:
+        logger.exception(e)
+        text += 'Number of Unconfirmed Transactions: currently unavailable\n\n'
 
     text += "What do you want to do with that Node?"
 
@@ -244,16 +255,14 @@ def get_running_docker_container():
     return json.loads(container_string)
 
 
-def get_thornode_object(address):
+def get_thornode_object_or_none(address):
     """
     Query nodeaccounts endpoints and return the Thornode object
     """
 
-    # todo: catch and rethrow?
     nodes = get_node_accounts()
 
     node = next(filter(lambda n: n['node_address'] == address, nodes), None)
-    # todo: throw if not found
 
     return node
 
@@ -300,7 +309,7 @@ def tor_to_rune(tor):
         return '{:.4f} RUNE'.format(tor / 100000000)
 
 
-def format_to_days_and_hours(duration: timedelta):
+def format_to_days_and_hours(duration: timedelta) -> str:
     result = ""
     hours = duration.seconds // 3600
 

@@ -14,6 +14,7 @@ from telegram.ext import (
 )
 
 from bot.jobs import *
+from bot.messages import NETWORK_ERROR_MSG
 from bot.service.thorchain_network_service import get_network_data, get_latest_block_height
 
 """
@@ -315,7 +316,7 @@ def handle_add_node(update, context):
     # Assume text input is an address
     address = update.message.text
 
-    node = get_thornode_object(address=address)
+    node = get_thornode_object_or_none(address=address)
 
     if node is None:
         update.message.reply_text(
@@ -512,67 +513,73 @@ def show_network_stats(update, context):
     Show summarized information of the whole network
     """
 
-    # todo: handle exception
-    network = get_network_data()
-    validators = get_node_accounts()
-    blocks_per_year = get_thorchain_blocks_per_year()  # todo: cache it?
-    latest_block_height = get_latest_block_height()  # todo: can we use random node from validators
-
-    statuses = {}
-    versions = {}
-    for validator in validators:
-        statuses[validator['status']] = 1 if not validator['status'] in statuses else statuses[validator['status']] + 1
-        versions[validator['version']] = 1 if not validator['version'] in versions else versions[
-                                                                                            validator['version']] + 1
-
     text = "Status of the whole THORChain network: \n"
 
-    text += "\n📡 Nodes:\n"
-    total_nodes = 0
-    for status in statuses.keys():
-        emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
-        text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
-        total_nodes += statuses[status]
-    text += "  = *" + str(total_nodes) + "* (total)\n"
+    try:
+        network = get_network_data()
+        validators = get_node_accounts()
 
-    text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
-            tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
-            tor_to_rune(network['bondMetrics']['averageActiveBond']) + "* (avg)\n  *" + \
-            tor_to_rune(network['bondMetrics']['medianActiveBond']) + "* (median)\n  *" + \
-            tor_to_rune(network['bondMetrics']['maximumActiveBond']) + "* (max)\n  *" + \
-            tor_to_rune(network['bondMetrics']['minimumActiveBond']) + "* (min)\n"
+        statuses = {}
+        versions = {}
+        for validator in validators:
+            status = validator['status']
+            version = validator['status']
 
-    text += "\n" + STATUS_EMOJIS["standby"] + "  Standby Bonds:\n  *" + \
-            tor_to_rune(network['bondMetrics']['totalStandbyBond']) + "* (total)\n  *" + \
-            tor_to_rune(network['bondMetrics']['averageStandbyBond']) + "* (avg)\n  *" + \
-            tor_to_rune(network['bondMetrics']['medianStandbyBond']) + "* (median)\n  *" + \
-            tor_to_rune(network['bondMetrics']['maximumStandbyBond']) + "* (max)\n  *" + \
-            tor_to_rune(network['bondMetrics']['minimumStandbyBond']) + "* (min)\n"
+            statuses[status] = 1 if not status in statuses else statuses[status] + 1
+            versions[version] = 1 if not version in versions else versions[version] + 1
 
-    text += "\n💰 Block Rewards:\n  *" + \
-            tor_to_rune(network['blockRewards']['blockReward']) + "* (total)\n  *" + \
-            tor_to_rune(network['blockRewards']['bondReward']) + "* (nodes)\n  *" + \
-            tor_to_rune(network['blockRewards']['stakeReward']) + "* (stakers)\n  *" + \
-            '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
-                network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
+        text += "\n📡 Nodes:\n"
+        total_nodes = 0
+        for status in statuses.keys():
+            emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+            text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
+            total_nodes += statuses[status]
+        text += "  = *" + str(total_nodes) + "* (total)\n"
 
-    text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
+        text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
+                tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
+                tor_to_rune(network['bondMetrics']['averageActiveBond']) + "* (avg)\n  *" + \
+                tor_to_rune(network['bondMetrics']['medianActiveBond']) + "* (median)\n  *" + \
+                tor_to_rune(network['bondMetrics']['maximumActiveBond']) + "* (max)\n  *" + \
+                tor_to_rune(network['bondMetrics']['minimumActiveBond']) + "* (min)\n"
 
-    text += "\n↩️ Node ROI: *" + \
-            '{:.2f}'.format((float(network['blockRewards']['bondReward']) * blocks_per_year) / float(
-                network['bondMetrics']['totalActiveBond']) * 100) \
-            + "*% APY\n"
+        text += "\n" + STATUS_EMOJIS["standby"] + "  Standby Bonds:\n  *" + \
+                tor_to_rune(network['bondMetrics']['totalStandbyBond']) + "* (total)\n  *" + \
+                tor_to_rune(network['bondMetrics']['averageStandbyBond']) + "* (avg)\n  *" + \
+                tor_to_rune(network['bondMetrics']['medianStandbyBond']) + "* (median)\n  *" + \
+                tor_to_rune(network['bondMetrics']['maximumStandbyBond']) + "* (max)\n  *" + \
+                tor_to_rune(network['bondMetrics']['minimumStandbyBond']) + "* (min)\n"
 
-    text += "\n📀 Versions:\n"
-    total_versions = 0
-    for version in versions.keys():
-        total_versions += versions[version]
-    for version in versions.keys():
-        text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
+        text += "\n💰 Block Rewards:\n  *" + \
+                tor_to_rune(network['blockRewards']['blockReward']) + "* (total)\n  *" + \
+                tor_to_rune(network['blockRewards']['bondReward']) + "* (nodes)\n  *" + \
+                tor_to_rune(network['blockRewards']['stakeReward']) + "* (stakers)\n  *" + \
+                '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
+                    network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
-    text += '\n⛏ Block Height: *' + str(latest_block_height) + "*\n"
+        text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
 
-    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
+        blocks_per_year = get_thorchain_blocks_per_year()
+        text += "\n↩️ Node ROI: *" + \
+                '{:.2f}'.format((float(network['blockRewards']['bondReward']) * blocks_per_year) / float(
+                    network['bondMetrics']['totalActiveBond']) * 100) \
+                + "*% APY\n"
+
+        text += "\n📀 Versions:\n"
+        total_versions = 0
+        for version in versions.keys():
+            total_versions += versions[version]
+        for version in versions.keys():
+            text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
+
+        latest_block_height = get_latest_block_height()
+        text += '\n⛏ Block Height: *' + str(latest_block_height) + "*\n"
+
+    except Exception as e:
+        logger.exception(e)
+        text += NETWORK_ERROR_MSG
+    finally:
+        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 
 
 def show_all_thorchain_nodes(update, context):
@@ -580,11 +587,14 @@ def show_all_thorchain_nodes(update, context):
     Show the status of all Thornodes in the whole Thorchain network
     """
 
-    # todo handle exceptions
-    nodes = get_node_accounts()
-    latest_block_height = get_latest_block_height()
-    blocks_per_second = get_thorchain_blocks_per_second()
-    # todo handle exceptions
+    try:
+        nodes = get_node_accounts()
+        latest_block_height = get_latest_block_height()
+        blocks_per_second = get_thorchain_blocks_per_second()
+    except Exception as e:
+        logger.exception(e)
+        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=NETWORK_ERROR_MSG)
+        return
 
     text = "Status of all THORNodes in the THORChain network:\n\n"
 

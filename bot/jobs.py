@@ -24,8 +24,11 @@ def check_thornodes(context):
 
     for node_address, node_data in user_data['nodes'].items():
 
-        # todo: handle exception
-        remote_node = get_thornode_object(address=node_address)
+        try:
+            remote_node = get_thornode_object_or_none(address=node_address)
+        except Exception as e:
+            logger.exception(e)
+            continue
 
         local_node = user_data['nodes'][node_address]
 
@@ -41,9 +44,10 @@ def check_thornodes(context):
 
         node_ip_address = node_data['ip_address']
 
-        # todo: handle exceptions
         check_thorchain_block_height(context, node_ip=node_ip_address, node_address=node_address)
+
         check_thorchain_catch_up_status(context, node_ip=node_ip_address)
+
         check_thorchain_midgard_api(context, node_ip=node_ip_address)
 
         # isNotBlocked = lastTimestamp < currentTimestamp - timeout
@@ -97,9 +101,11 @@ def check_thorchain_block_height(context, node_ip, node_address):
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
-    # todo: handle exceptions
-    block_height = get_latest_block_height(node_ip)
-    # todo: handle exceptions
+    try:
+        block_height = get_latest_block_height(node_ip)
+    except Exception as e:
+        logger.exception(e)
+        return
 
     # Check if block height got stuck
     if 'block_height' in node_data and block_height <= node_data['block_height']:
@@ -151,31 +157,34 @@ def check_thorchain_catch_up_status(context, node_ip):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    # todo: initialize somewhere else
     if 'is_catching_up' not in user_data:
         user_data['is_catching_up'] = False
 
-    # Todo: handle exceptions
-    is_currently_catching_up = is_thorchain_catching_up(node_ip)
-    # Todo: handle exceptions
+    try:
+        is_currently_catching_up = is_thorchain_catching_up(node_ip)
+    except Exception as e:
+        logger.exception(e)
+        return
 
     if user_data['is_catching_up'] != is_currently_catching_up:
-        block_height = get_latest_block_height(node_ip)
-        # TODO: handle exception
-        # TODO: make sure it is the same
+        try:
+            block_height = get_latest_block_height(node_ip)
+        except Exception as e:
+            logger.exception(e)
+            block_height = "currently unavailable"
+
         if is_currently_catching_up:
             user_data['is_catching_up'] = True
             text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
                    'IP: ' + node_ip + '\n' + \
                    'Current block height: ' + block_height + '\n\n' + \
                    'Please check your Thornode immediately!'
-            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
         else:
             user_data['is_catching_up'] = False
             text = 'The node caught up to the latest block height again! 👌' + '\n' + \
                    'IP: ' + node_ip + '\n' + \
                    'Current block height: ' + block_height
-            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
 
 
 def check_thorchain_midgard_api(context, node_ip):
@@ -186,7 +195,6 @@ def check_thorchain_midgard_api(context, node_ip):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    # todo: initialize somewhere else
     if 'is_midgard_healthy' not in user_data:
         user_data['is_midgard_healthy'] = True
 
@@ -214,13 +222,10 @@ def check_binance_health(context):
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
 
-    # todo: initialize somewhere else
     if 'is_binance_node_healthy' not in user_data:
         user_data['is_binance_node_healthy'] = True
 
-    # todo: handle exceptions
     is_binance_node_currently_healthy = is_binance_node_healthy()
-    # todo: handle exceptions
 
     if user_data['is_binance_node_healthy'] != is_binance_node_currently_healthy:
         if is_binance_node_currently_healthy:
