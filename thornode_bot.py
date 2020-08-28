@@ -520,7 +520,8 @@ def show_network_stats(update, context):
     text += "\n📡 Nodes:\n"
     total_nodes = 0
     for status in statuses.keys():
-        text += "  *" + str(statuses[status]) + "* (" + status + " " + STATUS_EMOJIS[status] + ")\n"
+        emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+        text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
         total_nodes += statuses[status]
     text += "  = *" + str(total_nodes) + "* (total)\n"
 
