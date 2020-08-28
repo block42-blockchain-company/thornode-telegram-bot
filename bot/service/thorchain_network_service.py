@@ -4,8 +4,6 @@ import requests
 
 from bot.constants import DEBUG, logger, BINANCE_NODE_IP
 
-NETWORK_ENDPOINT_PATH = ':8080/v1/network'
-
 
 def get_node_accounts():
     if DEBUG:
@@ -74,7 +72,7 @@ def get_network_data(node_ip=None):
     if node_ip is None:
         node_ip = get_random_seed_node_endpoint()
 
-    network_data_response = requests.get(url='http://' + node_ip + NETWORK_ENDPOINT_PATH)
+    network_data_response = requests.get(url='http://' + node_ip + ':8080/v1/network')
 
     if network_data_response.status_code != 200:
         raise BadStatusException(network_data_response)

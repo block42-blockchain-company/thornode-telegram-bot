@@ -100,14 +100,15 @@ def show_detail_menu(update, context):
                 format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
     except Exception as e:
         logger.exception(e)
-        text += 'More data about status currently unavailable\n\n'
+        text += 'Currently I Can\'t get duration of this status. Try again later!\n\n'
 
     try:
+        text += 'Number of Unconfirmed Transactions: '
         unconfirmed_txs = get_number_of_unconfirmed_transactions(node['ip_address'])
-        text += 'Number of Unconfirmed Transactions: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+        text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
     except Exception as e:
         logger.exception(e)
-        text += 'Number of Unconfirmed Transactions: currently unavailable\n\n'
+        text += 'Currently unavailable!\n\n'
 
     text += "What do you want to do with that Node?"
 
