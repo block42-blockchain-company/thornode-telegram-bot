@@ -57,7 +57,7 @@ class ThornodeBot(unittest.TestCase):
         )
 
         # Start the Telegram Terra Node Bot
-        cls.thornode_bot_process = Popen(['python3', 'thornode_bot.py'], cwd="../")
+        cls.thornode_bot_process = Popen(['python3', 'bot/thornode_bot.py'], cwd="../")
         time.sleep(5)
 
         with cls.telegram:

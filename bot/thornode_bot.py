@@ -24,7 +24,7 @@ Debug Processes
 """
 
 if DEBUG:
-    current_dir = os.path.dirname(__file__)
+    current_dir = os.path.dirname(os.path.realpath(__file__))
     increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
     test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
     mock_api_path = os.sep.join([test_dir, "mock_api.py"])

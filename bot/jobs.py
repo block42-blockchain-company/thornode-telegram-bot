@@ -246,7 +246,7 @@ def update_health_check_file(context):
     Write timestamp into health.check file for the health check
     """
 
-    current_dir = os.path.dirname(__file__)
+    current_dir = os.path.dirname(os.path.realpath(__file__))
     path = os.sep.join([current_dir, os.path.pardir, "storage", "health.check"])
 
     with open(path, 'w') as healthcheck_file:

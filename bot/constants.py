@@ -35,5 +35,5 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # Paths
-storage_path = os.sep.join([os.path.dirname(__file__), os.path.pardir, 'storage'])
+storage_path = os.sep.join([os.path.dirname(os.path.realpath(__file__)), os.path.pardir, 'storage'])
 session_data_path = os.sep.join([storage_path, 'session.data'])
