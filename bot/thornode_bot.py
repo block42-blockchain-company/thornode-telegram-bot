@@ -523,7 +523,7 @@ def show_network_stats(update, context):
         versions = {}
         for validator in validators:
             status = validator['status']
-            version = validator['status']
+            version = validator['version']
 
             statuses[status] = 1 if not status in statuses else statuses[status] + 1
             versions[version] = 1 if not version in versions else versions[version] + 1
