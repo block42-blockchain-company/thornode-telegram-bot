@@ -237,6 +237,11 @@ telegram application that uses your user identity on https://my.telegram.org .
 Simply login in with your phone number that is registered on telegram, 
 then choose any application (we chose Android) and follow the steps. 
 
+Afterwards run `python3 test/sign_in_telegram.py`. This asks
+you to put in your phone number, verifies your telegram client and creates the verification
+file `test/telegram_session.string`. This file is needed by the testing suite
+to impersonate your telegram client.
+
 Once you get access to api_id and api_hash, save them in the Environment variables
 `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` respectively.
 Also save the name of your Telegram Bot without the preceding `@` 

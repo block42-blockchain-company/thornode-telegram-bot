@@ -18,7 +18,7 @@ def increase_block_height():
 
         with open('status.json', 'w') as json_write_file:
             json.dump(node_data, json_write_file)
-        time.sleep(5)
+        time.sleep(2)
 
 
 if __name__ == '__main__':

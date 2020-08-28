@@ -34,6 +34,8 @@ INITIAL_NOTIFICATION_TIMEOUT = 15
 # Emojis for status of THORNodes
 STATUS_EMOJIS = {"unknown": "❓", "whitelisted": "📋", "standby": "📆", "ready": "🙋🏽‍♂️", "active": "💚", "disabled": "🔴"}
 
+JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
