@@ -78,7 +78,7 @@ def setup_existing_user(dispatcher):
         # Start monitoring jobs for all existing users
         if 'job_started' not in dispatcher.user_data[chat_id]:
             dispatcher.user_data[chat_id]['job_started'] = True
-        dispatcher.job_queue.run_repeating(thornode_checks, interval=30, context={
+        dispatcher.job_queue.run_repeating(thornode_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
@@ -111,7 +111,7 @@ def start(update, context):
 
     # Start job for user
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(thornode_checks, interval=30, context={
+        context.job_queue.run_repeating(thornode_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })

@@ -5,34 +5,18 @@ import os
 import itertools
 import random
 import unittest
+import sys
+sys.path.append('..')
 
 from subprocess import Popen
 from pyrogram import Client as TelegramClient
-
-# Delete previous sessions for clean testing
-#if os.path.exists("../storage/session.data"):
-#    os.remove("../storage/session.data")
-#
-## Start the Telegram Thornode Bot
-#thornode_bot_process = Popen(['python3', 'thornode_bot.py'], cwd="../")
-
+from helpers import tor_to_rune
 
 """
 ######################################################################################################################################################
 Static & environment variables
 ######################################################################################################################################################
 """
-
-#telegram = TelegramClient(
-#    "my_account",
-#    api_id=os.environ['TELEGRAM_API_ID'],
-#    api_hash=os.environ['TELEGRAM_API_HASH']
-#)
-
-# We got an address from our mock api json file.
-# This address will be recognized as valid by our bot and used throughout the tests.
-#VALID_ADDRESS = json.load(open('nodeaccounts.json'))[0]['node_address']
-#VALID_ADDRESS_TRUNCATED = VALID_ADDRESS[:9] + "..." + VALID_ADDRESS[-4:]
 
 STATUS_EMOJIS = {"active": "💚", "standby": "📆", "disabled": "🔴"}
 
@@ -46,8 +30,8 @@ TEST CASES
 
 
 class ThornodeBot(unittest.TestCase):
-    thornode_bot_process = {}
-    telegram = {}
+    thornode_bot_process = None
+    telegram = None
     BOT_ID = os.environ['TELEGRAM_BOT_ID']
 
     @classmethod
@@ -57,8 +41,12 @@ class ThornodeBot(unittest.TestCase):
             os.remove("../storage/session.data")
 
         # Authenticate Telegram Client of this testing suite
-        with open('telegram_session.string', 'r') as read_file:
-            telegram_session_string = read_file.read().splitlines()[0]
+        try:
+            with open('telegram_session.string', 'r') as read_file:
+                telegram_session_string = read_file.read().splitlines()[0]
+        except FileNotFoundError:
+            assert False, "File 'telegram_session.string' was not found!\n" \
+                          "Please run first 'python3 sign_in_telegram.py' to create 'telegram_session.string'!"
 
         cls.telegram = TelegramClient(
             telegram_session_string,
@@ -270,23 +258,23 @@ class ThornodeBot(unittest.TestCase):
             new_block_height = int(block_height) - 200
             node_data['result']['sync_info']['latest_block_height'] = str(new_block_height)
 
-            time.sleep(40)
+            time.sleep(7)
             with open('status.json', 'w') as json_write_file:
                 json.dump(node_data, json_write_file)
-            time.sleep(30)
+            time.sleep(5)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
 
             expected_response = 'Block height is not increasing anymore!'
             assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                                      "'\nbut got\n'" + response.text + "'"
+                                                                "'\nbut got\n'" + response.text + "'"
 
-            time.sleep(70)
+            time.sleep(12)
             response = next(self.telegram.iter_history(self.BOT_ID))
 
             expected_response = 'Block height is increasing again!'
             assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                                      "'\nbut got\n'" + response.text + "'"
+                                                                "'\nbut got\n'" + response.text + "'"
             print("Check Blockchain Height ✅")
             print("------------------------")
 
@@ -330,17 +318,6 @@ class ThornodeBot(unittest.TestCase):
         response = next(self.telegram.iter_history(self.BOT_ID))
         response.click(button)
         time.sleep(3)
-
-    def tor_to_rune(self, tor_string):
-        """
-        1e8 Tor are 1 Rune
-        """
-
-        tor_int = int(tor_string)
-        if tor_int >= 100000000:
-            return "{:,} RUNE".format(int(tor_int / 100000000))
-        else:
-            return '{:.8f} RUNE'.format(tor_int / 100000000)
 
     def assert_back_button(self, text):
         """
@@ -391,7 +368,7 @@ class ThornodeBot(unittest.TestCase):
                 os.rename(file_name + '_404.json', file_name + '.json')
             else:
                 os.rename(file_name + '.json', file_name + '_404.json')
-            time.sleep(40)
+            time.sleep(7)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
 
@@ -546,11 +523,11 @@ class ThornodeBot(unittest.TestCase):
             with open('nodeaccounts.json', 'w') as json_write_file:
                 json.dump(node_data_new, json_write_file)
 
-            time.sleep(70)
+            time.sleep(12)
             response = next(self.telegram.iter_history(self.BOT_ID))
 
             if field == "node_address":
-                expected_response = 'THORNode Thor-1 is not active anymore! 💀' + '\n' + \
+                expected_response = 'is not active anymore! 💀' + '\n' + \
                                    'Address: ' + node_data_original[0]['node_address'] + '\n\n' + \
                                    'Please enter another THORNode address.'
             else:
@@ -558,9 +535,9 @@ class ThornodeBot(unittest.TestCase):
                                     'Status: ' + node_data_original[0]['status'].capitalize()
                 if field == 'status':
                     expected_response += ' ➡️ ' + node_data_new[0]['status'].capitalize()
-                expected_response += '\nBond: ' + self.tor_to_rune(node_data_original[0]['bond'])
+                expected_response += '\nBond: ' + tor_to_rune(node_data_original[0]['bond'])
                 if field == 'bond':
-                    expected_response += ' ➡️ ' + self.tor_to_rune(node_data_new[0]['bond'])
+                    expected_response += ' ➡️ ' + tor_to_rune(node_data_new[0]['bond'])
                 expected_response += '\nSlash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points']))
                 if field == 'slash_points':
                     expected_response += ' ➡️ ' + '{:,}'.format(int(node_data_new[0]['slash_points']))
@@ -569,7 +546,7 @@ class ThornodeBot(unittest.TestCase):
                 "Expected '" + expected_response + "' but got '" + response.text + "'"
             print("Notification Thornode data change with " + field + " ✅")
             print("------------------------")
-            time.sleep(50)
+            time.sleep(9)
 
     def assert_delete_address(self, confirm):
         valid_address = self.add_valid_address()
@@ -660,7 +637,7 @@ class ThornodeBot(unittest.TestCase):
 
             with open('status.json', 'w') as json_write_file:
                 json.dump(node_data, json_write_file)
-            time.sleep(40)
+            time.sleep(7)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
 
@@ -675,91 +652,6 @@ class ThornodeBot(unittest.TestCase):
             print("Check catch up status with catching_up=" + str(catching_up) + " ✅")
             print("------------------------")
 
-
-"""
-######################################################################################################################################################
-TESTING COLLAGE
-######################################################################################################################################################
-"""
-
-
-#with telegram:
-#    try:
-#        time.sleep(5)
-#        test_start()
-#
-#        # Test My Thornode Area
-#        test_my_thornodes()
-#
-#        test_add_address(address="invalidAddress",
-#                         expected_response1="What's the address of your THORNode?",
-#                         expected_response2="⛔️ I have not found a THORNode with this address! Please try another one.")
-#        test_add_address(address=VALID_ADDRESS,
-#                         expected_response1="What's the address of your THORNode?",
-#                         expected_response2="Got it! 👌")
-#
-#        test_thornode_detail()
-#        test_back_button_thornode_details()
-#
-#        test_delete_address(confirm=False)
-#        test_delete_address(confirm=True)
-#
-#        test_add_all_addresses(confirm=False)
-#        test_add_all_addresses(confirm=True)
-#
-#        test_delete_all_addresses(confirm=False)
-#        test_delete_all_addresses(confirm=True)
-#
-#        test_add_address(address=VALID_ADDRESS,
-#                         expected_response1="What's the address of your THORNode?",
-#                         expected_response2="Got it! 👌")
-#
-#        test_change_alias(alias="SomeNewAliasThatIsUnfortunatelyTooLong",
-#                          expected_response1='How would you like to name your THORNode?',
-#                          expected_response2="⛔️ Alias cannot have more than 16 characters! Please try another one.")
-#        test_change_alias(alias="newAlias",
-#                          expected_response1='How would you like to name your THORNode?',
-#                          expected_response2="Got it! 👌")
-#
-#        test_delete_all_addresses(True)
-#
-#        # Test Show all THORNodes Area
-#        test_show_all_thorchain_nodes()
-#
-#        # Test Network View
-#        test_network()
-#
-#        # Test Admin Area
-#        test_admin_area()
-#        test_back_button_admin_area()
-#        if are_container_running(self):
-#            test_restart_container(confirm=False)
-#            test_restart_container(confirm=True)
-#
-#        test_add_address(address=VALID_ADDRESS,
-#                         expected_response1="What's the address of your THORNode?",
-#                         expected_response2="Got it! 👌")
-#
-#        test_thornode_notification(field="status")
-#        test_thornode_notification(field="bond")
-#        test_thornode_notification(field="slash_points")
-#        test_thornode_notification(field="node_address")
-#        test_block_height_notification()
-#        test_catch_up_notification(catching_up=True)
-#        test_catch_up_notification(catching_up=False)
-#        test_midgard_notification(healthy=False)
-#        test_midgard_notification(healthy=True)
-#        test_binance_health_notification(healthy=False)
-#        test_binance_health_notification(healthy=True)
-#
-#        print("✅ -----ALL TESTS PASSED----- ✅")
-#
-#    except AssertionError as e:
-#        print("💥 Assertion Error: 💥")
-#        print(e)
-#        print("💥 --> Shutting done Thornode Bot Process, Mock API Server Process and Telegram Client... 💥")
-#    finally:
-#        thornode_bot_process.terminate()
 
 if __name__ == '__main__':
     unittest.main()
