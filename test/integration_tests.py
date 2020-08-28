@@ -120,7 +120,7 @@ class ThornodeBot(unittest.TestCase):
 
             response = next(self.telegram.iter_history(self.BOT_ID))
 
-            number_of_unconfirmed_txs = json.load(open('unconfirmed_txs.json'))['result']['total']
+            number_of_unconfirmed_txs = json.load(open('mock_files/unconfirmed_txs.json'))['result']['total']
 
             assert response.text.find("Address: " + valid_address) != -1, "Thornode Details not showing stats"
             assert response.text.find("Number of Unconfirmed Txs: " + number_of_unconfirmed_txs) != -1, \
@@ -253,7 +253,7 @@ class ThornodeBot(unittest.TestCase):
     def test_block_height_notification(self):
         self.add_valid_address()
         with self.telegram:
-            with open('status.json') as json_read_file:
+            with open('mock_files/status.json') as json_read_file:
                 node_data = json.load(json_read_file)
 
             block_height = node_data['result']['sync_info']['latest_block_height']
@@ -261,7 +261,7 @@ class ThornodeBot(unittest.TestCase):
             node_data['result']['sync_info']['latest_block_height'] = str(new_block_height)
 
             time.sleep(7)
-            with open('status.json', 'w') as json_write_file:
+            with open('mock_files/status.json', 'w') as json_write_file:
                 json.dump(node_data, json_write_file)
             time.sleep(5)
 
@@ -333,7 +333,7 @@ class ThornodeBot(unittest.TestCase):
         assert response.text == text
 
     def add_valid_address(self):
-        valid_address = json.load(open('nodeaccounts.json'))[0]['node_address']
+        valid_address = json.load(open('mock_files/nodeaccounts.json'))[0]['node_address']
         self.assert_add_address(address=valid_address,
                      expected_response1="What's the address of your THORNode?",
                      expected_response2="Got it! 👌")
@@ -358,10 +358,10 @@ class ThornodeBot(unittest.TestCase):
     def assert_health_notification(self, chain, healthy):
         with self.telegram:
             if chain == THORCHAIN:
-                file_name = "midgard"
+                file_name = "mock_files/midgard"
                 messageContent = "Midgard API"
             elif chain == BINANCE:
-                file_name = "binance_health"
+                file_name = "mock_files/binance_health"
                 messageContent = "Binance Node"
             else:
                 assert False, "Chain in assert_health_notification is not recognized"
@@ -505,7 +505,7 @@ class ThornodeBot(unittest.TestCase):
         self.add_valid_address()
 
         with self.telegram:
-            with open('nodeaccounts.json') as json_read_file:
+            with open('mock_files/nodeaccounts.json') as json_read_file:
                 node_data_original = json.load(json_read_file)
                 node_data_new = copy.deepcopy(node_data_original)
 
@@ -522,7 +522,7 @@ class ThornodeBot(unittest.TestCase):
 
             node_data_new[0][field] = str(new_value)
 
-            with open('nodeaccounts.json', 'w') as json_write_file:
+            with open('mock_files/nodeaccounts.json', 'w') as json_write_file:
                 json.dump(node_data_new, json_write_file)
 
             time.sleep(12)
@@ -632,12 +632,12 @@ class ThornodeBot(unittest.TestCase):
     def assert_catch_up_notification(self, catching_up):
         self.add_valid_address()
         with self.telegram:
-            with open('status.json') as json_read_file:
+            with open('mock_files/status.json') as json_read_file:
                 node_data = json.load(json_read_file)
 
             node_data['result']['sync_info']['catching_up'] = catching_up
 
-            with open('status.json', 'w') as json_write_file:
+            with open('mock_files/status.json', 'w') as json_write_file:
                 json.dump(node_data, json_write_file)
             time.sleep(7)
 
