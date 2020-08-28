@@ -6,7 +6,7 @@ TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 
 NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
 NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
-    if 'NETWORK_TYPE' in os.environ and os.environ['NETWORK_TYPE'] in NETWORK_TYPES else 'TESTNET'
+    if 'NETWORK_TYPE' in os.environ and os.environ['NETWORK_TYPE'] in NETWORK_TYPES and not DEBUG else 'TESTNET'
 
 HEALTH_ENDPOINT_PATH = ':8080/v1/health'
 NETWORK_ENDPOINT_PATH = ':8080/v1/network'
