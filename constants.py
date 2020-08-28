@@ -4,10 +4,15 @@ import logging
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 
-STATUS_ENDPOINT_PATH = ":26657/status"
-UNCONFIRMED_TXS_ENDPOINT_PATH = ':26657/num_unconfirmed_txs'
+NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
+NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
+    if 'NETWORK_TYPE' in os.environ and os.environ['NETWORK_TYPE'] in NETWORK_TYPES and not DEBUG else 'TESTNET'
+
 HEALTH_ENDPOINT_PATH = ':8080/v1/health'
 NETWORK_ENDPOINT_PATH = ':8080/v1/network'
+SEED_NODE_ENDPOINT_PATH = {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[NETWORK_TYPE]
+STATUS_ENDPOINT_PATH = {"TESTNET": ":26657/status", "CHAOSNET": ":27147/status"}[NETWORK_TYPE]
+UNCONFIRMED_TXS_ENDPOINT_PATH = {"TESTNET": ":26657/num_unconfirmed_txs", "CHAOSNET": ":27147/num_unconfirmed_txs"}[NETWORK_TYPE]
 
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
@@ -27,7 +32,7 @@ NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
 INITIAL_NOTIFICATION_TIMEOUT = 15
 
 # Emojis for status of THORNodes
-STATUS_EMOJIS = {"active": "💚", "standby": "📆", "disabled": "🔴"}
+STATUS_EMOJIS = {"unknown": "❓", "whitelisted": "📋", "standby": "📆", "ready": "🙋🏽‍♂️", "active": "💚", "disabled": "🔴"}
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)

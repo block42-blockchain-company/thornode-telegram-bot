@@ -13,6 +13,7 @@ If you have questions feel free to open a github issue or contact us in our Tele
 
 Open `variables.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
+- `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
 - `BINANCE_NODE_IP` to any Binance Node IP you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor a Binance Node.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the Admin Area.
@@ -50,6 +51,14 @@ Set the telegram bot token you just created as an environment variable: `TELEGRA
 export TELEGRAM_BOT_TOKEN=XXX
 ```
 ---
+Set the network you want to monitor:
+```
+export NETWORK_TYPE=XXX
+```
+You can set it to `TESTNET` or `CHAOSNET`. If you leave this empty or write it wrong, testnet will be 
+monitored by default.
+---
+
 If you have a Binance Node IP that you want to monitor, you can set `BINANCE_NODE_IP` to this 
 IP. Set it to `localhost` if the Binance Node runs on the same machine as the Telegram Bot.
 
@@ -148,6 +157,9 @@ docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IP=XXX -v /var/run/do
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
+
+Set the `--env NETWORK_TYPE` flag to the network you want to monitor (`TESTNET` or `CHAOSNET` while 
+the former is the default).
 
 Set the `--env BINANCE_NODE_IP` flag to an IP of a running Binance Node, or to `localhost` if Telegram Bot and Binance
 Node run on the same machine.

@@ -60,10 +60,8 @@ def get_thornode_menu_buttons(user_data):
     keyboard = [[]]
 
     for address in user_data['nodes'].keys():
-        try:
-            emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']]
-        except:
-            emoji = STATUS_EMOJIS["disabled"]
+        emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']] \
+            if user_data['nodes'][address]['status'] in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
 
         truncated_address = address[:9] + "..." + address[-4:]
         button_text = emoji + " " + user_data['nodes'][address]['alias'] + " (" + truncated_address + ")"
@@ -326,7 +324,10 @@ def get_number_of_unconfirmed_txs(node_ip):
 
 
 def get_network_json():
-    url = 'http://' + get_random_seed_node_endpoint() + NETWORK_ENDPOINT_PATH
+    if DEBUG:
+        url = 'http://localhost:8080/network.json'
+    else:
+        url = 'http://' + get_random_seed_node_endpoint() + NETWORK_ENDPOINT_PATH
 
     while True:
         response = requests.get(url=url)
@@ -400,7 +401,7 @@ def get_random_seed_node_endpoint():
     Endpoint is chosen randomly from the seeding node.
     """
 
-    endpoints = requests.get('https://testnet-seed.thorchain.info').json()
+    endpoints = requests.get(url=SEED_NODE_ENDPOINT_PATH).json()
     return endpoints[random.randrange(0, len(endpoints))]
 
 

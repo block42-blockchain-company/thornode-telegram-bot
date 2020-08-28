@@ -520,7 +520,8 @@ def show_network_stats(update, context):
     text += "\n📡 Nodes:\n"
     total_nodes = 0
     for status in statuses.keys():
-        text += "  *" + str(statuses[status]) + "* (" + status + " " + STATUS_EMOJIS[status] + ")\n"
+        emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+        text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
         total_nodes += statuses[status]
     text += "  = *" + str(total_nodes) + "* (total)\n"
 
@@ -636,7 +637,7 @@ def main():
 
     # Start the bot
     bot.start_polling()
-    logger.info('THORNode Bot is running ...')
+    logger.info('THORNode Bot is running on ' + NETWORK_TYPE + ' ...')
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
