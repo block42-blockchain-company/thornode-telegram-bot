@@ -2,14 +2,7 @@ FROM ubuntu:18.04
 
 LABEL autoheal=true
 
-RUN mkdir /storage
-ADD scripts/healthcheck.py /
-
-ADD bot/thornode_bot.py /
-ADD requirements.txt/ /
-ADD bot/constants.py /
-ADD bot/helpers.py /
-ADD bot/jobs.py /
+ADD . /
 
 RUN apt-get update
 RUN apt-get install -y curl
