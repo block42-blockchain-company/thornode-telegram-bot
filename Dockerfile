@@ -2,14 +2,7 @@ FROM ubuntu:18.04
 
 LABEL autoheal=true
 
-RUN mkdir /storage
-ADD healthcheck.py/ /
-
-ADD thornode_bot.py/ /
-ADD requirements.txt/ /
-ADD constants.py/ /
-ADD helpers.py/ /
-ADD jobs.py/ /
+ADD . /
 
 RUN apt-get update
 RUN apt-get install -y curl
@@ -18,6 +11,6 @@ RUN apt-get install -y python3-pip
 
 RUN pip3 install -r requirements.txt
 
-HEALTHCHECK --start-period=10s --interval=10s --retries=2 --timeout=3s CMD [ "python3", "./healthcheck.py" ]
+HEALTHCHECK --start-period=10s --interval=10s --retries=2 --timeout=3s CMD [ "python3", "scripts/healthcheck.py" ]
 
-CMD [ "python3", "./thornode_bot.py" ]
+CMD [ "python3", "bot/thornode_bot.py" ]

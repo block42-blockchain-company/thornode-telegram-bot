@@ -1,25 +1,15 @@
-import random
 import subprocess
-import requests
 import json
 
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime, timedelta
 
-from constants import *
-
-"""
-######################################################################################################################################################
-Helpers
-######################################################################################################################################################
-"""
+from bot.constants import *
+from bot.messages import NETWORK_ERROR_MSG
+from bot.service.thorchain_network_service import *
 
 
 def try_message_with_home_menu(context, chat_id, text):
-    """
-    Send a new message with the home menu
-    """
-
     keyboard = get_home_menu_buttons()
     try_message(context=context, chat_id=chat_id, text=text,
                 reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
@@ -39,10 +29,6 @@ def get_home_menu_buttons():
 
 
 def show_thornode_menu_new_msg(update, context):
-    """
-    Send a new message with the Thornode Menu
-    """
-
     user_data = context.user_data if context.user_data else context.job.context['user_data']
 
     keyboard = get_thornode_menu_buttons(user_data=user_data)
@@ -82,17 +68,19 @@ def show_detail_menu(update, context):
     query = update.callback_query
     address = context.user_data['selected_node_address']
 
-    node = get_thornode_object(address=address)
+    try:
+        node = get_thornode_object_or_none(address=address)
+    except Exception as e:
+        logger.exception(e)
+        query.edit_message_text(NETWORK_ERROR_MSG)
+        show_thornode_menu_new_msg(update, context)
+        return
 
     if node is None:
         text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
         query.edit_message_text(text)
         show_thornode_menu_new_msg(update, context)
         return
-
-    latest_block_height = get_thorchain_latest_block_height()
-    blocks_per_second = get_thorchain_blocks_per_second()
-    status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
 
     text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
@@ -101,12 +89,26 @@ def show_detail_menu(update, context):
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
            'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-           'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n' + \
-           node['status'].capitalize() + ' for *' + \
-           format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
+           'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n'
 
-    unconfirmed_txs = get_number_of_unconfirmed_txs(node['ip_address'])
-    text += 'Number of Unconfirmed Txs: ' + '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+    try:
+        latest_block_height = get_latest_block_height()
+        blocks_per_second = get_thorchain_blocks_per_second()
+        status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
+
+        text += node['status'].capitalize() + ' for *' + \
+                format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
+    except Exception as e:
+        logger.exception(e)
+        text += 'Currently I Can\'t get duration of this status. Try again later!\n\n'
+
+    try:
+        text += 'Number of Unconfirmed Transactions: '
+        unconfirmed_txs = get_number_of_unconfirmed_transactions(node['ip_address'])
+        text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+    except Exception as e:
+        logger.exception(e)
+        text += 'Currently unavailable!\n\n'
 
     text += "What do you want to do with that Node?"
 
@@ -193,8 +195,8 @@ def try_message(context, chat_id, text, reply_markup=None):
             # Somehow session.data does not get updated if all users block the bot.
             # That makes problems on bot restart. That's why we delete the file ourselves.
             if len(context.dispatcher.persistence.user_data) == 0:
-                if os.path.exists("storage/session.data"):
-                    os.remove("storage/session.data")
+                if os.path.exists(session_data_path):
+                    os.remove(session_data_path)
             context.job.enabled = False
             context.job.schedule_removal()
         else:
@@ -212,7 +214,8 @@ def add_thornode_to_user_data(user_data, address, node):
         i += 1
         alias = "Thor-" + str(i)
         if not next(filter(
-                lambda current_address: user_data['nodes'][current_address]['alias'] == alias, user_data['nodes']), None):
+                lambda current_address: user_data['nodes'][current_address]['alias'] == alias, user_data['nodes']),
+                None):
             break
 
     user_data['nodes'][address] = {}
@@ -253,88 +256,16 @@ def get_running_docker_container():
     return json.loads(container_string)
 
 
-def get_thornode_object(address):
+def get_thornode_object_or_none(address):
     """
     Query nodeaccounts endpoints and return the Thornode object
     """
 
-    nodes = get_thorchain_validators()
-    # Get the right node
-    node = next(filter(lambda node: node['node_address'] == address, nodes), None)
+    nodes = get_node_accounts()
+
+    node = next(filter(lambda n: n['node_address'] == address, nodes), None)
+
     return node
-
-
-def get_thorchain_validators():
-    while True:
-        response = requests.get(url=get_thorchain_validators_endpoint())
-        if response.status_code == 200:
-            break
-
-    return response.json()
-
-
-def get_thorchain_latest_block_height(node_ip=None):
-    if node_ip is None:
-        node_ip = get_random_seed_node_endpoint()
-
-    url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
-    response = requests.get(url=url)
-
-    if response.status_code != 200:
-        raise Exception("Error while getting status")
-
-    body = response.json()
-    return body['result']['sync_info']['latest_block_height']
-
-
-def is_thorchain_catching_up(node_ip):
-    url = 'http://' + node_ip + STATUS_ENDPOINT_PATH
-
-    response = requests.get(url=url)
-    if response.status_code != 200:
-        return True
-
-    status = response.json()
-    return status['result']['sync_info']['catching_up']
-
-
-def is_thorchain_midgard_healthy(node_ip):
-    """
-    Returns status of Midgard API
-    """
-
-    url = 'http://' + node_ip + HEALTH_ENDPOINT_PATH
-    response = requests.get(url=url)
-    if response.status_code == 200:
-        return True
-    else:
-        return False
-
-
-def get_number_of_unconfirmed_txs(node_ip):
-    url = 'http://' + node_ip + UNCONFIRMED_TXS_ENDPOINT_PATH
-
-    while True:
-        response = requests.get(url=url)
-        if response.status_code == 200:
-            break
-
-    unconfirmed_txs_status = response.json()
-    return unconfirmed_txs_status['result']['total']
-
-
-def get_network_json():
-    if DEBUG:
-        url = 'http://localhost:8080/network.json'
-    else:
-        url = 'http://' + get_random_seed_node_endpoint() + NETWORK_ENDPOINT_PATH
-
-    while True:
-        response = requests.get(url=url)
-        if response.status_code == 200:
-            break
-
-    return response.json()
 
 
 def get_network_security(network_json):
@@ -342,7 +273,8 @@ def get_network_security(network_json):
     Returns the network security ratio in plain english
     """
 
-    network_security_ratio = 1 - (int(network_json['totalStaked']) / int(network_json['bondMetrics']['totalActiveBond']))
+    network_security_ratio = 1 - (
+            int(network_json['totalStaked']) / int(network_json['bondMetrics']['totalActiveBond']))
 
     if network_security_ratio > 0.9:
         qualitative_security = "Inefficent"
@@ -358,51 +290,8 @@ def get_network_security(network_json):
     return qualitative_security
 
 
-def is_binance_node_healthy():
-    url = 'http://' + BINANCE_NODE_IP + ':26657/health'
-
-    response = requests.get(url=url)
-    if response.status_code == 200:
-        return True
-    else:
-        return False
-
-
-def get_thorchain_blocks_per_year():
-    """
-    Return blocks per year of thorchain network
-    """
-
-    while True:
-        response = requests.get(url='http://' + get_random_seed_node_endpoint() + ':8080/v1/thorchain/constants')
-        if response.status_code == 200:
-            break
-
-    return response.json()['int_64_values']['BlocksPerYear']
-
-
 def get_thorchain_blocks_per_second():
     return get_thorchain_blocks_per_year() / (365 * 24 * 60 * 60)
-
-
-def get_thorchain_validators_endpoint():
-    """
-    Return the nodeaccounts endpoint to query data from.
-    """
-
-    if DEBUG:
-        return 'http://localhost:8080/nodeaccounts.json'
-    else:
-        return 'http://' + get_random_seed_node_endpoint() + ':1317/thorchain/nodeaccounts'
-
-
-def get_random_seed_node_endpoint():
-    """
-    Endpoint is chosen randomly from the seeding node.
-    """
-
-    endpoints = requests.get(url=SEED_NODE_ENDPOINT_PATH).json()
-    return endpoints[random.randrange(0, len(endpoints))]
 
 
 def tor_to_rune(tor):
@@ -421,7 +310,7 @@ def tor_to_rune(tor):
         return '{:.4f} RUNE'.format(tor / 100000000)
 
 
-def format_to_days_and_hours(duration: timedelta):
+def format_to_days_and_hours(duration: timedelta) -> str:
     result = ""
     hours = duration.seconds // 3600
 
