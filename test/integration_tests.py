@@ -6,11 +6,13 @@ import itertools
 import random
 import unittest
 import sys
+
+from bot.helpers import tor_to_rune
+
 sys.path.append('..')
 
 from subprocess import Popen
 from pyrogram import Client as TelegramClient
-from helpers import tor_to_rune
 
 """
 ######################################################################################################################################################
@@ -211,7 +213,7 @@ class ThornodeBot(unittest.TestCase):
             response = next(self.telegram.iter_history(self.BOT_ID))
 
             expected_response = 'THORNode: not monitored'
-            assert response.text.find(expected_response) != -1, "Expected '" + expected_response1 + \
+            assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
                                                                       "'\nbut got\n'" + response.text + "'"
             print("👀 SHOW ALL ✅")
             print("------------------------")
