@@ -637,7 +637,7 @@ def main():
 
     # Start the bot
     bot.start_polling()
-    logger.info('THORNode Bot is running ...')
+    logger.info('THORNode Bot is running on ' + NETWORK_TYPE + ' ...')
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
