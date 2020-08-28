@@ -8,12 +8,6 @@ NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
 NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
     if 'NETWORK_TYPE' in os.environ and os.environ['NETWORK_TYPE'] in NETWORK_TYPES and not DEBUG else 'TESTNET'
 
-HEALTH_ENDPOINT_PATH = ':8080/v1/health'
-NETWORK_ENDPOINT_PATH = ':8080/v1/network'
-SEED_NODE_ENDPOINT_PATH = {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[NETWORK_TYPE]
-STATUS_ENDPOINT_PATH = {"TESTNET": ":26657/status", "CHAOSNET": ":27147/status"}[NETWORK_TYPE]
-UNCONFIRMED_TXS_ENDPOINT_PATH = {"TESTNET": ":26657/num_unconfirmed_txs", "CHAOSNET": ":27147/num_unconfirmed_txs"}[NETWORK_TYPE]
-
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
     BINANCE_NODE_IP = 'localhost'

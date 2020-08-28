@@ -2,7 +2,7 @@ import random
 
 import requests
 
-from bot.constants import DEBUG, logger, BINANCE_NODE_IP
+from bot.constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE
 
 
 def get_node_accounts():
@@ -23,7 +23,9 @@ def get_node_status(node_ip=None):
     if node_ip is None:
         node_ip = get_random_seed_node_endpoint()
 
-    status_response = requests.get(url='http://' + node_ip + ':26657/status')
+    status_path = {"TESTNET": ":26657/status", "CHAOSNET": ":27147/status"}[NETWORK_TYPE]
+
+    status_response = requests.get(url='http://' + node_ip + status_path)
 
     if status_response.status_code != 200:
         raise BadStatusException(status_response)
@@ -50,7 +52,9 @@ def is_midgard_api_healthy(node_ip) -> bool:
 
 
 def get_number_of_unconfirmed_transactions(node_ip) -> int:
-    url = 'http://' + node_ip + ':26657/num_unconfirmed_txs'
+    unconfirmed_txs_path = {"TESTNET": ":26657/num_unconfirmed_txs", "CHAOSNET": ":27147/num_unconfirmed_txs"}[
+        NETWORK_TYPE]
+    url = 'http://' + node_ip + unconfirmed_txs_path
 
     transactions_data_response = requests.get(url=url)
 
@@ -61,7 +65,9 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
 
 
 def get_random_seed_node_endpoint() -> str:
-    seeding_node_url = 'https://testnet-seed.thorchain.info'  # todo: from .env
+    seeding_node_url = \
+        {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[
+            NETWORK_TYPE]
 
     available_node_ips = requests.get(seeding_node_url).json()
 
