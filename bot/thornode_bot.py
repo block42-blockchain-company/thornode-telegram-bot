@@ -15,6 +15,7 @@ from telegram.ext import (
 
 from handlers.network_info import *
 from constants import *
+from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
 
@@ -603,4 +604,4 @@ def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
