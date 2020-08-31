@@ -113,9 +113,9 @@ async def get_pool_addresses(node_ip: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(f'http://{node_ip}:8080/v1/thorchain/pool_addresses') as resp:
             if resp.status != 200:
-                raise Exception("Error while getting pool address." +
-                                " Endpoint responded with: " + await resp.text() + "\nCode: " +
-                                str(resp.status) + '')
+                raise Exception(f"Error while getting pool address. " +
+                                "Endpoint responded with: {await resp.text()} \n"
+                                "Code: ${str(resp.status)}")
 
             return await resp.json()
 

@@ -1,5 +1,7 @@
+import asyncio
 import subprocess
 import json
+from typing import Callable, Awaitable
 
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime, timedelta
@@ -343,3 +345,11 @@ def error(update, context):
     """
 
     logger.warning('Update "%s" caused error: %s', update, context.error)
+
+
+async def for_each_async(elements: [], function: Callable[..., Awaitable[None]]):
+    tasks = []
+    for element in elements:
+        tasks.append(function(element))
+
+    await asyncio.gather(*tasks)
