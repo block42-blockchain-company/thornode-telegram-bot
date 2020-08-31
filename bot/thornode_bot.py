@@ -606,14 +606,16 @@ def show_vault_key_addresses(update, context):
                                    text="Can't get node addresses. Please check the internet connection and try again.")
         return
 
-    ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))[:3]
+    ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))
 
     chain_to_node_addresses = defaultdict(list)
 
+    unavailable_addresses = []
     for node_ip in ip_addresses:
         try:
             pool_addresses = get_pool_addresses(node_ip)
         except Exception as e:
+            unavailable_addresses.append(node_ip)
             logger.exception(e)
             continue
 
@@ -630,6 +632,11 @@ def show_vault_key_addresses(update, context):
             message += "node" if nodes_agreeing == 1 else "nodes"
             message += ")\n"
         message += "\n"
+
+    if len(unavailable_addresses) > 0:
+        message += "😱 I couldn't get pool addresses from these nodes 😱:\n"
+        for address in unavailable_addresses:
+            message += f"{str(address)}\n"
 
     try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=message)
 
