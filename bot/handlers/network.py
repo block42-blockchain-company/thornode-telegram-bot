@@ -14,14 +14,6 @@ def show_network_menu(update, context):
                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-async def for_each_async(elements: [], function: Callable[..., Awaitable[None]]):
-    tasks = []
-    for element in elements:
-        tasks.append(function(element))
-
-    await asyncio.gather(*tasks)
-
-
 async def show_network_stats(update, context):
     """
     Show summarized information of the whole network
@@ -96,20 +88,21 @@ async def show_network_stats(update, context):
         try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 
 
+async def save_pool_address(ip_address, chain_to_node_addresses, unavailable_addresses):
+    try:
+        pool_addresses = await get_pool_addresses(ip_address)
+    except Exception as exc:
+        unavailable_addresses.append(ip_address)
+        logger.exception(exc)
+        return
+
+    for chain_data in pool_addresses['current']:
+        chain_to_node_addresses[chain_data['chain']].append(chain_data['address'])
+
+
 async def show_vault_key_addresses(update, context):
     chain_to_node_addresses = defaultdict(list)
     unavailable_addresses = []
-
-    async def save_pool(ip_address):
-        try:
-            pool_addresses = await get_pool_addresses(ip_address)
-        except Exception as e:
-            unavailable_addresses.append(ip_address)
-            logger.exception(e)
-            return
-
-        for chain in pool_addresses['current']:
-            chain_to_node_addresses[chain['chain']].append(chain['address'])
 
     try:
         node_accounts = get_node_accounts()
@@ -121,16 +114,18 @@ async def show_vault_key_addresses(update, context):
 
     ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))
 
-    await for_each_async(ip_addresses, save_pool)
+    await for_each_async(ip_addresses, lambda ip: save_pool_address(ip, chain_to_node_addresses, unavailable_addresses))
 
     message = ''
+
     for chain, addresses in chain_to_node_addresses.items():
         message += f"*{chain}*\n"
         distinct_addresses = set(addresses)
+
         for address in distinct_addresses:
-            nodes_agreeing = addresses.count(address)
-            message += f"{address} (*{str(nodes_agreeing)}* "
-            message += "node" if nodes_agreeing == 1 else "nodes"
+            nodes_agreeing_count = addresses.count(address)
+            message += f"{address} (*{str(nodes_agreeing_count)}* "
+            message += "node" if nodes_agreeing_count == 1 else "nodes"
             message += ")\n"
         message += "\n"
 
