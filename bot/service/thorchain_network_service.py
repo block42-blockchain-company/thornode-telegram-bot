@@ -108,6 +108,17 @@ def get_thorchain_blocks_per_year(node_ip=None):
     return constants_response.json()['int_64_values']['BlocksPerYear']
 
 
+def get_pool_addresses(node_ip: str):
+    pool_addresses_response = requests.get(url='http://' + node_ip + ':8080/v1/thorchain/pool_addresses')
+
+    if pool_addresses_response.status_code != 200:
+        raise Exception("Error while getting pool address." +
+                        " Endpoint responded with: " + pool_addresses_response.text + "\nCode: " +
+                        str(pool_addresses_response.status_code) + '')
+
+    return pool_addresses_response.json()
+
+
 class BadStatusException(Exception):
     def __init__(self, response: requests.Response):
         self.message = "Error while network request.\nReceived status code: " + \

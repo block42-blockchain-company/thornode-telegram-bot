@@ -599,20 +599,20 @@ def show_network_stats(update, context):
 
 def show_vault_key_addresses(update, context):
     try:
-        node_accounts = get_thorchain_validators()
+        node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
         try_message_with_home_menu(context=context, chat_id=update.effective_chat.id,
                                    text="Can't get node addresses. Please check the internet connection and try again.")
         return
 
-    ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))
+    ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))[:3]
 
     chain_to_node_addresses = defaultdict(list)
 
-    for node_ip in ip_addresses[:3]:
+    for node_ip in ip_addresses:
         try:
-            pool_addresses = get_pool(node_ip)
+            pool_addresses = get_pool_addresses(node_ip)
         except Exception as e:
             logger.exception(e)
             continue
@@ -621,25 +621,17 @@ def show_vault_key_addresses(update, context):
             chain_to_node_addresses[chain['chain']].append(chain['address'])
 
     message = ''
-    for chain, nodes_to_pointed_address in chain_to_node_addresses.items():
-        message += "Chain: " + chain
-        address_to_nodes_agreeing = defaultdict(int)
-        for address in nodes_to_pointed_address:
-            address_to_nodes_agreeing[address] += 1
+    for chain, addresses in chain_to_node_addresses.items():
+        message += f"*{chain}*\n"
+        distinct_addresses = set(addresses)
+        for address in distinct_addresses:
+            nodes_agreeing = addresses.count(address)
+            message += f"{address} (*{str(nodes_agreeing)}* "
+            message += "node" if nodes_agreeing == 1 else "nodes"
+            message += ")\n"
+        message += "\n"
 
-        print(address_to_nodes_agreeing)
-
-    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=str(chain_to_node_addresses))
-
-
-def get_pool(ip_address: str):
-    response = requests.get(url='http://' + ip_address + ':8080/v1/thorchain/pool_addresses')
-
-    if response.status_code != 200:
-        raise Exception("Error while getting pool address." +
-                        " Endpoint responded with: " + response.text + "\nCode: " + str(response.status_code) + '')
-
-    return response.json()
+    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=message)
 
 
 def show_all_thorchain_nodes(update, context):

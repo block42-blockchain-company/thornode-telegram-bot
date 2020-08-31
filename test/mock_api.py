@@ -28,8 +28,8 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
         if endpoint == '/v1/health':
             self.path = 'mock_files/midgard.json'
         elif endpoint == '/v1/thorchain/pool_addresses':
-            self.pool_addresses_counter += 1
-            self.path = 'mock_files/pool_addresses_' + str(self.pool_addresses_counter % 3 + 1) + '.json'
+            MidgardHttpServerHandler.pool_addresses_counter += 1
+            self.path = 'mock_files/pool_addresses_' + str(MidgardHttpServerHandler.pool_addresses_counter % 3 + 1) + '.json'
         else:
             self.path = 'mock_files' + endpoint
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
