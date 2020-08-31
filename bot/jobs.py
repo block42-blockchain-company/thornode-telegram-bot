@@ -1,5 +1,5 @@
-from bot.helpers import *
-from bot.service.thorchain_network_service import *
+from helpers import *
+from service.thorchain_network_service import *
 
 
 def thornode_checks(context):

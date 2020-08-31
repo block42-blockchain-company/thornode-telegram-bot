@@ -1,9 +1,7 @@
-import asyncio
 from collections import defaultdict
-from typing import Callable, Awaitable
 
-from bot.helpers import *
-from bot.messages import NETWORK_ERROR_MSG
+from helpers import *
+from messages import NETWORK_ERROR_MSG
 
 
 def show_network_menu(update, context):

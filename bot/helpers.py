@@ -6,9 +6,9 @@ from typing import Callable, Awaitable
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime, timedelta
 
-from bot.constants import *
-from bot.messages import NETWORK_ERROR_MSG
-from bot.service.thorchain_network_service import *
+from constants import *
+from messages import NETWORK_ERROR_MSG
+from service.thorchain_network_service import *
 
 
 def try_message_with_home_menu(context, chat_id, text):

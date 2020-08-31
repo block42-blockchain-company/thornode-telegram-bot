@@ -1,8 +1,6 @@
-import asyncio
 import atexit
 import copy
 import re
-from collections import defaultdict
 
 from telegram.error import BadRequest
 from telegram.ext.dispatcher import run_async
@@ -15,10 +13,10 @@ from telegram.ext import (
     Filters
 )
 
-from bot.handlers.network import show_network_menu, show_network_stats, show_vault_key_addresses
-from bot.jobs import *
-from bot.messages import NETWORK_ERROR_MSG
-from bot.service.thorchain_network_service import get_network_data, get_latest_block_height
+from handlers.network_info import *
+from constants import *
+from messages import NETWORK_ERROR_MSG
+from service.thorchain_network_service import *
 
 """
 ######################################################################################################################################################

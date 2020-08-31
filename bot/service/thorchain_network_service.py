@@ -3,7 +3,7 @@ import random
 import aiohttp
 import requests
 
-from bot.constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE
+from constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE
 
 
 def get_node_accounts():
