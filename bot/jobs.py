@@ -1,4 +1,5 @@
 from helpers import *
+from service.local_storage_service import LocalStorageService
 from service.thorchain_network_service import *
 
 
@@ -252,3 +253,26 @@ def update_health_check_file(context):
     with open(path, 'w') as healthcheck_file:
         timestamp = datetime.timestamp(datetime.now())
         healthcheck_file.write(str(timestamp))
+
+
+def check_versions_status_job(context):
+    service = LocalStorageService(context)
+    logger.info("I'm checking version changes...")
+    message = ''
+
+    try:
+        node_accounts = get_node_accounts()
+    except Exception as e:
+        logger.exception(e)
+        message = 'I couldn\'t check the versions of other nodes in network! List of nodes currently unavailable!'
+        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
+        return
+
+    for node in node_accounts:
+        if service.has_changed_version(node['address'], node['version']):
+            message += f"Node {node['address']} changed software version:" \
+                       f" {service.get_saved_version(node['address'])} -> {node['version']}\n"
+            service.save_new_version(node['address'], node['version'])
+
+    if len(message) > 0:
+        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
