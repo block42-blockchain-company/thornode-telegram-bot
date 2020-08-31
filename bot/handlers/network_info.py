@@ -6,7 +6,7 @@ from messages import NETWORK_ERROR_MSG
 
 def show_network_menu(update, context):
     keyboard = [[InlineKeyboardButton('📊 NETWORK STATS', callback_data='show-network-stats')],
-                [InlineKeyboardButton('🔒 VAULT KEY ADDRESS', callback_data='vault_key_addresses')]]
+                [InlineKeyboardButton('🔒 VAULT ADDRESSES', callback_data='vault_key_addresses')]]
 
     try_message(context=context, chat_id=update.effective_message.chat_id, text='Choose an option:',
                 reply_markup=InlineKeyboardMarkup(keyboard))

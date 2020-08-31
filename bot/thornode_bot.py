@@ -3,7 +3,6 @@ import copy
 import re
 
 from telegram.error import BadRequest
-from telegram.ext.dispatcher import run_async
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -12,9 +11,9 @@ from telegram.ext import (
     MessageHandler,
     Filters
 )
+from telegram.ext.dispatcher import run_async
 
 from handlers.network_info import *
-from constants import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
