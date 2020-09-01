@@ -306,6 +306,9 @@ class ThornodeBot(unittest.TestCase):
         self.assert_health_notification(BINANCE, healthy=False)
         self.assert_health_notification(BINANCE, healthy=True)
 
+    def test_version_change_notification(self):
+        self.assert_version_change_notification()
+
     """
     ######################################################################################################################################################
     HELPER
@@ -653,6 +656,28 @@ class ThornodeBot(unittest.TestCase):
 
             print("Check catch up status with catching_up=" + str(catching_up) + " ✅")
             print("------------------------")
+
+    def assert_version_change_notification(self):
+        with self.telegram:
+            with open('mock_files/nodeaccounts.json') as file:
+                node_accounts = json.load(file)
+
+            node_accounts[0]['version'] = '42.0.42'
+
+            with open('mock_files/nodeaccounts.json', 'w') as file:
+                json.dump(node_accounts, file)
+
+            time.sleep(8)
+
+            self.assert_bot_message('Node thor97 changed software version: 0.7.0 -> 42.0.42')
+
+            print("Check version change notification:  ✅")
+            print("------------------------")
+
+    def assert_bot_message(self, expected_response):
+        response = next(self.telegram.iter_history(self.BOT_ID))
+        assert response.text.find(
+            expected_response) != -1, f"Expected '{expected_response}'\nbut got\n'{response.text}'"
 
 
 if __name__ == '__main__':
