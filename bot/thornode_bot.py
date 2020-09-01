@@ -211,7 +211,6 @@ def dispatch_query(update, context):
                 raise
 
     if call:
-        call = asyncio.coroutine(call)
         return asyncio.run(call(update, context))
 
 
