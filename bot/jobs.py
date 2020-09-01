@@ -7,7 +7,7 @@ def thornode_checks(context):
     """
     Periodic checks of various node stats
     """
-
+    check_versions_status(context)
     check_thornodes(context)
     if BINANCE_NODE_IP:
         check_binance_health(context)
@@ -255,7 +255,7 @@ def update_health_check_file(context):
         healthcheck_file.write(str(timestamp))
 
 
-def check_versions_status_job(context):
+def check_versions_status(context):
     service = LocalStorageService(context)
     logger.info("I'm checking version changes...")
     message = ''
@@ -269,10 +269,10 @@ def check_versions_status_job(context):
         return
 
     for node in node_accounts:
-        if service.has_changed_version(node['address'], node['version']):
-            message += f"Node {node['address']} changed software version:" \
-                       f" {service.get_saved_version(node['address'])} -> {node['version']}\n"
-            service.save_new_version(node['address'], node['version'])
+        if service.has_changed_version(node['node_address'], node['version']):
+            message += f"Node {node['node_address']} changed software version:" \
+                       f" {service.get_saved_version(node['node_address'])} -> {node['version']}\n"
+            service.save_new_version(node['node_address'], node['version'])
 
     if len(message) > 0:
         try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
