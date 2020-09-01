@@ -166,7 +166,7 @@ def dispatch_query(update, context):
         call = show_thornode_menu_edit_msg
     elif data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
-    elif data == 'show-network-stats':
+    elif data == 'show_network_stats':
         call = show_network_stats
     elif data == 'vault_key_addresses':
         call = show_vault_key_addresses

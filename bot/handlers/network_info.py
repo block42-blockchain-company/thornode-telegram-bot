@@ -5,7 +5,7 @@ from messages import NETWORK_ERROR_MSG
 
 
 def show_network_menu(update, context):
-    keyboard = [[InlineKeyboardButton('📊 NETWORK STATS', callback_data='show-network-stats')],
+    keyboard = [[InlineKeyboardButton('📊 NETWORK STATS', callback_data='show_network_stats')],
                 [InlineKeyboardButton('🔒 VAULT ADDRESSES', callback_data='vault_key_addresses')]]
 
     try_message(context=context, chat_id=update.effective_message.chat_id, text='Choose an option:',
@@ -107,7 +107,7 @@ async def show_vault_key_addresses(update, context):
     except Exception as e:
         logger.exception(e)
         try_message_with_home_menu(context=context, chat_id=update.effective_chat.id,
-                                   text="Can't get node addresses. Please check the internet connection and try again.")
+                                   text="Can't get node addresses, please try again.")
         return
 
     ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))
