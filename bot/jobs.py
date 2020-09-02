@@ -270,8 +270,10 @@ def check_versions_status(context):
 
     for node in node_accounts:
         if service.has_changed_version(node['node_address'], node['version']):
-            message += f"Node {node['node_address']} changed software version:" \
-                       f" {service.get_saved_version(node['node_address'])} -> {node['version']}\n"
+            message += f"Node *{node['node_address']}* \n" \
+                       f"Ip address: *{node['ip_address']}*\n" \
+                       f"Changed software version \n" \
+                       f" *{service.get_saved_version(node['node_address'])}*   ➡️   *{node['version']}*\n"
             service.save_new_version(node['node_address'], node['version'])
 
     if len(message) > 0:
