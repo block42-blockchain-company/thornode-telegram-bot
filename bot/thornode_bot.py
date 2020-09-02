@@ -3,7 +3,6 @@ import copy
 import re
 
 from telegram.error import BadRequest
-from telegram.ext.dispatcher import run_async
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -12,10 +11,12 @@ from telegram.ext import (
     MessageHandler,
     Filters
 )
+from telegram.ext.dispatcher import run_async
 
-from bot.jobs import *
-from bot.messages import NETWORK_ERROR_MSG
-from bot.service.thorchain_network_service import get_network_data, get_latest_block_height
+from handlers.network_info import *
+from jobs import *
+from messages import NETWORK_ERROR_MSG
+from service.thorchain_network_service import *
 
 """
 ######################################################################################################################################################
@@ -165,6 +166,10 @@ def dispatch_query(update, context):
         call = show_thornode_menu_edit_msg
     elif data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
+    elif data == 'show_network_stats':
+        call = show_network_stats
+    elif data == 'vault_key_addresses':
+        call = show_vault_key_addresses
     elif data == 'add_thornode':
         call = add_thornode
     elif data == 'confirm_add_all_thornodes':
@@ -205,7 +210,8 @@ def dispatch_query(update, context):
                 raise
 
     if call:
-        return call(update, context)
+        call = asyncio.coroutine(call)
+        return asyncio.run(call(update, context))
 
 
 def show_home_menu_edit_msg(update, context):
@@ -295,7 +301,7 @@ def plain_input(update, context):
     if message == '📡 MY NODES':
         return show_thornode_menu_handler(update, context)
     elif message == '🌎 NETWORK':
-        return show_network_stats(update, context)
+        return show_network_menu(update, context)
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
     elif message == '🔑 ADMIN AREA':
@@ -506,80 +512,6 @@ def restart_container(update, context):
 
     query.edit_message_text('Container\n*' + container_name + '*\nsuccessfully restarted!', parse_mode='markdown')
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
-
-
-def show_network_stats(update, context):
-    """
-    Show summarized information of the whole network
-    """
-
-    text = "Status of the whole THORChain network: \n"
-
-    try:
-        network = get_network_data()
-        validators = get_node_accounts()
-
-        statuses = {}
-        versions = {}
-        for validator in validators:
-            status = validator['status']
-            version = validator['version']
-
-            statuses[status] = 1 if not status in statuses else statuses[status] + 1
-            versions[version] = 1 if not version in versions else versions[version] + 1
-
-        text += "\n📡 Nodes:\n"
-        total_nodes = 0
-        for status in statuses.keys():
-            emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
-            text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
-            total_nodes += statuses[status]
-        text += "  = *" + str(total_nodes) + "* (total)\n"
-
-        text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
-                tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
-                tor_to_rune(network['bondMetrics']['averageActiveBond']) + "* (avg)\n  *" + \
-                tor_to_rune(network['bondMetrics']['medianActiveBond']) + "* (median)\n  *" + \
-                tor_to_rune(network['bondMetrics']['maximumActiveBond']) + "* (max)\n  *" + \
-                tor_to_rune(network['bondMetrics']['minimumActiveBond']) + "* (min)\n"
-
-        text += "\n" + STATUS_EMOJIS["standby"] + "  Standby Bonds:\n  *" + \
-                tor_to_rune(network['bondMetrics']['totalStandbyBond']) + "* (total)\n  *" + \
-                tor_to_rune(network['bondMetrics']['averageStandbyBond']) + "* (avg)\n  *" + \
-                tor_to_rune(network['bondMetrics']['medianStandbyBond']) + "* (median)\n  *" + \
-                tor_to_rune(network['bondMetrics']['maximumStandbyBond']) + "* (max)\n  *" + \
-                tor_to_rune(network['bondMetrics']['minimumStandbyBond']) + "* (min)\n"
-
-        text += "\n💰 Block Rewards:\n  *" + \
-                tor_to_rune(network['blockRewards']['blockReward']) + "* (total)\n  *" + \
-                tor_to_rune(network['blockRewards']['bondReward']) + "* (nodes)\n  *" + \
-                tor_to_rune(network['blockRewards']['stakeReward']) + "* (stakers)\n  *" + \
-                '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
-                    network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
-
-        text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
-
-        blocks_per_year = get_thorchain_blocks_per_year()
-        text += "\n↩️ Node ROI: *" + \
-                '{:.2f}'.format((float(network['blockRewards']['bondReward']) * blocks_per_year) / float(
-                    network['bondMetrics']['totalActiveBond']) * 100) \
-                + "*% APY\n"
-
-        text += "\n📀 Versions:\n"
-        total_versions = 0
-        for version in versions.keys():
-            total_versions += versions[version]
-        for version in versions.keys():
-            text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
-
-        latest_block_height = get_latest_block_height()
-        text += '\n⛏ Block Height: *' + str(latest_block_height) + "*\n"
-
-    except Exception as e:
-        logger.exception(e)
-        text += NETWORK_ERROR_MSG
-    finally:
-        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
 
 
 def show_all_thorchain_nodes(update, context):

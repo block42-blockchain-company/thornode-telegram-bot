@@ -1,8 +1,9 @@
 import random
 
+import aiohttp
 import requests
 
-from bot.constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE
+from constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE
 
 
 def get_node_accounts():
@@ -106,6 +107,17 @@ def get_thorchain_blocks_per_year(node_ip=None):
         raise BadStatusException(constants_response)
 
     return constants_response.json()['int_64_values']['BlocksPerYear']
+
+
+async def get_pool_addresses(node_ip: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'http://{node_ip}:8080/v1/thorchain/pool_addresses') as resp:
+            if resp.status != 200:
+                raise Exception(f"Error while getting pool address. " +
+                                "Endpoint responded with: {await resp.text()} \n"
+                                "Code: ${str(resp.status)}")
+
+            return await resp.json()
 
 
 class BadStatusException(Exception):

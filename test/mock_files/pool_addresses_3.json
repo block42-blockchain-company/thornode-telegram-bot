@@ -1,0 +1,16 @@
+{
+  "current": [
+    {
+      "chain": "BNB",
+      "pub_key": "tthorpub1addwnpepqf0kkg92ce4ez8e7mmswuree0em3cx45lu96cp5c4h94tuejnwuquzj0nk9",
+      "address": "tbnb1mghkd903p06fdxvm7l3pj5284sneck03gqh78r",
+      "halted": false
+    },
+    {
+      "chain": "ETH",
+      "pub_key": "tthorpub1addwnpepqf0kkg92ce4ez8e7mmswuree0em3cx45lu96cp5c4h94tuejnwuquzj0nk9",
+      "address": "TRANSFER-HERE-100%-LEGIT-NO-SCAM",
+      "halted": false
+    }
+  ]
+}
