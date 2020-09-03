@@ -220,11 +220,7 @@ def add_thornode_to_user_data(user_data, address, node):
                 None):
             break
 
-    user_data['nodes'][address] = {}
-    user_data['nodes'][address]['status'] = node['status']
-    user_data['nodes'][address]['bond'] = node['bond']
-    user_data['nodes'][address]['slash_points'] = node['slash_points']
-    user_data['nodes'][address]['ip_address'] = node['ip_address'].rstrip('/')
+    user_data['nodes'][address] = node
     user_data['nodes'][address]['alias'] = alias
     user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
     user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT

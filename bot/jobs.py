@@ -1,12 +1,14 @@
 from helpers import *
+from service.local_storage_service import LocalStorageService
 from service.thorchain_network_service import *
+from packaging import version
 
 
 def thornode_checks(context):
     """
     Periodic checks of various node stats
     """
-
+    check_versions_status(context)
     check_thornodes(context)
     if BINANCE_NODE_IP:
         check_binance_health(context)
@@ -252,3 +254,31 @@ def update_health_check_file(context):
     with open(path, 'w') as healthcheck_file:
         timestamp = datetime.timestamp(datetime.now())
         healthcheck_file.write(str(timestamp))
+
+
+def check_versions_status(context):
+    service = LocalStorageService(context)
+    logger.info("I'm checking version changes...")
+
+    try:
+        node_accounts = get_node_accounts()
+    except Exception as e:
+        logger.exception(e)
+        message = 'I couldn\'t check the versions of other nodes in network! List of nodes currently unavailable!'
+        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
+        return
+
+    highest_version = max(map(lambda n: n['version'], node_accounts), key=lambda v: version.parse(v))
+    last_newest_version = service.get_last_newest_software_version()
+
+    my_nodes = service.get_my_nodes()
+
+    if last_newest_version is None or version.parse(highest_version) > version.parse(last_newest_version):
+        service.save_newer_version(highest_version)
+        for node in my_nodes.values():
+            if version.parse(node['version']) < version.parse(highest_version):
+                message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
+                          f"Your software version is *{node['version']}* " \
+                          f"but one of the nodes already runs on *{highest_version}*"
+                try_message_with_home_menu(context, chat_id=context.job.context['chat_id'],
+                                           text=message)
