@@ -3,3 +3,4 @@ requests==2.23.0
 python-telegram-bot==12.6.1
 tgcrypto==1.2.0
 aiohttp==3.6.2
+packaging==20.4

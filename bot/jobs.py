@@ -1,6 +1,7 @@
 from helpers import *
 from service.local_storage_service import LocalStorageService
 from service.thorchain_network_service import *
+from packaging import version
 
 
 def thornode_checks(context):
@@ -258,7 +259,6 @@ def update_health_check_file(context):
 def check_versions_status(context):
     service = LocalStorageService(context)
     logger.info("I'm checking version changes...")
-    message = ''
 
     try:
         node_accounts = get_node_accounts()
@@ -268,13 +268,17 @@ def check_versions_status(context):
         try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
         return
 
-    for node in node_accounts:
-        if service.has_changed_version(node['node_address'], node['version']):
-            message += f"Node *{node['node_address']}* \n" \
-                       f"Ip address: *{node['ip_address']}*\n" \
-                       f"Changed software version \n" \
-                       f" *{service.get_saved_version(node['node_address'])}*   ➡️   *{node['version']}*\n"
-            service.save_new_version(node['node_address'], node['version'])
+    highest_version = max(map(lambda n: n['version'], node_accounts), key=lambda v: version.parse(v))
+    last_newest_version = service.get_last_newest_software_version()
 
-    if len(message) > 0:
-        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
+    my_nodes = service.get_my_nodes()
+
+    if last_newest_version is None or version.parse(highest_version) > version.parse(last_newest_version):
+        service.save_newer_version(highest_version)
+        for node in my_nodes.values():
+            if version.parse(node['version']) < version.parse(highest_version):
+                message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
+                          f"Your software version is *{node['version']}* " \
+                          f"but one of the nodes already runs on *{highest_version}*"
+                try_message_with_home_menu(context, chat_id=context.job.context['chat_id'],
+                                           text=message)
