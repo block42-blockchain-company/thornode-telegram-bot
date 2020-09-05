@@ -44,14 +44,6 @@ def check_thornodes(context):
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
             continue
 
-        node_ip_address = node_data['ip_address']
-
-        check_thorchain_block_height(context, node_ip=node_ip_address, node_address=node_address)
-
-        check_thorchain_catch_up_status(context, node_ip=node_ip_address)
-
-        check_thorchain_midgard_api(context, node_ip=node_ip_address)
-
         # isNotBlocked = lastTimestamp < currentTimestamp - timeout
         if float(local_node['last_notification_timestamp']) < \
                 float(datetime.timestamp(
@@ -84,6 +76,7 @@ def check_thornodes(context):
                 local_node['status'] = remote_node['status']
                 local_node['bond'] = remote_node['bond']
                 local_node['slash_points'] = remote_node['slash_points']
+                local_node['ip_address'] = remote_node['ip_address']
                 local_node['last_notification_timestamp'] = datetime.timestamp(datetime.now())
                 local_node['notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
 
@@ -91,11 +84,18 @@ def check_thornodes(context):
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
+        if local_node['status'] in MONITORED_STATUSES:
+            check_thorchain_block_height(context, node_address=node_address)
+
+            check_thorchain_catch_up_status(context, node_address=node_address)
+
+            check_thorchain_midgard_api(context, node_address=node_address)
+
     for node_address in inactive_nodes:
         del user_data['nodes'][node_address]
 
 
-def check_thorchain_block_height(context, node_ip, node_address):
+def check_thorchain_block_height(context, node_address):
     """
     Make sure the block height increases
     """
@@ -104,10 +104,17 @@ def check_thorchain_block_height(context, node_ip, node_address):
     node_data = context.job.context['user_data']['nodes'][node_address]
 
     try:
-        block_height = get_latest_block_height(node_ip)
+        block_height = get_latest_block_height(node_data['ip_address'])
     except Exception as e:
         logger.exception(e)
         return
+
+    # Send message if there were changes or block height just got (un)stuck
+    # Stuck count:
+    # 0 == everthings alright
+    # 1 == just got stuck
+    # -1 == just got unstuck
+    # > 1 == still stuck
 
     # Check if block height got stuck
     if 'block_height' in node_data and block_height <= node_data['block_height']:
@@ -118,7 +125,7 @@ def check_thorchain_block_height(context, node_ip, node_address):
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in node_data and node_data['block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
-                   'IP: ' + node_ip + '\n' + \
+                   'IP: ' + node_data['ip_address'] + '\n' + \
                    'THORNode: ' + node_data['alias'] + '\n' + \
                    'Node address: ' + node_address + '\n' + \
                    'Block height now at: ' + block_height + '\n'
@@ -133,85 +140,83 @@ def check_thorchain_block_height(context, node_ip, node_address):
     # If it just got stuck send a message
     if node_data['block_height_stuck_count'] == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
-               'IP: ' + node_ip + '\n' + \
+               'IP: ' + node_data['ip_address'] + '\n' + \
                'THORNode: ' + node_data['alias'] + '\n' + \
                'Node address: ' + node_address + '\n' + \
                'Block height stuck at: ' + block_height + '\n\n' + \
                'Please check your Thornode immediately!'
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
 
-    # Show buttons if there were changes or block height just got (un)stuck
-    # Stuck count:
-    # 0 == everthings alright
-    # 1 == just got stuck
-    # -1 == just got unstuck
-    # > 1 == still stuck
 
-    # if user_data['block_height_stuck_count'] == 1 or user_data['block_height_stuck_count'] == -1:
-    #    try_message_with_home_menu(context=context, chat_id=chat_id)
-
-
-def check_thorchain_catch_up_status(context, node_ip):
+def check_thorchain_catch_up_status(context, node_address):
     """
     Check if node is some blocks behind with catch up status
     """
 
     chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    node_data = context.job.context['user_data']['nodes'][node_address]
 
-    if 'is_catching_up' not in user_data:
-        user_data['is_catching_up'] = False
+    if 'is_catching_up' not in node_data:
+        node_data['is_catching_up'] = False
 
     try:
-        is_currently_catching_up = is_thorchain_catching_up(node_ip)
+        is_currently_catching_up = is_thorchain_catching_up(node_data['ip_address'])
     except Exception as e:
         logger.exception(e)
         return
 
-    if user_data['is_catching_up'] != is_currently_catching_up:
+    if node_data['is_catching_up'] != is_currently_catching_up:
         try:
-            block_height = get_latest_block_height(node_ip)
+            block_height = get_latest_block_height(node_data['ip_address'])
         except Exception as e:
             logger.exception(e)
             block_height = "currently unavailable"
 
         if is_currently_catching_up:
-            user_data['is_catching_up'] = True
+            node_data['is_catching_up'] = True
             text = 'The Node is behind the latest block height and catching up! 💀 ' + '\n' + \
-                   'IP: ' + node_ip + '\n' + \
+                   'IP: ' + node_data['ip_address'] + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address + '\n' + \
                    'Current block height: ' + block_height + '\n\n' + \
                    'Please check your Thornode immediately!'
         else:
-            user_data['is_catching_up'] = False
+            node_data['is_catching_up'] = False
             text = 'The node caught up to the latest block height again! 👌' + '\n' + \
-                   'IP: ' + node_ip + '\n' + \
+                   'IP: ' + node_data['ip_address'] + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address + '\n' + \
                    'Current block height: ' + block_height
         try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
 
 
-def check_thorchain_midgard_api(context, node_ip):
+def check_thorchain_midgard_api(context, node_address):
     """
     Check that Midgard API is ok
     """
 
     chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    node_data = context.job.context['user_data']['nodes'][node_address]
 
-    if 'is_midgard_healthy' not in user_data:
-        user_data['is_midgard_healthy'] = True
+    if 'is_midgard_healthy' not in node_data:
+        node_data['is_midgard_healthy'] = True
 
-    is_midgard_healthy = is_midgard_api_healthy(node_ip)
+    is_midgard_healthy = is_midgard_api_healthy(node_data['ip_address'])
 
-    if user_data['is_midgard_healthy'] != is_midgard_healthy:
+    if node_data['is_midgard_healthy'] != is_midgard_healthy:
         if is_midgard_healthy:
-            user_data['is_midgard_healthy'] = True
+            node_data['is_midgard_healthy'] = True
             text = 'Midgard API is healthy again! 👌' + '\n' + \
-                   'IP: ' + node_ip + '\n'
+                   'IP: ' + node_data['ip_address'] + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
         else:
-            user_data['is_midgard_healthy'] = False
+            node_data['is_midgard_healthy'] = False
             text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
-                   'IP: ' + node_ip + '\n\n' + \
+                   'IP: ' + node_data['ip_address'] + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address + '\n\n' + \
                    'Please check your Thornode immediately!'
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
