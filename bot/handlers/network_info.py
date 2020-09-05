@@ -110,7 +110,8 @@ async def show_vault_key_addresses(update, context):
                                    text="Can't get node addresses, please try again.")
         return
 
-    ip_addresses = list(map(lambda x: x['ip_address'], node_accounts))
+    monitored_node_accounts = list(filter(lambda x: x['status'] in MONITORED_STATUSES, node_accounts))
+    ip_addresses = list(map(lambda x: x['ip_address'], monitored_node_accounts))
 
     await for_each_async(ip_addresses, lambda ip: save_pool_address(ip, chain_to_node_addresses, unavailable_addresses))
 

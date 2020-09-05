@@ -8,6 +8,7 @@ import unittest
 import sys
 
 from bot.helpers import tor_to_rune
+from bot.constants import MONITORED_STATUSES
 
 sys.path.append('..')
 
@@ -116,7 +117,7 @@ class ThornodeBot(unittest.TestCase):
 
             response = next(self.telegram.iter_history(self.BOT_ID))
             self.click_button(response.reply_markup.inline_keyboard[0][0].text)
-            time.sleep(5)
+            time.sleep(10)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
 
@@ -293,6 +294,7 @@ class ThornodeBot(unittest.TestCase):
         self.assert_thornode_notification(field="node_address")
 
     def test_catch_up_notification(self):
+        self.add_valid_address()
         self.assert_catch_up_notification(catching_up=True)
         self.assert_catch_up_notification(catching_up=False)
 
@@ -513,10 +515,10 @@ class ThornodeBot(unittest.TestCase):
             if field == 'node_address':
                 new_value = 'thor' + str(new_value)
             elif field == 'status':
-                statuses = ['active', 'standby', 'disabled']
-                if statuses[new_value % 3] == node_data_original[0][field]:
+                statuses = MONITORED_STATUSES
+                if statuses[new_value % len(MONITORED_STATUSES)] == node_data_original[0][field]:
                     new_value += 1
-                new_value = statuses[new_value % 3]
+                new_value = statuses[new_value % len(MONITORED_STATUSES)]
             else:
                 new_value += int(node_data_new[0][field])
 
@@ -630,7 +632,6 @@ class ThornodeBot(unittest.TestCase):
             print("------------------------")
 
     def assert_catch_up_notification(self, catching_up):
-        self.add_valid_address()
         with self.telegram:
             with open('mock_files/status.json') as json_read_file:
                 node_data = json.load(json_read_file)

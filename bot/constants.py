@@ -28,6 +28,8 @@ INITIAL_NOTIFICATION_TIMEOUT = 15
 # Emojis for status of THORNodes
 STATUS_EMOJIS = {"unknown": "❓", "whitelisted": "📋", "standby": "📆", "ready": "🙋🏽‍♂️", "active": "💚", "disabled": "🔴"}
 
+MONITORED_STATUSES = ["standby", "ready", "active"]
+
 JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 
 # Enable logging
