@@ -271,7 +271,9 @@ def get_network_security(network_json):
     Returns the network security ratio in plain english
     """
 
-    network_security_ratio = int(network_json['bondMetrics']['totalActiveBond']) / int(network_json['totalStaked'])
+    total_active_bond = int(network_json['bondMetrics']['totalActiveBond'])
+    total_staked = int(network_json['totalStaked'])
+    network_security_ratio = total_active_bond / (total_active_bond + total_staked / 2) # only half of total_staked is RUNE
 
     if network_security_ratio > 0.9:
         qualitative_security = "Inefficent"
