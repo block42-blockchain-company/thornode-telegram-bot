@@ -61,13 +61,11 @@ async def show_network_stats(update, context):
                 '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
                     network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
-        text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
+        text += "\n🔓 Network Security:  *" + get_qualitative_network_security(network) + "*\n"
 
-        blocks_per_year = get_thorchain_blocks_per_year()
         text += "\n↩️ Node ROI: *" + \
-                '{:.2f}'.format((float(network['blockRewards']['bondReward']) * blocks_per_year) / float(
-                    network['bondMetrics']['totalActiveBond']) * 100) \
-                + "*% APY\n"
+                '{:.2f}'.format(float(network['bondingROI']) * 100) \
+                + " %* APY\n"
 
         text += "\n📀 Versions:\n"
         total_versions = 0

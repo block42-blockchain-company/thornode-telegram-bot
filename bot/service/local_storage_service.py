@@ -13,3 +13,6 @@ class LocalStorageService:
 
     def save_newer_version(self, version: str):
         self.context.job.context['user_data']['newest_software_version'] = version
+
+    def get_node_statuses(self):
+        return self.context.job.context['user_data']['node_statuses']

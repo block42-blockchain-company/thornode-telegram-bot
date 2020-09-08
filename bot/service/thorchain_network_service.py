@@ -66,6 +66,9 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
 
 
 def get_random_seed_node_endpoint() -> str:
+    if DEBUG:
+        return 'localhost'
+
     seeding_node_url = \
         {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[
             NETWORK_TYPE]

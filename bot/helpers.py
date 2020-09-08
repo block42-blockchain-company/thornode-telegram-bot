@@ -265,15 +265,21 @@ def get_thornode_object_or_none(address):
 
     return node
 
-
 def get_network_security(network_json):
     """
-    Returns the network security ratio in plain english
+    Returns Network security as a ratio number
     """
 
     total_active_bond = int(network_json['bondMetrics']['totalActiveBond'])
     total_staked = int(network_json['totalStaked'])
-    network_security_ratio = total_active_bond / (total_active_bond + total_staked / 2) # only half of total_staked is RUNE
+    return total_active_bond / (total_active_bond + total_staked / 2)  # only half of total_staked is RUNE
+
+def get_qualitative_network_security(network_json):
+    """
+    Returns the network security ratio in plain english
+    """
+
+    network_security_ratio = get_network_security(network_json)
 
     if network_security_ratio > 0.9:
         qualitative_security = "Inefficent"
