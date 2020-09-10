@@ -314,7 +314,7 @@ def check_churning(context):
     churned_out = []
     for validator in validators:
         remote_status = validator['status']
-        local_status = local_node_statuses[validator['node_address']]
+        local_status = local_node_statuses[validator['node_address']] if validator['node_address'] in local_node_statuses else "unknown"
         if remote_status != local_status:
             if 'active' == remote_status:
                 churned_in.append({"address": validator['node_address'], "bond": validator['bond']})
@@ -323,19 +323,19 @@ def check_churning(context):
 
     if len(churned_in) or len(churned_out):
         text = "🔄 CHURN SUMMARY\n" \
-               "THORChain has successfully churned:\n\n" \
-               "Nodes Added:\n"
+               "THORChain has successfully churned:\n\n"
+        text += "Nodes Added:\n" if len(churned_in) else ""
         for node in churned_in:
-            text += "*" + node['address'] + "*\nBond: *" + tor_to_rune(node['bond']) + '*\n'
-        text += "\nNodes Removed:\n"
+            text += f"*{node['address']}*\nBond: *{tor_to_rune(node['bond'])}*\n"
+        text += "\nNodes Removed:\n" if len(churned_out) else ""
         for node in churned_out:
-            text += "*" + node['address'] + "*\nBond: *" + tor_to_rune(node['bond']) + '*\n'
+            text += f"*{node['address']}*\nBond: *{tor_to_rune(node['bond'])}*\n"
         text += "\nSystem:\n"
 
         try:
             network = get_network_data()
-            text += "🔓 Network Security: *" + get_qualitative_network_security(network) + "*\n\n" \
-                    "💚 Total Active Bond: *" + tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n\n" \
+            text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n\n" \
+                    f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(int(get_network_security(network) * 100)) + " %*\n\n" \
                     "↩️ Bond ROI: *" + '{:.2f}'.format(float(network['bondingROI']) * 100) + " %* APY\n\n" \
                     "↩️ Stake ROI: *" + '{:.2f}'.format(float(network['stakingROI']) * 100) + " %* APY"
@@ -343,8 +343,7 @@ def check_churning(context):
             logger.exception(e)
             text += 'Network information is currently unavailable!'
 
-        for validator in validators:
-            user_data['node_statuses'][validator['node_address']] = validator['status']
-
         try_message_with_home_menu(context=context, chat_id=context.job.context['chat_id'], text=text)
+
+    service.set_node_statuses(validators)
 

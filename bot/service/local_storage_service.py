@@ -15,4 +15,10 @@ class LocalStorageService:
         self.context.job.context['user_data']['newest_software_version'] = version
 
     def get_node_statuses(self):
+        if 'node_statuses' not in self.context.job.context['user_data']:
+            self.context.job.context['user_data']['node_statuses'] = {}
         return self.context.job.context['user_data']['node_statuses']
+
+    def set_node_statuses(self, validators):
+        for validator in validators:
+            self.context.job.context['user_data']['node_statuses'][validator['node_address']] = validator['status']

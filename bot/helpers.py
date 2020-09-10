@@ -265,34 +265,34 @@ def get_thornode_object_or_none(address):
 
     return node
 
+
 def get_network_security(network_json):
     """
-    Returns Network security as a ratio number
+    Returns network security as a ratio number
     """
 
     total_active_bond = int(network_json['bondMetrics']['totalActiveBond'])
     total_staked = int(network_json['totalStaked'])
     return total_active_bond / (total_active_bond + total_staked / 2)  # only half of total_staked is RUNE
 
-def get_qualitative_network_security(network_json):
-    """
-    Returns the network security ratio in plain english
-    """
 
-    network_security_ratio = get_network_security(network_json)
+def network_security_ratio_to_string(network_security_ratio):
+    """
+    Converts the network security ratio to an understandable english string
+    """
 
     if network_security_ratio > 0.9:
-        qualitative_security = "Inefficent"
+        network_security_string = "Inefficent"
     elif network_security_ratio <= 0.9 and network_security_ratio > 0.75:
-        qualitative_security = "Overbonded"
+        network_security_string = "Overbonded"
     elif network_security_ratio <= 0.75 and network_security_ratio >= 0.6:
-        qualitative_security = "Optimal"
+        network_security_string = "Optimal"
     elif network_security_ratio < 0.6 and network_security_ratio >= 0.5:
-        qualitative_security = "Underbonded"
+        network_security_string = "Underbonded"
     elif network_security_ratio < 0.5 and network_security_ratio:
-        qualitative_security = "Insecure"
+        network_security_string = "Insecure"
 
-    return qualitative_security
+    return network_security_string
 
 
 def get_thorchain_blocks_per_second():

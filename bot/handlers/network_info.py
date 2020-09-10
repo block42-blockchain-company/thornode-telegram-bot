@@ -36,9 +36,9 @@ async def show_network_stats(update, context):
         total_nodes = 0
         for status in statuses.keys():
             emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
-            text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
+            text += f"  *{str(statuses[status])}* ({status} {emoji})\n"
             total_nodes += statuses[status]
-        text += "  = *" + str(total_nodes) + "* (total)\n"
+        text += f"  = *{str(total_nodes)}* (total)\n"
 
         text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
                 tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
@@ -61,7 +61,7 @@ async def show_network_stats(update, context):
                 '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
                     network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
-        text += "\n🔓 Network Security:  *" + get_qualitative_network_security(network) + "*\n"
+        text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n"
 
         text += "\n↩️ Node ROI: *" + \
                 '{:.2f}'.format(float(network['bondingROI']) * 100) \
