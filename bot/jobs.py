@@ -10,6 +10,7 @@ def thornode_checks(context):
     """
     check_versions_status(context)
     check_thornodes(context)
+    check_churning(context)
     if BINANCE_NODE_IP:
         check_binance_health(context)
 
@@ -287,3 +288,62 @@ def check_versions_status(context):
                           f"but one of the nodes already runs on *{highest_version}*"
                 try_message_with_home_menu(context, chat_id=context.job.context['chat_id'],
                                            text=message)
+
+def check_churning(context):
+    user_data = context.job.context['user_data']
+    service = LocalStorageService(context)
+
+    try:
+        validators = get_node_accounts()
+    except Exception as e:
+        logger.exception(e)
+        message = 'I couldn\'t check the statuses of other nodes in network! List of nodes currently unavailable!'
+        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
+        return
+
+
+    if 'node_statuses' not in user_data:
+        user_data['node_statuses'] = {}
+        for validator in validators:
+            user_data['node_statuses'][validator['node_address']] = validator['status']
+        return
+
+    local_node_statuses = service.get_node_statuses()
+
+    churned_in = []
+    churned_out = []
+    for validator in validators:
+        remote_status = validator['status']
+        local_status = local_node_statuses[validator['node_address']] if validator['node_address'] in local_node_statuses else "unknown"
+        if remote_status != local_status:
+            if 'active' == remote_status:
+                churned_in.append({"address": validator['node_address'], "bond": validator['bond']})
+            elif 'active' == local_status:
+                churned_out.append({"address": validator['node_address'], "bond": validator['bond']})
+
+    if len(churned_in) or len(churned_out):
+        text = "🔄 CHURN SUMMARY\n" \
+               "THORChain has successfully churned:\n\n"
+        text += "Nodes Added:\n" if len(churned_in) else ""
+        for node in churned_in:
+            text += f"*{node['address']}*\nBond: *{tor_to_rune(node['bond'])}*\n"
+        text += "\nNodes Removed:\n" if len(churned_out) else ""
+        for node in churned_out:
+            text += f"*{node['address']}*\nBond: *{tor_to_rune(node['bond'])}*\n"
+        text += "\nSystem:\n"
+
+        try:
+            network = get_network_data()
+            text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n\n" \
+                    f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
+                    "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(int(get_network_security(network) * 100)) + " %*\n\n" \
+                    "↩️ Bond ROI: *" + '{:.2f}'.format(float(network['bondingROI']) * 100) + " %* APY\n\n" \
+                    "↩️ Stake ROI: *" + '{:.2f}'.format(float(network['stakingROI']) * 100) + " %* APY"
+        except Exception as e:
+            logger.exception(e)
+            text += 'Network information is currently unavailable!'
+
+        try_message_with_home_menu(context=context, chat_id=context.job.context['chat_id'], text=text)
+
+    service.set_node_statuses(validators)
+

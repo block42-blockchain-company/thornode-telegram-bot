@@ -5,8 +5,8 @@ from messages import NETWORK_ERROR_MSG
 
 
 def show_network_menu(update, context):
-    keyboard = [[InlineKeyboardButton('📊 NETWORK STATS', callback_data='show_network_stats')],
-                [InlineKeyboardButton('🔒 VAULT ADDRESSES', callback_data='vault_key_addresses')]]
+    keyboard = [[InlineKeyboardButton('📊 NETWORK STATS', callback_data='show_network_stats'),
+                InlineKeyboardButton('🔒 VAULT ADDRESSES', callback_data='vault_key_addresses')]]
 
     try_message(context=context, chat_id=update.effective_message.chat_id, text='Choose an option:',
                 reply_markup=InlineKeyboardMarkup(keyboard))
@@ -36,9 +36,9 @@ async def show_network_stats(update, context):
         total_nodes = 0
         for status in statuses.keys():
             emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
-            text += "  *" + str(statuses[status]) + "* (" + status + " " + emoji + ")\n"
+            text += f"  *{str(statuses[status])}* ({status} {emoji})\n"
             total_nodes += statuses[status]
-        text += "  = *" + str(total_nodes) + "* (total)\n"
+        text += f"  = *{str(total_nodes)}* (total)\n"
 
         text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
                 tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
@@ -61,13 +61,11 @@ async def show_network_stats(update, context):
                 '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
                     network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
-        text += "\n🔓 Network Security:  *" + get_network_security(network) + "*\n"
+        text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n"
 
-        blocks_per_year = get_thorchain_blocks_per_year()
         text += "\n↩️ Node ROI: *" + \
-                '{:.2f}'.format((float(network['blockRewards']['bondReward']) * blocks_per_year) / float(
-                    network['bondMetrics']['totalActiveBond']) * 100) \
-                + "*% APY\n"
+                '{:.2f}'.format(float(network['bondingROI']) * 100) \
+                + " %* APY\n"
 
         text += "\n📀 Versions:\n"
         total_versions = 0
@@ -110,7 +108,7 @@ async def show_vault_key_addresses(update, context):
                                    text="Can't get node addresses, please try again.")
         return
 
-    monitored_node_accounts = list(filter(lambda x: x['status'] in MONITORED_STATUSES, node_accounts))
+    monitored_node_accounts = list(filter(lambda x: x['status'] == 'active', node_accounts))
     ip_addresses = list(map(lambda x: x['ip_address'], monitored_node_accounts))
 
     await for_each_async(ip_addresses, lambda ip: save_pool_address(ip, chain_to_node_addresses, unavailable_addresses))

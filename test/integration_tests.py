@@ -8,7 +8,6 @@ import unittest
 import sys
 
 from bot.helpers import tor_to_rune
-from bot.constants import MONITORED_STATUSES
 
 sys.path.append('..')
 
@@ -117,7 +116,7 @@ class ThornodeBot(unittest.TestCase):
 
             response = next(self.telegram.iter_history(self.BOT_ID))
             self.click_button(response.reply_markup.inline_keyboard[0][0].text)
-            time.sleep(10)
+            time.sleep(15)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
 
@@ -154,11 +153,9 @@ class ThornodeBot(unittest.TestCase):
             print("------------------------")
 
     def test_delete_address_confirm_false(self):
-        self.add_valid_address()
         self.assert_delete_address(confirm=False)
 
     def test_delete_address_confirm_true(self):
-        self.add_valid_address()
         self.assert_delete_address(confirm=True)
 
     def test_change_alias_invalid(self):
@@ -176,6 +173,7 @@ class ThornodeBot(unittest.TestCase):
 
     def test_add_all_addresses_confirm_true(self):
         self.assert_add_all_addresses(confirm=True)
+        self.assert_delete_all_addresses(confirm=True)
 
     def test_delete_all_addresses_confirm_false(self):
         self.assert_delete_all_addresses(confirm=False)
@@ -189,8 +187,9 @@ class ThornodeBot(unittest.TestCase):
             time.sleep(3)
 
             self.telegram.send_message(self.BOT_ID, "🌎 NETWORK")
+            self.click_button("📊 NETWORK STATS")
 
-            time.sleep(10)
+            time.sleep(15)
             response = next(self.telegram.iter_history(self.BOT_ID))
 
             expected_response1 = 'Status of the whole THORChain network:'
@@ -281,8 +280,28 @@ class ThornodeBot(unittest.TestCase):
             print("Check Blockchain Height ✅")
             print("------------------------")
 
+    def test_node_version_notification(self):
+        self.add_valid_address()
+        with self.telegram:
+            with open('mock_files/nodeaccounts.json') as json_read_file:
+                node_data = json.load(json_read_file)
+
+            a, b, c = str(node_data[0]['version']).split('.')
+            node_data[0]['version'] = a + '.' + b + '.' + str(int(c) + 1)
+
+            with open('mock_files/nodeaccounts.json', 'w') as json_write_file:
+                json.dump(node_data, json_write_file)
+
+            time.sleep(12)
+
+            response = next(self.telegram.iter_history(self.BOT_ID))
+
+            expected_response = 'Consider updating the software on your node:'
+            assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
+                                                                "'\nbut got\n'" + response.text + "'"
+
     def test_thornode_notification_status(self):
-        self.assert_thornode_notification(field="status")
+        self.assert_thornode_notification_status()
 
     def test_thornode_notification_bond(self):
         self.assert_thornode_notification(field="bond")
@@ -307,6 +326,7 @@ class ThornodeBot(unittest.TestCase):
         self.add_valid_address()
         self.assert_health_notification(BINANCE, healthy=False)
         self.assert_health_notification(BINANCE, healthy=True)
+
 
     """
     ######################################################################################################################################################
@@ -514,11 +534,6 @@ class ThornodeBot(unittest.TestCase):
             new_value = random.randrange(0, 100)
             if field == 'node_address':
                 new_value = 'thor' + str(new_value)
-            elif field == 'status':
-                statuses = MONITORED_STATUSES
-                if statuses[new_value % len(MONITORED_STATUSES)] == node_data_original[0][field]:
-                    new_value += 1
-                new_value = statuses[new_value % len(MONITORED_STATUSES)]
             else:
                 new_value += int(node_data_new[0][field])
 
@@ -527,7 +542,7 @@ class ThornodeBot(unittest.TestCase):
             with open('mock_files/nodeaccounts.json', 'w') as json_write_file:
                 json.dump(node_data_new, json_write_file)
 
-            time.sleep(12)
+            time.sleep(15)
             response = next(self.telegram.iter_history(self.BOT_ID))
 
             if field == "node_address":
@@ -537,8 +552,6 @@ class ThornodeBot(unittest.TestCase):
             else:
                 expected_response = 'Address: ' + node_data_original[0]['node_address'] + '\n' + \
                                     'Status: ' + node_data_original[0]['status'].capitalize()
-                if field == 'status':
-                    expected_response += ' ➡️ ' + node_data_new[0]['status'].capitalize()
                 expected_response += '\nBond: ' + tor_to_rune(node_data_original[0]['bond'])
                 if field == 'bond':
                     expected_response += ' ➡️ ' + tor_to_rune(node_data_new[0]['bond'])
@@ -549,6 +562,42 @@ class ThornodeBot(unittest.TestCase):
             assert response.text.find(expected_response) != -1, \
                 "Expected '" + expected_response + "' but got '" + response.text + "'"
             print("Notification Thornode data change with " + field + " ✅")
+            print("------------------------")
+            time.sleep(9)
+
+    def assert_thornode_notification_status(self):
+        self.add_valid_address()
+
+        with self.telegram:
+            with open('mock_files/nodeaccounts.json') as json_read_file:
+                node_data_original = json.load(json_read_file)
+                node_data_new = copy.deepcopy(node_data_original)
+
+            if node_data_original[0]['status'] == 'active':
+                node_data_new[0]['status'] = 'standby'
+            else:
+                node_data_new[0]['status'] = 'active'
+
+            with open('mock_files/nodeaccounts.json', 'w') as json_write_file:
+                json.dump(node_data_new, json_write_file)
+
+            time.sleep(15)
+            response1 = next(itertools.islice(self.telegram.iter_history(self.BOT_ID), 1, None))
+            response2 = next(itertools.islice(self.telegram.iter_history(self.BOT_ID), 0, None))
+
+            expected_response1 = 'Address: ' + node_data_original[0]['node_address'] + '\n' + \
+                                'Status: ' + node_data_original[0]['status'].capitalize()
+            expected_response1 += ' ➡️ ' + node_data_new[0]['status'].capitalize()
+            expected_response1 += '\nBond: ' + tor_to_rune(node_data_original[0]['bond'])
+            expected_response1 += '\nSlash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points']))
+
+            expected_response2 = "🔄 CHURN SUMMARY"
+
+            assert response1.text.find(expected_response1) != -1 or response2.text.find(expected_response1) != -1, \
+                "Expected '" + expected_response1 + "' but got '" + response1.text + "' and '" + response2.text + "'"
+            assert response1.text.find(expected_response2) != -1 or response2.text.find(expected_response2) != -1, \
+                "Expected '" + expected_response2 + "' but got '" + response1.text + "' and '" + response2.text + "'"
+            print("Notification Thornode data change with status ✅")
             print("------------------------")
             time.sleep(9)
 

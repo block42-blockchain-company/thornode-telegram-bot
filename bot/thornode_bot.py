@@ -126,12 +126,23 @@ def start(update, context):
         context.user_data['job_started'] = True
         context.user_data['nodes'] = {}
 
-    text = 'Heil ok sæll! I am your THORNode Bot. 🤖\n' \
-           'I will notify you about changes of your node\'s *Status*, *Bond* or *Slash Points*, ' \
-           'if your *Block Height* gets stuck and if your *Midgard API* gets unhealthy!\n'
+    text = 'Heil ok sæll! I am your THORNode Bot running on ' + NETWORK_TYPE + '. 🤖\n\n' \
+           'I will notify you about changes of your THORNode\'s\n' \
+           '- *Status*\n' \
+           '- *Bond*\n' \
+           '- *Slash Points*\n' \
+           '- if your *Block Height* gets stuck\n' \
+           '- if your *Midgard API* gets unhealthy\n\n' \
+           'You will get a notification\n' \
+           '- once any node *upgrades its version*\n' \
+           '- after *successful churning*\n\n'
     if BINANCE_NODE_IP:
-        text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n'
-    text += 'Moreover, in the Admin Area you can *restart any docker container* that runs alongside my container!'
+        text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n\n'
+    text += 'Moreover, in the Admin Area you can\n' \
+            '- *restart any docker container* that runs alongside my container\n\n' \
+            'In the Network section you can display\n' \
+            '- the *status of the whole network*\n' \
+            '- the correct *vault addresses*.'
 
     # Send message
     try_message_with_home_menu(context=context, chat_id=update.message.chat.id, text=text)

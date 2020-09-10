@@ -1,7 +1,5 @@
 FROM ubuntu:18.04
 
-LABEL autoheal=true
-
 ADD . /
 
 RUN apt-get update
