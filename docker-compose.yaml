@@ -13,6 +13,7 @@ services:
       - variables.env
     volumes:
       - thornode-bot-volume:/storage
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   thornode-bot-volume:
