@@ -40,6 +40,7 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
+    socketserver.TCPServer.allow_reuse_address = True
     midgard_process = Thread(target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever)
     midgard_process.daemon = True
     midgard_process.start()
