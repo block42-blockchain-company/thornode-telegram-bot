@@ -32,7 +32,6 @@ docker-compose up -d
 * [Run and test the bot](#run-and-test-the-bot)
 * [Production](#production)
   * [Docker Standalone](#docker-standalone)
-    * [Healthcheck](#healthcheck)
   * [Docker Compose](#docker-compose)
 * [Testing](#testing)
 
@@ -178,20 +177,6 @@ This is the directory where your bot saves and retrieves the `session.data` file
 *Please note that as docker is intended for production,
 there is not the possibility for the `DEBUG` mode when using docker.*
 
-
-#### [Healthcheck](#healthcheck)
-There is a health check in the Dockerfile that runs the `scrips/healthcheck.py` file.
-The script assures that `thornode_bot.py` is periodically updating the `health.check` file.
-
-If the docker health check fails, the docker container is marked as "unhealthy". 
-However, when using docker standalone (without docker compose or docker swarm) this doesn't do anything.
-To restart unhealthy containers, we have to use the autoheal image https://hub.docker.com/r/willfarrell/autoheal/ .
-
-To make sure a potentially unhealthy `thorbot_node` container is restarted, run the autoheal container alongside the
-`thornode_bot` container:
-```
-docker run -d --name autoheal --restart=always -v /var/run/docker.sock:/var/run/docker.sock willfarrell/autoheal
-```
 
 ### [Docker Compose](#docker-compose)
 The explained steps in the Docker Standalone section are conveniently bundled into a

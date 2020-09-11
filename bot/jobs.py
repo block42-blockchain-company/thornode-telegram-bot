@@ -249,19 +249,6 @@ def check_binance_health(context):
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 
-def update_health_check_file(context):
-    """
-    Write timestamp into health.check file for the health check
-    """
-
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    path = os.sep.join([current_dir, os.path.pardir, "storage", "health.check"])
-
-    with open(path, 'w') as healthcheck_file:
-        timestamp = datetime.timestamp(datetime.now())
-        healthcheck_file.write(str(timestamp))
-
-
 def check_versions_status(context):
     service = LocalStorageService(context)
     logger.info("I'm checking version changes...")

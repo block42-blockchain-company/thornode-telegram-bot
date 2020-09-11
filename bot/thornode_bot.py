@@ -594,9 +594,6 @@ def main():
 
     setup_existing_user(dispatcher=dispatcher)
 
-    # Start job for health check
-    dispatcher.job_queue.run_repeating(update_health_check_file, interval=5, context={})
-
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CallbackQueryHandler(dispatch_query))
     dispatcher.add_handler(MessageHandler(Filters.text, plain_input))
