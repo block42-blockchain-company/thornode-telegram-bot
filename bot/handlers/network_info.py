@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from helpers import *
 from messages import *
@@ -23,21 +23,16 @@ async def show_network_stats(update, context):
         network = get_network_data()
         validators = get_node_accounts()
 
-        statuses = {}
-        versions = {}
-        for validator in validators:
-            status = validator['status']
-            version = validator['version']
-
-            statuses[status] = 1 if not status in statuses else statuses[status] + 1
-            versions[version] = 1 if not version in versions else versions[version] + 1
+        statuses_counter = Counter(map(lambda v: v['status'], validators))
+        active_validators = filter(lambda v: v['status'] == 'active', validators)
+        versions_counter = Counter(map(lambda v: v['version'], active_validators))
 
         text += "\n📡 Nodes:\n"
-        total_nodes = 0
-        for status in statuses.keys():
+        for status in statuses_counter:
             emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
-            text += f"  *{str(statuses[status])}* ({status} {emoji})\n"
-            total_nodes += statuses[status]
+            text += f"  *{str(statuses_counter[status])}* ({status} {emoji})\n"
+
+        total_nodes = len(validators)
         text += f"  = *{str(total_nodes)}* (total)\n"
 
         text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
@@ -68,14 +63,15 @@ async def show_network_stats(update, context):
                 + " %* APY\n"
 
         text += "\n📀 Versions:\n"
-        total_versions = 0
-        for version in versions.keys():
-            total_versions += versions[version]
-        for version in versions.keys():
-            text += "  *" + version + "* (" + '{:.2f}'.format((versions[version] / total_versions) * 100) + "%)\n"
+
+        counter_versions = sum(versions_counter.values())
+
+        for version in versions_counter:
+            text += "  *" + version + "* (" + '{:.2f}'.format(
+                (versions_counter[version] / counter_versions) * 100) + "%)\n"
 
         latest_block_height = get_latest_block_height()
-        text += '\n⛏ Block Height: *' + str(latest_block_height) + "*\n"
+        text += f'\n⛏ Block Height: *{int(latest_block_height):,}*\n'
 
     except Exception as e:
         logger.exception(e)
