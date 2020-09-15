@@ -91,8 +91,10 @@ def get_network_data(node_ip=None):
 
 
 def is_binance_node_healthy() -> bool:
+    health_path = {"TESTNET": ":26657/health", "CHAOSNET": ":27147/health"}[NETWORK_TYPE]
+    
     try:
-        health_response = requests.get(url='http://' + BINANCE_NODE_IP + ':26657/health')
+        health_response = requests.get(url='http://' + BINANCE_NODE_IP + health_path)
     except Exception as e:
         logger.exception(e)
         return False
