@@ -8,6 +8,7 @@ def thornode_checks(context):
     """
     Periodic checks of various node stats
     """
+
     check_versions_status(context)
     check_thornodes(context)
     check_churning(context)
@@ -101,6 +102,8 @@ def check_thorchain_block_height(context, node_address):
     Make sure the block height increases
     """
 
+    logger.info("I'm checking thorchain block height...")
+
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
@@ -154,6 +157,8 @@ def check_thorchain_catch_up_status(context, node_address):
     Check if node is some blocks behind with catch up status
     """
 
+    logger.info("I'm checking catch up status...")
+
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
@@ -196,6 +201,8 @@ def check_thorchain_midgard_api(context, node_address):
     Check that Midgard API is ok
     """
 
+    logger.info("I'm checking Midgard health...")
+
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
@@ -226,6 +233,8 @@ def check_binance_health(context):
     """
     Check if Binance Node is healthy
     """
+
+    logger.info("I'm checking binance node health...")
 
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
@@ -277,6 +286,8 @@ def check_versions_status(context):
                                            text=message)
 
 def check_churning(context):
+    logger.info("I'm checking if churning occured...")
+
     user_data = context.job.context['user_data']
     service = LocalStorageService(context)
 

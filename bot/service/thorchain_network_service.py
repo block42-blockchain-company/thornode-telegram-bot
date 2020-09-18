@@ -3,7 +3,7 @@ import random
 import aiohttp
 import requests
 
-from constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE
+from constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE, CONNECTION_TIMEOUT
 
 
 def get_node_accounts():
@@ -12,7 +12,7 @@ def get_node_accounts():
     else:
         url = 'http://' + get_random_seed_node_endpoint() + ':1317/thorchain/nodeaccounts'
 
-    validators_response = requests.get(url=url)
+    validators_response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
 
     if validators_response.status_code != 200:
         raise BadStatusException(validators_response)
@@ -26,7 +26,7 @@ def get_node_status(node_ip=None):
 
     status_path = {"TESTNET": ":26657/status", "CHAOSNET": ":27147/status"}[NETWORK_TYPE]
 
-    status_response = requests.get(url='http://' + node_ip + status_path)
+    status_response = requests.get(url='http://' + node_ip + status_path, timeout=CONNECTION_TIMEOUT)
 
     if status_response.status_code != 200:
         raise BadStatusException(status_response)
@@ -44,7 +44,7 @@ def is_thorchain_catching_up(node_ip=None) -> bool:
 
 def is_midgard_api_healthy(node_ip) -> bool:
     try:
-        midgard_health_response = requests.get(url='http://' + node_ip + ':8080/v1/health')
+        midgard_health_response = requests.get(url='http://' + node_ip + ':8080/v1/health', timeout=CONNECTION_TIMEOUT)
     except Exception as e:
         logger.exception(e)
         return False
@@ -57,7 +57,7 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
         NETWORK_TYPE]
     url = 'http://' + node_ip + unconfirmed_txs_path
 
-    transactions_data_response = requests.get(url=url)
+    transactions_data_response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
 
     if transactions_data_response.status_code != 200:
         raise BadStatusException(transactions_data_response)
@@ -73,16 +73,22 @@ def get_random_seed_node_endpoint() -> str:
         {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[
             NETWORK_TYPE]
 
-    available_node_ips = requests.get(seeding_node_url).json()
+    available_node_ips = requests.get(url=seeding_node_url, timeout=CONNECTION_TIMEOUT).json()
 
-    return random.choice(available_node_ips)
+    random.shuffle(available_node_ips)
+    response = None
+    for node_ip in available_node_ips:
+        response = requests.get(url='http://' + node_ip + ':8080/v1/health', timeout=10)
+        if response.status_code == 200:
+            return node_ip
+    raise BadStatusException(response)
 
 
 def get_network_data(node_ip=None):
     if node_ip is None:
         node_ip = get_random_seed_node_endpoint()
 
-    network_data_response = requests.get(url='http://' + node_ip + ':8080/v1/network')
+    network_data_response = requests.get(url='http://' + node_ip + ':8080/v1/network', timeout=CONNECTION_TIMEOUT)
 
     if network_data_response.status_code != 200:
         raise BadStatusException(network_data_response)
@@ -94,7 +100,7 @@ def is_binance_node_healthy() -> bool:
     health_path = {"TESTNET": ":26657/health", "CHAOSNET": ":27147/health"}[NETWORK_TYPE]
     
     try:
-        health_response = requests.get(url='http://' + BINANCE_NODE_IP + health_path)
+        health_response = requests.get(url='http://' + BINANCE_NODE_IP + health_path, timeout=CONNECTION_TIMEOUT)
     except Exception as e:
         logger.exception(e)
         return False
@@ -106,7 +112,7 @@ def get_thorchain_blocks_per_year(node_ip=None):
     if node_ip is None:
         node_ip = get_random_seed_node_endpoint()
 
-    constants_response = requests.get(url='http://' + node_ip + ':8080/v1/thorchain/constants')
+    constants_response = requests.get(url='http://' + node_ip + ':8080/v1/thorchain/constants', timeout=CONNECTION_TIMEOUT)
 
     if constants_response.status_code != 200:
         raise BadStatusException(constants_response)
@@ -116,7 +122,7 @@ def get_thorchain_blocks_per_year(node_ip=None):
 
 async def get_pool_addresses(node_ip: str):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'http://{node_ip}:8080/v1/thorchain/pool_addresses') as resp:
+        async with session.get(f'http://{node_ip}:8080/v1/thorchain/pool_addresses', timeout=CONNECTION_TIMEOUT) as resp:
             if resp.status != 200:
                 raise Exception(f"Error while getting pool address. " +
                                 "Endpoint responded with: {await resp.text()} \n"
@@ -129,3 +135,5 @@ class BadStatusException(Exception):
     def __init__(self, response: requests.Response):
         self.message = "Error while network request.\nReceived status code: " + \
                        str(response.status_code) + '\nReceived response: ' + response.text
+    def __str__(self):
+        return self.message

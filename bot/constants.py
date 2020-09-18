@@ -39,3 +39,5 @@ logger = logging.getLogger(__name__)
 # Paths
 storage_path = os.sep.join([os.path.dirname(os.path.realpath(__file__)), os.path.pardir, 'storage'])
 session_data_path = os.sep.join([storage_path, 'session.data'])
+
+CONNECTION_TIMEOUT = 10
