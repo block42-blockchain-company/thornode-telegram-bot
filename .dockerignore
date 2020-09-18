@@ -1,1 +1,9 @@
 test
+venv
+variables.env
+docker-compose.yaml
+README.md
+LICENSE
+.git
+.gitignore
+*cache
