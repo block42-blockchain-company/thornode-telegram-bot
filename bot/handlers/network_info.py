@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from helpers import *
-from messages import NETWORK_ERROR_MSG
+from messages import *
 
 
 def show_network_menu(update, context):
@@ -105,7 +105,7 @@ async def show_vault_key_addresses(update, context):
     except Exception as e:
         logger.exception(e)
         try_message_with_home_menu(context=context, chat_id=update.effective_chat.id,
-                                   text="Can't get node addresses, please try again.")
+                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
     monitored_node_accounts = list(filter(lambda x: x['status'] == 'active', node_accounts))

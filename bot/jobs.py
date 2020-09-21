@@ -2,6 +2,7 @@ from helpers import *
 from service.local_storage_service import LocalStorageService
 from service.thorchain_network_service import *
 from packaging import version
+from messages import *
 
 
 def thornode_checks(context):
@@ -266,8 +267,7 @@ def check_versions_status(context):
         node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        message = 'I couldn\'t check the versions of other nodes in network! List of nodes currently unavailable!'
-        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
+        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
     highest_version = max(map(lambda n: n['version'], node_accounts), key=lambda v: version.parse(v))
@@ -295,8 +295,7 @@ def check_churning(context):
         validators = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        message = 'I couldn\'t check the statuses of other nodes in network! List of nodes currently unavailable!'
-        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=message)
+        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
 

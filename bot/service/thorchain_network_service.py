@@ -3,7 +3,7 @@ import random
 import aiohttp
 import requests
 
-from constants import DEBUG, logger, BINANCE_NODE_IP, NETWORK_TYPE, CONNECTION_TIMEOUT
+from constants import *
 
 
 def get_node_accounts():
@@ -78,7 +78,11 @@ def get_random_seed_node_endpoint() -> str:
     random.shuffle(available_node_ips)
     response = None
     for node_ip in available_node_ips:
-        response = requests.get(url='http://' + node_ip + ':8080/v1/health', timeout=10)
+        try:
+            response = requests.get(url='http://' + node_ip + ':8080/v1/health', timeout=10)
+        except Exception as e:
+            logger.exception(e)
+            continue
         if response.status_code == 200:
             return node_ip
     raise BadStatusException(response)
