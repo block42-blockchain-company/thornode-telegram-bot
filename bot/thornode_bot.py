@@ -50,7 +50,7 @@ def setup_existing_users(dispatcher):
         # Start monitoring jobs for all existing users
         if 'job_started' not in dispatcher.user_data[chat_id]:
             dispatcher.user_data[chat_id]['job_started'] = True
-        dispatcher.job_queue.run_repeating(thornode_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
+        dispatcher.job_queue.run_repeating(user_specific_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
@@ -95,6 +95,17 @@ def setup_existing_users(dispatcher):
                 del dispatcher.user_data[chat_id]['nodes'][address]
 
 
+def setup_bot_data(dispatcher):
+    if 'binance_nodes'not in dispatcher.bot_data:
+        dispatcher.bot_data['binance_nodes'] = {}
+    for binance_node_ip in BINANCE_NODE_IPS:
+        if binance_node_ip not in dispatcher.bot_data['binance_nodes']:
+            dispatcher.bot_data['binance_nodes'][binance_node_ip] = {}
+
+    dispatcher.job_queue.run_repeating(general_bot_checks, interval=JOB_INTERVAL_IN_SECONDS)
+
+
+
 """
 ######################################################################################################################################################
 Handlers
@@ -110,7 +121,7 @@ def start(update, context):
 
     # Start job for user
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(thornode_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
+        context.job_queue.run_repeating(user_specific_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
             'chat_id': update.message.chat.id,
             'user_data': context.user_data
         })
@@ -127,7 +138,7 @@ def start(update, context):
            'You will get a notification\n' \
            '- once any node *upgrades its version*\n' \
            '- after *successful churning*\n\n'
-    if BINANCE_NODE_IP:
+    if BINANCE_NODE_IPS:
         text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n\n'
     text += 'Moreover, in the Admin Area you can\n' \
             '- *restart any docker container* that runs alongside my container\n\n' \
@@ -600,7 +611,8 @@ def main():
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path), use_context=True)
     dispatcher = bot.dispatcher
 
-    setup_existing_users(dispatcher=dispatcher)
+    setup_existing_user(dispatcher=dispatcher)
+    setup_bot_data(dispatcher=dispatcher)
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CallbackQueryHandler(dispatch_query))

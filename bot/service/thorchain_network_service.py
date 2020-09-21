@@ -100,11 +100,11 @@ def get_network_data(node_ip=None):
     return network_data_response.json()
 
 
-def is_binance_node_healthy() -> bool:
+def is_binance_node_healthy(binance_node_ip) -> bool:
     health_path = {"TESTNET": ":26657/health", "CHAOSNET": ":27147/health"}[NETWORK_TYPE]
     
     try:
-        health_response = requests.get(url='http://' + BINANCE_NODE_IP + health_path, timeout=CONNECTION_TIMEOUT)
+        health_response = requests.get(url='http://' + binance_node_ip + health_path, timeout=CONNECTION_TIMEOUT)
     except Exception as e:
         logger.exception(e)
         return False

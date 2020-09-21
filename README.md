@@ -14,8 +14,8 @@ If you have questions feel free to open a github issue or contact us in our Tele
 Open `variables.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
-- `BINANCE_NODE_IP` to any Binance Node IP you want to monitor (or `localhost`).
-Leave it empty or remove it to not monitor a Binance Node.
+- `BINANCE_NODE_IPS` to a list of Binance Node IPs you want to monitor (or `localhost`).
+Leave it empty or remove it to not monitor any Binance Node.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the Admin Area.
 
 Install `docker` and `docker-compose` and run:
@@ -58,13 +58,14 @@ You can set it to `TESTNET` or `CHAOSNET`. If you leave this empty or write it w
 monitored by default.
 ---
 
-If you have a Binance Node IP that you want to monitor, you can set `BINANCE_NODE_IP` to this 
-IP. Set it to `localhost` if the Binance Node runs on the same machine as the Telegram Bot.
+If you have any Binance Node IPs that you want to monitor, you can set `BINANCE_NODE_IPS` to these 
+IPs. Set it to `localhost` if the Binance Node runs on the same machine as the Telegram Bot.
 
 **Leave this environment variable empty or don't even set it to not do any Binance Node monitoring.**
 
+If you enter multiple Binance Node IPs, make sure to separate the IDs with `,` i.e. a comma.
 ```
-export BINANCE_NODE_IP=3.228.22.197
+export BINANCE_NODE_IPS=3.228.22.197,localhost
 ```
 ---
 Next set Telegram User IDs that are permissioned to access the Admin Area in the `ADMIN_USER_IDS` environment variable.
@@ -156,7 +157,7 @@ docker volume create thornode-bot-volume
 Finally, run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IP=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IPS=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
@@ -164,9 +165,9 @@ Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token.
 Set the `--env NETWORK_TYPE` flag to the network you want to monitor (`TESTNET` or `CHAOSNET` while 
 the former is the default).
 
-Set the `--env BINANCE_NODE_IP` flag to an IP of a running Binance Node, or to `localhost` if Telegram Bot and Binance
-Node run on the same machine.
-Leave this empty i.e. `--env BINANCE_NODE_IP=` or remove it to not do any Binance monitoring.
+Set the `--env BINANCE_NODE_IPS` flag to a comma separated list of IPs of running Binance Nodes, 
+or to `localhost` if Telegram Bot and Binance Node run on the same machine.
+Leave this empty i.e. `--env BINANCE_NODE_IPS=` or remove it to not do any Binance monitoring.
 
 The `-v` argument passes the dockersocket to the container so that we can restart docker containers from
 inside the Telegram Bot.
@@ -183,7 +184,7 @@ The explained steps in the Docker Standalone section are conveniently bundled in
 `docker-compose.yaml` file.
 
 First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`, 
-`BINANCE_NODE_IP` and `ADMIN_USER_IDS`
+`BINANCE_NODE_IPS` and `ADMIN_USER_IDS`
 
 If you don't want to spin up the official docker image from our dockerhub, open 
 `docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`

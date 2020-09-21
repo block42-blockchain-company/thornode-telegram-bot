@@ -4,15 +4,22 @@ from packaging import version
 from messages import *
 
 
-def thornode_checks(context):
+def user_specific_checks(context):
     """
-    Periodic checks of various node stats
+    Periodic checks of nodes that the user monitors
     """
 
     check_versions_status(context)
     check_thornodes(context)
+
+
+def general_bot_checks(context):
+    """
+    Periodic checks that are interesting for all users
+    """
+
     check_churning(context)
-    if BINANCE_NODE_IP:
+    if BINANCE_NODE_IPS:
         check_binance_health(context)
 
 
@@ -235,27 +242,27 @@ def check_binance_health(context):
     """
 
     logger.info("I'm checking binance node health...")
+    binance_nodes = context.bot_data['binance_nodes']
 
-    chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    for binance_node_ip in BINANCE_NODE_IPS:
+        if 'is_binance_node_healthy' not in binance_nodes[binance_node_ip]:
+            binance_nodes[binance_node_ip]['is_binance_node_healthy'] = True
+        binance_node_data = binance_nodes[binance_node_ip]
 
-    if 'is_binance_node_healthy' not in user_data:
-        user_data['is_binance_node_healthy'] = True
+        is_binance_node_currently_healthy = is_binance_node_healthy(binance_node_ip)
 
-    is_binance_node_currently_healthy = is_binance_node_healthy()
-
-    if user_data['is_binance_node_healthy'] != is_binance_node_currently_healthy:
-        if is_binance_node_currently_healthy:
-            user_data['is_binance_node_healthy'] = True
-            text = 'Binance Node is healthy again! 👌' + '\n' + \
-                   'IP: ' + BINANCE_NODE_IP + '\n'
-            try_message_with_home_menu(context, chat_id=chat_id, text=text)
-        else:
-            user_data['is_binance_node_healthy'] = False
-            text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
-                   'IP: ' + BINANCE_NODE_IP + '\n\n' + \
-                   'Please check your Binance Node immediately!'
-            try_message_with_home_menu(context, chat_id=chat_id, text=text)
+        if binance_node_data['is_binance_node_healthy'] != is_binance_node_currently_healthy:
+            if is_binance_node_currently_healthy:
+                binance_node_data['is_binance_node_healthy'] = True
+                text = 'Binance Node is healthy again! 👌' + '\n' + \
+                       'IP: ' + binance_node_ip + '\n'
+                try_message_to_all_users(context, text=text)
+            else:
+                binance_node_data['is_binance_node_healthy'] = False
+                text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
+                       'IP: ' + binance_node_ip + '\n\n' + \
+                       'Please check your Binance Node immediately!'
+                try_message_to_all_users(context, text=text)
 
 
 def check_versions_status(context):
@@ -295,16 +302,13 @@ def check_churning(context):
         try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
-    if 'node_statuses' not in user_data:
-        user_data['node_statuses'] = {}
+    if 'node_statuses' not in context.bot_data:
+        context.bot_data['node_statuses'] = {}
         for validator in validators:
-            user_data['node_statuses'][validator['node_address']] = validator['status']
+            context.bot_data['node_statuses'][validator['node_address']] = validator['status']
         return
 
-    if 'node_statuses' not in user_data:
-        context.job.context['user_data']['node_statuses'] = {}
-
-    local_node_statuses = user_data['node_statuses']
+    local_node_statuses = context.bot_data['node_statuses']
 
     churned_in = []
     churned_out = []
@@ -338,9 +342,9 @@ def check_churning(context):
                     "↩️ Stake ROI: *" + '{:.2f}'.format(float(network['stakingROI']) * 100) + " %* APY"
         except Exception as e:
             logger.exception(e)
-            text += 'Network information is currently unavailable!'
+            text += NETWORK_ERROR_MSG
 
-        try_message_with_home_menu(context=context, chat_id=context.job.context['chat_id'], text=text)
+        try_message_to_all_users(context, text=text)
 
     for validator in validators:
-        user_data['node_statuses'][validator['node_address']] = validator['status']
+        context.bot_data['node_statuses'][validator['node_address']] = validator['status']

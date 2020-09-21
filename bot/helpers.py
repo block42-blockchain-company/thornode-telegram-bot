@@ -17,6 +17,11 @@ def try_message_with_home_menu(context, chat_id, text):
                 reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
 
 
+def try_message_to_all_users(context, text):
+    for chat_id in context.dispatcher.user_data.keys():
+        try_message_with_home_menu(context, chat_id=chat_id, text=text)
+
+
 def get_home_menu_buttons():
     """
     Return keyboard buttons for the home menu
