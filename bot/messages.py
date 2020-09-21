@@ -1,1 +1,2 @@
-NETWORK_ERROR_MSG = '😱 There was an error while getting data 😱\n Please check your internet connection and try again!'
+NETWORK_ERROR_MSG = '😱 There was an error while getting data 😱\nEither your internet connection or the node endpoint is down!'
+NODE_LIST_UNAVAILABLE_ERROR_MSG = '😱 I couldn\'t check the versions of other nodes in network! 😱\nList of nodes currently unavailable!'
