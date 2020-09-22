@@ -105,7 +105,7 @@ def setup_existing_users(dispatcher):
 
         for address in local_node_addresses:
             try:
-                new_node = next(n for n in new_node_accounts if n['address'] == address)
+                new_node = next(n for n in new_node_accounts if n['node_address'] == address)
                 del dispatcher.user_data[chat_id]['nodes'][address]
                 add_thornode_to_user_data(dispatcher.user_data[chat_id], address, new_node)
             except StopIteration:
