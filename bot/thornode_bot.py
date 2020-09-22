@@ -105,7 +105,7 @@ def setup_existing_users(dispatcher):
 
         for address in local_node_addresses:
             try:
-                new_node = next(n for n in new_node_accounts if n['address'] == address)
+                new_node = next(n for n in new_node_accounts if n['node_addrkess'] == address)
                 del dispatcher.user_data[chat_id]['nodes'][address]
                 add_thornode_to_user_data(dispatcher.user_data[chat_id], address, new_node)
             except StopIteration:
@@ -140,15 +140,15 @@ def start(update, context):
         context.user_data['nodes'] = {}
 
     text = 'Heil ok sæll! I am your THORNode Bot running on ' + NETWORK_TYPE + '. 🤖\n\n' \
-           'I will notify you about changes of your THORNode\'s\n' \
-           '- *Status*\n' \
-           '- *Bond*\n' \
-           '- *Slash Points*\n' \
-           '- if your *Block Height* gets stuck\n' \
-           '- if your *Midgard API* gets unhealthy\n\n' \
-           'You will get a notification\n' \
-           '- once any node *upgrades its version*\n' \
-           '- after *successful churning*\n\n'
+                                                                               'I will notify you about changes of your THORNode\'s\n' \
+                                                                               '- *Status*\n' \
+                                                                               '- *Bond*\n' \
+                                                                               '- *Slash Points*\n' \
+                                                                               '- if your *Block Height* gets stuck\n' \
+                                                                               '- if your *Midgard API* gets unhealthy\n\n' \
+                                                                               'You will get a notification\n' \
+                                                                               '- once any node *upgrades its version*\n' \
+                                                                               '- after *successful churning*\n\n'
     if BINANCE_NODE_IP:
         text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n\n'
     text += 'Moreover, in the Admin Area you can\n' \
