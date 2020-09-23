@@ -1,8 +1,8 @@
 import atexit
-import copy
 import re
+import time
 
-from telegram.error import BadRequest
+from telegram.error import BadRequest, Unauthorized
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -20,68 +20,32 @@ from service.thorchain_network_service import *
 
 """
 ######################################################################################################################################################
-Debug Processes
-######################################################################################################################################################
-"""
-
-if DEBUG:
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
-    test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
-    mock_api_path = os.sep.join([test_dir, "mock_api.py"])
-
-    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd=test_dir)
-    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd=test_dir)
-
-
-    def cleanup():
-        mock_api_process.terminate()
-        increase_block_height_process.terminate()
-
-
-    atexit.register(cleanup)
-
-"""
-######################################################################################################################################################
 BOT RESTART SETUP
 ######################################################################################################################################################
 """
 
 
-def setup_existing_user(dispatcher):
+def setup_existing_users(dispatcher):
     """
     Tasks to ensure smooth user experience for existing users upon Bot restart
     """
+    logger.info("Setting up the user's data.")
 
-    # Iterate over all existing users
-    chat_ids = dispatcher.user_data.keys()
-    delete_chat_ids = []
-    for chat_id in chat_ids:
-        # Send a notification to existing users that the Bot got restarted
+    bot_blocked_by_ids = []
+
+    for chat_id in dispatcher.user_data.keys():
         restart_message = 'Heil ok sæll!\n' \
                           'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
                           'To make sure you have the latest features, please start ' \
                           'a fresh chat with me by typing /start.'
+
         try:
             dispatcher.bot.send_message(chat_id, restart_message)
+        except Unauthorized:
+            bot_blocked_by_ids.append(chat_id)
+            continue
         except TelegramError as e:
-            if 'bot was blocked by the user' in e.message:
-                delete_chat_ids.append(chat_id)
-                continue
-            else:
-                print("Got Error\n" + str(e) + "\nwith telegram user " + str(chat_id))
-
-        # Delete all node addresses and add them again to ensure all user_data fields are up to date
-        if 'nodes' not in dispatcher.user_data[chat_id]:
-            dispatcher.user_data[chat_id]['nodes'] = {}
-
-        current_user_data = copy.deepcopy(dispatcher.user_data[chat_id])
-
-        for address in current_user_data['nodes']:
-            del dispatcher.user_data[chat_id]['nodes'][address]
-        for address in current_user_data['nodes']:
-            add_thornode_to_user_data(dispatcher.user_data[chat_id], address,
-                                      current_user_data['nodes'][address])
+            logger.exception(f'USER {str(chat_id)}\n Error: {str(e)}', exc_info=True)
 
         # Start monitoring jobs for all existing users
         if 'job_started' not in dispatcher.user_data[chat_id]:
@@ -90,8 +54,9 @@ def setup_existing_user(dispatcher):
             'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
         })
 
-    for chat_id in delete_chat_ids:
-        print("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
+    for chat_id in bot_blocked_by_ids:
+        logger.warning("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
+
         del dispatcher.user_data[chat_id]
         del dispatcher.chat_data[chat_id]
         del dispatcher.persistence.user_data[chat_id]
@@ -102,6 +67,32 @@ def setup_existing_user(dispatcher):
         if len(dispatcher.persistence.user_data) == 0:
             if os.path.exists(session_data_path):
                 os.remove(session_data_path)
+
+    try:
+        new_node_accounts = get_node_accounts()
+    except:
+        logger.exception("Fatal error! I couldn't get node accounts to update the local user_data!", exc_info=True)
+        return
+
+    # Delete all node addresses and add them again to ensure all user_data fields are up to date
+    for chat_id in dispatcher.user_data.keys():
+        if 'nodes' not in dispatcher.user_data[chat_id]:
+            dispatcher.user_data[chat_id]['nodes'] = {}
+
+        local_node_addresses = list(dispatcher.user_data[chat_id]['nodes'].keys())
+
+        for address in local_node_addresses:
+            try:
+                new_node = next(n for n in new_node_accounts if n['node_address'] == address)
+                del dispatcher.user_data[chat_id]['nodes'][address]
+                add_thornode_to_user_data(dispatcher.user_data[chat_id], address, new_node)
+            except StopIteration:
+                obsolete_node = dispatcher.user_data[chat_id]['nodes'][address]
+                dispatcher.bot.send_message(chat_id,
+                                            f"Your node f{obsolete_node['alias']} with address {address} "
+                                            f"is not present in the network! "
+                                            f"I'm removing it...")
+                del dispatcher.user_data[chat_id]['nodes'][address]
 
 
 """
@@ -582,17 +573,34 @@ Application
 """
 
 
+def setup_debug_processes():
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
+    test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
+    mock_api_path = os.sep.join([test_dir, "mock_api.py"])
+
+    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd=test_dir)
+    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd=test_dir)
+
+    def cleanup():
+        mock_api_process.terminate()
+        increase_block_height_process.terminate()
+
+    atexit.register(cleanup)
+    time.sleep(1)  # Make sure all processes started before bot starts using them
+
+
 def main():
     """
     Init telegram bot, attach handlers and wait for incoming requests.
     """
+    if DEBUG:
+        setup_debug_processes()
 
-    # Init telegram bot
-    bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path),
-                  use_context=True)
+    bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path), use_context=True)
     dispatcher = bot.dispatcher
 
-    setup_existing_user(dispatcher=dispatcher)
+    setup_existing_users(dispatcher=dispatcher)
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CallbackQueryHandler(dispatch_query))

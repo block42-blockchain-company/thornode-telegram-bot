@@ -1,5 +1,4 @@
 from helpers import *
-from service.local_storage_service import LocalStorageService
 from service.thorchain_network_service import *
 from packaging import version
 from messages import *
@@ -260,8 +259,8 @@ def check_binance_health(context):
 
 
 def check_versions_status(context):
-    service = LocalStorageService(context)
     logger.info("I'm checking version changes...")
+    user_data = context.job.context['user_data']
 
     try:
         node_accounts = get_node_accounts()
@@ -271,13 +270,11 @@ def check_versions_status(context):
         return
 
     highest_version = max(map(lambda n: n['version'], node_accounts), key=lambda v: version.parse(v))
-    last_newest_version = service.get_last_newest_software_version()
-
-    my_nodes = service.get_my_nodes()
+    last_newest_version = user_data.get('newest_software_version', None)
 
     if last_newest_version is None or version.parse(highest_version) > version.parse(last_newest_version):
-        service.save_newer_version(highest_version)
-        for node in my_nodes.values():
+        user_data['newest_software_version'] = highest_version
+        for node in user_data['nodes'].values():
             if version.parse(node['version']) < version.parse(highest_version):
                 message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
                           f"Your software version is *{node['version']}* " \
@@ -285,11 +282,11 @@ def check_versions_status(context):
                 try_message_with_home_menu(context, chat_id=context.job.context['chat_id'],
                                            text=message)
 
+
 def check_churning(context):
     logger.info("I'm checking if churning occured...")
 
     user_data = context.job.context['user_data']
-    service = LocalStorageService(context)
 
     try:
         validators = get_node_accounts()
@@ -298,20 +295,23 @@ def check_churning(context):
         try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
-
     if 'node_statuses' not in user_data:
         user_data['node_statuses'] = {}
         for validator in validators:
             user_data['node_statuses'][validator['node_address']] = validator['status']
         return
 
-    local_node_statuses = service.get_node_statuses()
+    if 'node_statuses' not in user_data:
+        context.job.context['user_data']['node_statuses'] = {}
+
+    local_node_statuses = user_data['node_statuses']
 
     churned_in = []
     churned_out = []
     for validator in validators:
         remote_status = validator['status']
-        local_status = local_node_statuses[validator['node_address']] if validator['node_address'] in local_node_statuses else "unknown"
+        local_status = local_node_statuses[validator['node_address']] if validator[
+                                                                             'node_address'] in local_node_statuses else "unknown"
         if remote_status != local_status:
             if 'active' == remote_status:
                 churned_in.append({"address": validator['node_address'], "bond": validator['bond']})
@@ -342,5 +342,5 @@ def check_churning(context):
 
         try_message_with_home_menu(context=context, chat_id=context.job.context['chat_id'], text=text)
 
-    service.set_node_statuses(validators)
-
+    for validator in validators:
+        user_data['node_statuses'][validator['node_address']] = validator['status']
