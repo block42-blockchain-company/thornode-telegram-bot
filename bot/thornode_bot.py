@@ -1,5 +1,6 @@
 import atexit
 import re
+import time
 
 from telegram.error import BadRequest, Unauthorized
 from telegram.ext import (
@@ -16,29 +17,6 @@ from handlers.network_info import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
-
-"""
-######################################################################################################################################################
-Debug Processes
-######################################################################################################################################################
-"""
-
-if DEBUG:
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
-    test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
-    mock_api_path = os.sep.join([test_dir, "mock_api.py"])
-
-    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd=test_dir)
-    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd=test_dir)
-
-
-    def cleanup():
-        mock_api_process.terminate()
-        increase_block_height_process.terminate()
-
-
-    atexit.register(cleanup)
 
 """
 ######################################################################################################################################################
@@ -595,10 +573,29 @@ Application
 """
 
 
+def setup_debug_processes():
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
+    test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
+    mock_api_path = os.sep.join([test_dir, "mock_api.py"])
+
+    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd=test_dir)
+    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd=test_dir)
+
+    def cleanup():
+        mock_api_process.terminate()
+        increase_block_height_process.terminate()
+
+    atexit.register(cleanup)
+    time.sleep(1)  # Make sure all processes started before bot starts using them
+
+
 def main():
     """
     Init telegram bot, attach handlers and wait for incoming requests.
     """
+    if DEBUG:
+        setup_debug_processes()
 
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path), use_context=True)
     dispatcher = bot.dispatcher
