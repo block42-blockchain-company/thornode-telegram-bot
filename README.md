@@ -30,13 +30,13 @@ Admin Area (not working on K8s at the moment).
 
 Install the same `kubectl` version you use in your K8s cluster (one major version difference is alright).
 
-Download the cluster config file from your K8s provider, and set the path of it to the `KUBECONFIG` environment 
+Download the cluster config file from your K8s provider and set the path of it to the `KUBECONFIG` environment 
 variable:
 ```
 export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
 ```
 
-Now run 
+Now, from the project's main directoty, run 
 ```
 # One Bot on Chaosnet:
 kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
@@ -75,6 +75,8 @@ docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml up
 * [Run and test the bot](#run-and-test-the-bot)
 * [Production](#production)
   * [Kubernetes](#kubernetes)
+    * [K8s-Setup](#k8s-setup)
+    * [Modifying running K8s-Bot](#modifying-running-k8s-bot)
   * [Docker Standalone](#docker-standalone)
   * [Docker Compose](#docker-compose)
 * [Testing](#testing)
@@ -188,6 +190,8 @@ set DEBUG as there's no DEBUG mode in the k8s or docker version).
 As many node operators deploy all thorchain components via K8s, it makes sense to run the Bot in the same K8s cluster.
 Our solution should run on all K8s clusters (AWS, Digital Ocean, on-premise...)
 
+#### [K8s-Setup](#k8s-setup)
+
 All K8s files can be found in `/kubernetes`.
 
 The `k8s_setup_*.yaml` files define the namespace in which the bot(s) operates, as well as the persistent volume claim(s)
@@ -229,7 +233,7 @@ kubectl get pods -n thornode-bot
 kubectl get pvc -n thornode-bot
 ``` 
 
----
+#### [Modifying running K8s-Bot](#modifying-running-k8s-bot)
 
 At a later point you might want to update the environment variables, or use the latest docker image.
 For the former, modify `kubernetes/k8s_thornode_bot_deployment-*.yaml` as desired.
