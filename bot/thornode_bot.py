@@ -611,7 +611,7 @@ def main():
     bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path), use_context=True)
     dispatcher = bot.dispatcher
 
-    setup_existing_user(dispatcher=dispatcher)
+    setup_existing_users(dispatcher=dispatcher)
     setup_bot_data(dispatcher=dispatcher)
 
     dispatcher.add_handler(CommandHandler('start', start))
