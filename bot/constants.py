@@ -10,11 +10,13 @@ NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
 
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
-    BINANCE_NODE_IP = 'localhost'
-elif 'BINANCE_NODE_IP' in os.environ and os.environ['BINANCE_NODE_IP']:
-    BINANCE_NODE_IP = os.environ['BINANCE_NODE_IP']
+    BINANCE_NODE_IPS = ['localhost', '0.0.0.0']
 else:
-    BINANCE_NODE_IP = None
+    BINANCE_NODE_IPS = [binance_ip for binance_ip in
+                  os.environ['BINANCE_NODE_IPS'].split(",")] \
+        if 'BINANCE_NODE_IPS' in os.environ and os.environ['BINANCE_NODE_IPS'] != "" \
+        else []
+
 
 ADMIN_USER_IDS = [int(admin_id) for admin_id in
                   os.environ['ADMIN_USER_IDS'].split(",")] if 'ADMIN_USER_IDS' in os.environ else []

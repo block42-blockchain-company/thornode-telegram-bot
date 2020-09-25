@@ -123,8 +123,8 @@ class ThornodeBot(unittest.TestCase):
             number_of_unconfirmed_txs = json.load(open('mock_files/unconfirmed_txs.json'))['result']['total']
 
             assert response.text.find("Address: " + valid_address) != -1, "Thornode Details not showing stats"
-            assert response.text.find("Number of Unconfirmed Txs: " + number_of_unconfirmed_txs) != -1, \
-                "Thornode Details not showing Number of unconfirmed Txs"
+            assert response.text.find("Number of Unconfirmed Transactions: " + number_of_unconfirmed_txs) != -1, \
+                "Thornode Details not showing Number of unconfirmed Transactions"
             assert response.reply_markup.inline_keyboard[0][0].text == "➖ REMOVE", \
                 "➖ REMOVE Button not in Thornode Details"
             assert response.reply_markup.inline_keyboard[0][1].text == "✏️ CHANGE ALIAS", \
@@ -187,6 +187,7 @@ class ThornodeBot(unittest.TestCase):
             time.sleep(3)
 
             self.telegram.send_message(self.BOT_ID, "🌎 NETWORK")
+            time.sleep(3)
             self.click_button("📊 NETWORK STATS")
 
             time.sleep(15)
