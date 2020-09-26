@@ -11,7 +11,8 @@ If you have questions feel free to open a github issue or contact us in our Tele
 
 ## Quickstart
 
-Open `variables.env` file and set
+Depending on which network your bot should monitor, open `variables-chaosnet.env` and/or
+ `variables-testnet.env` file and set
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs you want to monitor (or `localhost`).
@@ -21,7 +22,14 @@ Leave it empty or remove it to not monitor any Binance Node.
 Install `docker` and `docker-compose` and run:
 
 ```
-docker-compose up -d
+# One Bot on Chaosnet:
+docker-compose -f docker-compose-chaosnet.yaml up -d
+
+# One Bot on Testnet:
+docker-compose -f docker-compose-testnet.yaml up -d
+
+# Two Bots on both networks:
+docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml up -d
 ```
 
 ## Steps to run everything yourself
@@ -180,19 +188,38 @@ there is not the possibility for the `DEBUG` mode when using docker.*
 
 
 ### [Docker Compose](#docker-compose)
-The explained steps in the Docker Standalone section are conveniently bundled into a
-`docker-compose.yaml` file.
+The explained steps in the Docker Standalone section are conveniently bundled into the files
+`docker-compose-chaosnet.yaml` and `docker-compose-testnet.yaml`.
 
-First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`, 
-`BINANCE_NODE_IPS` and `ADMIN_USER_IDS`
+First, as before, you need to set the right values in the `variables-chaosnet.env` and/or
+`variables-testnet.env` files for `TELEGRAM_BOT_TOKEN`, `BINANCE_NODE_IPS` and `ADMIN_USER_IDS`
 
-If you don't want to spin up the official docker image from our dockerhub, open 
-`docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
+If you don't want to spin up the official docker image from our dockerhub, open any of the 
+`docker-compose-*.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
 and comment in the line `build: .`.
 
-Finally, start the Thornode Telegram Bot with:
+Finally, start the Thornode Telegram Bot with `docker-compose up -d`, and specify the correct file with the `-f` flag:
 ```
-docker-compose up -d
+# One Bot on Chaosnet:
+docker-compose -f docker-compose-chaosnet.yaml up -d
+
+# One Bot on Testnet:
+docker-compose -f docker-compose-testnet.yaml up -d
+
+# Two Bots on both networks:
+docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml up -d
+```
+
+If you want to stop your bot(s) later again, run `docker-compose down`, and specify the correct file with the `-f` flag:
+```
+# One Bot on Chaosnet:
+docker-compose -f docker-compose-chaosnet.yaml down
+
+# One Bot on Testnet:
+docker-compose -f docker-compose-testnet.yaml down
+
+# Two Bots on both networks:
+docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml down
 ```
 
 ---
@@ -203,7 +230,7 @@ try to this:
 ```
 docker network create vpnworkaround --subnet 10.0.1.0/24
 ```
-* Then comment in the networks configuration in `docker-compose.yaml`
+* Then comment in the networks configuration in any `docker-compose-*.yaml`
 ```
 networks:
   default:
@@ -212,7 +239,7 @@ networks:
 ```
 * Run again in your terminal
 ```
-docker-compose up -d
+docker-compose up -f docker-compose-*.yaml -d
 ```
 
 This solution is taken from https://github.com/docker/for-linux/issues/418#issuecomment-491323611
