@@ -94,7 +94,7 @@ def setup_existing_users(dispatcher):
                 obsolete_node = dispatcher.user_data[chat_id]['nodes'][address]
                 dispatcher.bot.send_message(
                     chat_id,
-                    f"Your node f{obsolete_node['alias']} with address {address} "
+                    f"Your node {obsolete_node['alias']} with address {address} "
                     f"is not present in the network! "
                     f"I'm removing it...")
                 del dispatcher.user_data[chat_id]['nodes'][address]
