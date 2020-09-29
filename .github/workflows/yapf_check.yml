@@ -15,4 +15,4 @@ jobs:
       with:
         args:
           - --verbose
-          - --style=pep8
+          - --recursive
