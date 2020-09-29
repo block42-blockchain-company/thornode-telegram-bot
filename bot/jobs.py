@@ -293,8 +293,6 @@ def check_versions_status(context):
 def check_churning(context):
     logger.info("I'm checking if churning occured...")
 
-    user_data = context.job.context['user_data']
-
     try:
         validators = get_node_accounts()
     except Exception as e:
