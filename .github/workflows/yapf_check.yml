@@ -13,4 +13,4 @@ jobs:
     - name: run YAPF to format python code
       uses: block42-blockchain-company/yapf-action@master
       with:
-        args: --verbose
+        args: [--verbose, --style=pep8]
