@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  thornode_bot:
-    container_name: thornode_bot
+  thornode_bot_testnet:
+    container_name: thornode_bot_testnet
 
     # comment 'image:' in and 'build:' out to use official image from docker hub
     # comment 'image:' out and 'build:' in to build an image from your local directory
@@ -10,13 +10,13 @@ services:
     #build: .
 
     env_file:
-      - variables.env
+      - variables-testnet.env
     volumes:
-      - thornode-bot-volume:/storage
+      - thornode-bot-testnet-volume:/storage
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  thornode-bot-volume:
+  thornode-bot-testnet-volume:
 
 
 # If you have problems running 'docker-compose up' and you're using a VPN, try to run this command in the console:
