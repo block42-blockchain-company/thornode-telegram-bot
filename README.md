@@ -5,19 +5,54 @@ If you have questions feel free to open a github issue or contact us in our Tele
 
 ## Requirements
 * Telegram
+* Kubectl (if you want to run with Kubernetes)
 * Docker (if you want to run with docker or docker-compose)
 * Docker Compose (if you want to run with docker-compose)
 * Python3 (if you want to run without docker)
 
 ## Quickstart
+For *kubernetes* open `kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml` and/or 
+`kubernetes/k8s_thornode_bot_deployment_testnet.yaml` file;
 
-Depending on which network your bot should monitor, open `variables-chaosnet.env` and/or
- `variables-testnet.env` file and set
+For *docker-compose* open `variables-chaosnet.env` and/or
+ `variables-testnet.env` file and set:
+ 
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Binance Node.
-- `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the Admin Area.
+- `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the 
+Admin Area (not working on K8s at the moment).
+
+### Kubernetes (K8s)
+
+*We assume that you already have a running K8s cluster.*
+
+Install the same `kubectl` version you use in your K8s cluster (one major version difference is alright).
+
+Download the cluster config file from your K8s provider, and set the path of it to the `KUBECONFIG` environment 
+variable:
+```
+export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
+```
+
+Now run 
+```
+# One Bot on Chaosnet:
+kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
+
+# One Bot on Testnet:
+kubectl create -f kubernetes/k8s_setup_testnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+
+# Two Bots on both networks:
+kubectl create -f kubernetes/k8s_setup_chaosnet.yaml -f kubernetes/k8s_setup_testnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+```
+
+
+### Docker-compose
 
 Install `docker` and `docker-compose` and run:
 
@@ -39,6 +74,7 @@ docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml up
 * [Start the bot](#start-the-bot)
 * [Run and test the bot](#run-and-test-the-bot)
 * [Production](#production)
+  * [Kubernetes](#kubernetes)
   * [Docker Standalone](#docker-standalone)
   * [Docker Compose](#docker-compose)
 * [Testing](#testing)
@@ -141,8 +177,98 @@ If you want to reset your bot's data, simply delete the file `session.data` in t
 In production, you do not want to use mock data from the local endpoint but real network data. 
 To get real data just set `DEBUG=False` and all other environment variables as 
 described in the 'Set environment variables' section.
-If you're using docker-compose to run this Bot, modify the existing variables in `variables.env` file (No need to
-set DEBUG as there's no DEBUG mode in the docker version). 
+
+If you're using kubernetes to run this Bot, modify the existing variables in `kubernetes/k8s_thornode_bot_deployment.yaml` file.
+To use docker-compose, modify the existing variables in `variables.env` file (No need to
+set DEBUG as there's no DEBUG mode in the k8s or docker version). 
+
+### [Kubernetes](#kubernetes)
+*We assume that you already have a running Kubernetes (K8s) cluster running in the cloud or on-premise.*
+
+As many node operators deploy all thorchain components via K8s, it makes sense to run the Bot in the same K8s cluster.
+Our solution should run on all K8s clusters (AWS, Digital Ocean, on-premise...)
+
+All K8s files can be found in `/kubernetes`.
+
+The `k8s_setup_*.yaml` files define the namespace in which the bot(s) operates, as well as the persistent volume claim(s)
+that ensures user data is persisted across bot restarts.
+
+In the `k8s_thornode_bot_deployment-*.yaml` files you find the deployment of the actual bot(s).
+These are the files where you have to insert the correct values for the environment variables.
+
+Set the right values as indicated by the comments.
+
+After that install the kubernetes command line control `kubectl`.
+Check out the K8s version of your running cluster, and install a `kubectl` version that is within 
+one major version of your cluster (e.g. cluster is 1.17.4, install for `kubectl` either 1.16.X, 1.17.X or 1.18.X).
+
+To connect to your cluster, first download the cluster config file from your K8s provider.
+Then set the path of the config file to the `KUBECONFIG` environment variable:
+```
+export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
+```
+
+Now create first the setup manifest, and then the deployment manifest with:
+```
+# One Bot on Chaosnet:
+kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
+
+# One Bot on Testnet:
+kubectl create -f kubernetes/k8s_setup_testnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+
+# Two Bots on both networks:
+kubectl create -f kubernetes/k8s_setup_chaosnet.yaml -f kubernetes/k8s_setup_testnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+```
+
+Check out if your deployment and persistent volume claim were succesfully created with:
+```
+kubectl get pods -n thornode-bot
+kubectl get pvc -n thornode-bot
+``` 
+
+---
+
+At a later point you might want to update the environment variables, or use the latest docker image.
+For the former, modify `kubernetes/k8s_thornode_bot_deployment-*.yaml` as desired.
+
+Then delete the deployment, and create it again:
+```
+# One Bot on Chaosnet:
+kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
+
+# One Bot on Testnet:
+kubectl delete -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+
+# Two Bots on both networks:
+kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+```
+
+Your bot(s) should send you a message that he got updated. 
+He now uses the new environment variables / newest docker image.
+
+---
+
+If you want to delete all k8s resources related to the bot(s) (namespace and persistent volume with user data), 
+first delete the deployment and then the setup:
+```
+# One Bot on Chaosnet:
+kubectl delete -f kubernetes/k8s_setup_chaosnet.yaml
+kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
+
+# One Bot on Testnet:
+kubectl delete -f kubernetes/k8s_setup_testnet.yaml
+kubectl delete -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+
+# Two Bots on both networks:
+kubectl delete -f kubernetes/k8s_setup_chaosnet.yaml -f kubernetes/k8s_setup_testnet.yaml
+kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+```
 
 ### [Docker Standalone](#docker-standalone)
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
