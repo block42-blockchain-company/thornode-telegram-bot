@@ -1,5 +1,9 @@
-name: YAPF Formatting Check
-on: [push]
+name: YAPF Formatting
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 jobs:
   formatting-check:
     name: Formatting Check
