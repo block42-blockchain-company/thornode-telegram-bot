@@ -5,10 +5,16 @@ from messages import *
 
 
 def show_network_menu(update, context):
-    keyboard = [[InlineKeyboardButton('📊 NETWORK STATS', callback_data='show_network_stats'),
-                InlineKeyboardButton('🔒 VAULT ADDRESSES', callback_data='vault_key_addresses')]]
+    keyboard = [[
+        InlineKeyboardButton('📊 NETWORK STATS',
+                             callback_data='show_network_stats'),
+        InlineKeyboardButton('🔒 VAULT ADDRESSES',
+                             callback_data='vault_key_addresses')
+    ]]
 
-    try_message(context=context, chat_id=update.effective_message.chat_id, text='Choose an option:',
+    try_message(context=context,
+                chat_id=update.effective_message.chat_id,
+                text='Choose an option:',
                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
@@ -24,12 +30,15 @@ async def show_network_stats(update, context):
         validators = get_node_accounts()
 
         statuses_counter = Counter(map(lambda v: v['status'], validators))
-        active_validators = filter(lambda v: v['status'] == 'active', validators)
-        versions_counter = Counter(map(lambda v: v['version'], active_validators))
+        active_validators = filter(lambda v: v['status'] == 'active',
+                                   validators)
+        versions_counter = Counter(
+            map(lambda v: v['version'], active_validators))
 
         text += "\n📡 Nodes:\n"
         for status in statuses_counter:
-            emoji = STATUS_EMOJIS[status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+            emoji = STATUS_EMOJIS[
+                status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
             text += f"  *{str(statuses_counter[status])}* ({status} {emoji})\n"
 
         total_nodes = len(validators)
@@ -77,10 +86,13 @@ async def show_network_stats(update, context):
         logger.exception(e)
         text += NETWORK_ERROR_MSG
     finally:
-        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=text)
+        try_message_with_home_menu(context=context,
+                                   chat_id=update.effective_chat.id,
+                                   text=text)
 
 
-async def save_pool_address(ip_address, chain_to_node_addresses, unavailable_addresses):
+async def save_pool_address(ip_address, chain_to_node_addresses,
+                            unavailable_addresses):
     try:
         pool_addresses = await get_pool_addresses(ip_address)
     except Exception as exc:
@@ -89,7 +101,8 @@ async def save_pool_address(ip_address, chain_to_node_addresses, unavailable_add
         return
 
     for chain_data in pool_addresses['current']:
-        chain_to_node_addresses[chain_data['chain']].append(chain_data['address'])
+        chain_to_node_addresses[chain_data['chain']].append(
+            chain_data['address'])
 
 
 async def show_vault_key_addresses(update, context):
@@ -100,14 +113,18 @@ async def show_vault_key_addresses(update, context):
         node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id,
+        try_message_with_home_menu(context=context,
+                                   chat_id=update.effective_chat.id,
                                    text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
-    monitored_node_accounts = list(filter(lambda x: x['status'] == 'active', node_accounts))
+    monitored_node_accounts = list(
+        filter(lambda x: x['status'] == 'active', node_accounts))
     ip_addresses = list(map(lambda x: x['ip_address'], monitored_node_accounts))
 
-    await for_each_async(ip_addresses, lambda ip: save_pool_address(ip, chain_to_node_addresses, unavailable_addresses))
+    await for_each_async(
+        ip_addresses, lambda ip: save_pool_address(ip, chain_to_node_addresses,
+                                                   unavailable_addresses))
 
     message = ''
 
@@ -127,4 +144,6 @@ async def show_vault_key_addresses(update, context):
         for address in unavailable_addresses:
             message += f"{str(address)}\n"
 
-    try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=message)
+    try_message_with_home_menu(context=context,
+                               chat_id=update.effective_chat.id,
+                               text=message)

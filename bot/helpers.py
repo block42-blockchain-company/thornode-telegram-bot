@@ -13,8 +13,11 @@ from service.thorchain_network_service import *
 
 def try_message_with_home_menu(context, chat_id, text):
     keyboard = get_home_menu_buttons()
-    try_message(context=context, chat_id=chat_id, text=text,
-                reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True))
+    try_message(context=context,
+                chat_id=chat_id,
+                text=text,
+                reply_markup=ReplyKeyboardMarkup(keyboard,
+                                                 resize_keyboard=True))
 
 
 def try_message_to_all_users(context, text):
@@ -27,21 +30,29 @@ def get_home_menu_buttons():
     Return keyboard buttons for the home menu
     """
 
-    keyboard = [[KeyboardButton('📡 MY NODES', callback_data='thornode_menu'),
-                 KeyboardButton('🌎 NETWORK', callback_data='thornode_menu')],
-                [KeyboardButton('👀 SHOW ALL', callback_data='show_all_thorchain_nodes'),
-                 KeyboardButton('🔑 ADMIN AREA', callback_data='admin_menu')]]
+    keyboard = [[
+        KeyboardButton('📡 MY NODES', callback_data='thornode_menu'),
+        KeyboardButton('🌎 NETWORK', callback_data='thornode_menu')
+    ],
+                [
+                    KeyboardButton('👀 SHOW ALL',
+                                   callback_data='show_all_thorchain_nodes'),
+                    KeyboardButton('🔑 ADMIN AREA', callback_data='admin_menu')
+                ]]
 
     return keyboard
 
 
 def show_thornode_menu_new_msg(update, context):
-    user_data = context.user_data if context.user_data else context.job.context['user_data']
+    user_data = context.user_data if context.user_data else context.job.context[
+        'user_data']
 
     keyboard = get_thornode_menu_buttons(user_data=user_data)
     text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
                                                                                            'THORNodes yet.\nAdd a Node!'
-    try_message(context=context, chat_id=update.effective_message.chat_id, text=text,
+    try_message(context=context,
+                chat_id=update.effective_message.chat_id,
+                text=text,
                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
@@ -57,12 +68,21 @@ def get_thornode_menu_buttons(user_data):
             if user_data['nodes'][address]['status'] in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
 
         truncated_address = address[:9] + "..." + address[-4:]
-        button_text = emoji + " " + user_data['nodes'][address]['alias'] + " (" + truncated_address + ")"
-        keyboard.append([InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)])
+        button_text = emoji + " " + user_data['nodes'][address][
+            'alias'] + " (" + truncated_address + ")"
+        keyboard.append([
+            InlineKeyboardButton(button_text,
+                                 callback_data='thornode_details-' + address)
+        ])
 
-    keyboard.append([InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
-    keyboard.append([InlineKeyboardButton('➕ ADD ALL', callback_data='confirm_add_all_thornodes'),
-                     InlineKeyboardButton('➖ REMOVE ALL', callback_data='confirm_delete_all_thornodes')])
+    keyboard.append(
+        [InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
+    keyboard.append([
+        InlineKeyboardButton('➕ ADD ALL',
+                             callback_data='confirm_add_all_thornodes'),
+        InlineKeyboardButton('➖ REMOVE ALL',
+                             callback_data='confirm_delete_all_thornodes')
+    ])
 
     return keyboard
 
@@ -101,7 +121,8 @@ def show_detail_menu(update, context):
     try:
         latest_block_height = get_latest_block_height()
         blocks_per_second = get_thorchain_blocks_per_second()
-        status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
+        status_since_in_seconds = (int(latest_block_height) - int(
+            node['status_since'])) / blocks_per_second
 
         text += node['status'].capitalize() + ' for *' + \
                 format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n'
@@ -111,7 +132,8 @@ def show_detail_menu(update, context):
 
     try:
         text += 'Number of Unconfirmed Transactions: '
-        unconfirmed_txs = get_number_of_unconfirmed_transactions(node['ip_address'])
+        unconfirmed_txs = get_number_of_unconfirmed_transactions(
+            node['ip_address'])
         text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
     except Exception as e:
         logger.exception(e)
@@ -119,12 +141,16 @@ def show_detail_menu(update, context):
 
     text += "What do you want to do with that Node?"
 
-    keyboard = [[InlineKeyboardButton('➖ REMOVE', callback_data='confirm_thornode_deletion'),
-                 InlineKeyboardButton('✏️ CHANGE ALIAS', callback_data='change_alias')],
-                [InlineKeyboardButton('⬅️ BACK', callback_data='thornode_menu')]]
+    keyboard = [[
+        InlineKeyboardButton('➖ REMOVE',
+                             callback_data='confirm_thornode_deletion'),
+        InlineKeyboardButton('✏️ CHANGE ALIAS', callback_data='change_alias')
+    ], [InlineKeyboardButton('⬅️ BACK', callback_data='thornode_menu')]]
 
     # Modify message
-    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(text,
+                            parse_mode='markdown',
+                            reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_admin_menu_new_msg(context, chat_id):
@@ -144,7 +170,10 @@ def show_admin_menu_new_msg(context, chat_id):
            "Below is a list of docker containers running on your system.\n" \
            "Click on any container to restart it!"
 
-    try_message(context=context, chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
+    try_message(context=context,
+                chat_id=chat_id,
+                text=text,
+                reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_admin_menu_buttons():
@@ -164,7 +193,11 @@ def get_admin_menu_buttons():
             container_name = name.replace('/', '')
             status = container['Status']
             text = "🐳 " + container_name + " - " + status
-            keyboard.append([InlineKeyboardButton(text, callback_data='container-#' + container_name)])
+            keyboard.append([
+                InlineKeyboardButton(text,
+                                     callback_data='container-#' +
+                                     container_name)
+            ])
 
     return keyboard
 
@@ -190,10 +223,14 @@ def try_message(context, chat_id, text, reply_markup=None):
         return
 
     try:
-        context.bot.send_message(chat_id, text, parse_mode='markdown', reply_markup=reply_markup)
+        context.bot.send_message(chat_id,
+                                 text,
+                                 parse_mode='markdown',
+                                 reply_markup=reply_markup)
     except TelegramError as e:
         if 'bot was blocked by the user' in e.message:
-            print("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
+            print("Telegram user " + str(chat_id) +
+                  " blocked me; removing him from the user list")
             del context.dispatcher.user_data[chat_id]
             del context.dispatcher.chat_data[chat_id]
             del context.dispatcher.persistence.user_data[chat_id]
@@ -207,7 +244,8 @@ def try_message(context, chat_id, text, reply_markup=None):
             context.job.enabled = False
             context.job.schedule_removal()
         else:
-            print("Got Error\n" + str(e) + "\nwith telegram user " + str(chat_id))
+            print("Got Error\n" + str(e) + "\nwith telegram user " +
+                  str(chat_id))
 
 
 def add_thornode_to_user_data(user_data, address, node):
@@ -220,15 +258,18 @@ def add_thornode_to_user_data(user_data, address, node):
     while True:
         i += 1
         alias = "Thor-" + str(i)
-        if not next(filter(
-                lambda current_address: user_data['nodes'][current_address]['alias'] == alias, user_data['nodes']),
-                None):
+        if not next(
+                filter(
+                    lambda current_address: user_data['nodes'][current_address][
+                        'alias'] == alias, user_data['nodes']), None):
             break
 
     user_data['nodes'][address] = node
     user_data['nodes'][address]['alias'] = alias
-    user_data['nodes'][address]['last_notification_timestamp'] = datetime.timestamp(datetime.now())
-    user_data['nodes'][address]['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+    user_data['nodes'][address][
+        'last_notification_timestamp'] = datetime.timestamp(datetime.now())
+    user_data['nodes'][address][
+        'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
 
 def show_confirmation_menu(update, text, keyboard):
@@ -238,7 +279,9 @@ def show_confirmation_menu(update, text, keyboard):
 
     query = update.callback_query
 
-    query.edit_message_text(text, parse_mode='markdown', reply_markup=InlineKeyboardMarkup(keyboard))
+    query.edit_message_text(text,
+                            parse_mode='markdown',
+                            reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_running_docker_container():
@@ -247,7 +290,9 @@ def get_running_docker_container():
     """
 
     bash_command = DOCKER_CURL_CMD + " http://localhost/containers/json"
-    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(bash_command.split(),
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
     output, error = process.communicate()
     rc = process.returncode
 
@@ -278,7 +323,8 @@ def get_network_security(network_json):
 
     total_active_bond = int(network_json['bondMetrics']['totalActiveBond'])
     total_staked = int(network_json['totalStaked'])
-    return total_active_bond / (total_active_bond + total_staked / 2)  # only half of total_staked is RUNE
+    return total_active_bond / (total_active_bond + total_staked / 2
+                               )  # only half of total_staked is RUNE
 
 
 def network_security_ratio_to_string(network_security_ratio):
@@ -355,7 +401,8 @@ def error(update, context):
     logger.warning('Update "%s" caused error: %s', update, context.error)
 
 
-async def for_each_async(elements: [], function: Callable[..., Awaitable[None]]):
+async def for_each_async(elements: [], function: Callable[...,
+                                                          Awaitable[None]]):
     tasks = []
     for element in elements:
         tasks.append(function(element))
