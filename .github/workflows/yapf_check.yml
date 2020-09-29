@@ -14,5 +14,5 @@ jobs:
       uses: block42-blockchain-company/yapf-action@master
       with:
         args:
-          - --verbose
-          - --recursive
+          - verbose
+          - recursive
