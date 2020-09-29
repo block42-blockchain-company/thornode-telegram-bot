@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: run YAPF to test if python code is correctly formatted
+    - name: run YAPF to reformat python code
       uses: block42-blockchain-company/yapf-action@master
       with:
-        args: --verbose
+        args: [--verbose, --style='{based_on_style: pep8}']
