@@ -1,0 +1,50 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: thornode-bot-pvc
+  namespace: thornode
+  labels:
+    pvclaim: thornode-bot-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thornode-bot
+  namespace: thornode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thornode-bot
+  template:
+    metadata:
+      labels:
+        app: thornode-bot
+    spec:
+      containers:
+        - name: thornode-bot
+          image: block42blockchaincompany/thornode_bot:latest
+          imagePullPolicy: Always
+          env:
+            # Input the API Token you got from: https://t.me/BotFather
+            - name: TELEGRAM_BOT_TOKEN
+              value: "XXX:YYY"
+            # Choose "CHAOSNET" or "TESTNET"
+            - name: NETWORK_TYPE
+              value: "CHAOSNET"
+            # You can monitor one or more Binance nodes. Add them separated by comma (,)
+            # To use the default Binance node of your Thornode setup (using k8s DNS), leave it unchanged
+            - name: BINANCE_NODE_IPS
+              value: "binance-daemon.thornode"
+      volumes:
+        - name: thornode-bot-volume
+          persistentVolumeClaim:
+            claimName: thornode-bot-pvc
