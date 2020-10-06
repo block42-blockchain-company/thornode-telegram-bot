@@ -11,11 +11,9 @@ If you have questions feel free to open a github issue or contact us in our Tele
 * Python3 (if you want to run without docker)
 
 ## Quickstart
-For *kubernetes* open `kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml` and/or 
-`kubernetes/k8s_thornode_bot_deployment_testnet.yaml` file;
+For *kubernetes* open `kubernetes/k8s.yaml`;
 
-For *docker-compose* open `variables-chaosnet.env` and/or
- `variables-testnet.env` file and set:
+For *docker-compose* open `variables.env` and set:
  
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
@@ -24,7 +22,7 @@ Leave it empty or remove it to not monitor any Binance Node.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the 
 Admin Area (not working on K8s at the moment).
 
-### Kubernetes (K8s)
+### Kubernetes (k8s)
 
 *We assume that you already have a running K8s cluster.*
 
@@ -38,17 +36,7 @@ export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
 
 Now, from the project's main directoty, run 
 ```
-# One Bot on Chaosnet:
-kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
-
-# One Bot on Testnet:
-kubectl create -f kubernetes/k8s_setup_testnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
-
-# Two Bots on both networks:
-kubectl create -f kubernetes/k8s_setup_chaosnet.yaml -f kubernetes/k8s_setup_testnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+kubectl create -f kubernetes/k8s.yaml
 ```
 
 
@@ -57,14 +45,7 @@ kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubern
 Install `docker` and `docker-compose` and run:
 
 ```
-# One Bot on Chaosnet:
-docker-compose -f docker-compose-chaosnet.yaml up -d
-
-# One Bot on Testnet:
-docker-compose -f docker-compose-testnet.yaml up -d
-
-# Two Bots on both networks:
-docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml up -d
+docker-compose -f docker-compose/docker-compose.yaml up -d
 ```
 
 ## Steps to run everything yourself
@@ -93,7 +74,7 @@ Then send `/newbot` in the chat, and follow the given steps to create a new tele
 Set the telegram bot token you just created as an environment variable: `TELEGRAM_BOT_TOKEN`
 
 ```
-export TELEGRAM_BOT_TOKEN=XXX
+export TELEGRAM_BOT_TOKEN=XXX:YYY
 ```
 ---
 Set the network you want to monitor:
@@ -111,7 +92,7 @@ IPs. Set it to `localhost` if the Binance Node runs on the same machine as the T
 
 If you enter multiple Binance Node IPs, make sure to separate the IDs with `,` i.e. a comma.
 ```
-export BINANCE_NODE_IPS=3.228.22.197,localhost
+export BINANCE_NODE_IPS=localhost,1.2.3.4
 ```
 ---
 Next set Telegram User IDs that are permissioned to access the Admin Area in the `ADMIN_USER_IDS` environment variable.
@@ -194,11 +175,8 @@ Our solution should run on all K8s clusters (AWS, Digital Ocean, on-premise...)
 
 All K8s files can be found in `/kubernetes`.
 
-The `k8s_setup_*.yaml` files define the namespace in which the bot(s) operates, as well as the persistent volume claim(s)
-that ensures user data is persisted across bot restarts.
-
-In the `k8s_thornode_bot_deployment-*.yaml` files you find the deployment of the actual bot(s).
-These are the files where you have to insert the correct values for the environment variables.
+The `k8s.yaml` file define the namespace in which the bot(s) operates, as well as the persistent volume claim(s)
+that ensures user data is persisted across bot restarts. The bot deployment will also be created, make sure to insert the correct values for the environment variables.
 
 Set the right values as indicated by the comments.
 
@@ -214,43 +192,24 @@ export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
 
 Now create first the setup manifest, and then the deployment manifest with:
 ```
-# One Bot on Chaosnet:
-kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
-
-# One Bot on Testnet:
-kubectl create -f kubernetes/k8s_setup_testnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
-
-# Two Bots on both networks:
-kubectl create -f kubernetes/k8s_setup_chaosnet.yaml -f kubernetes/k8s_setup_testnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+kubectl create -f kubernetes/k8s.yaml
 ```
 
-Check out if your deployment and persistent volume claim were succesfully created with:
+Check out if your deployment and persistent volume claim were successfully created with:
 ```
-kubectl get pods -n thornode-bot
-kubectl get pvc -n thornode-bot
+kubectl get pods -n thornode
+kubectl get pvc -n thornode
 ``` 
 
-#### [Modifying running K8s-Bot](#modifying-running-k8s-bot)
+#### [Modifying running k8s-Bot](#modifying-running-k8s-bot)
 
 At a later point you might want to update the environment variables, or use the latest docker image.
-For the former, modify `kubernetes/k8s_thornode_bot_deployment-*.yaml` as desired.
+For the former, modify `kubernetes/k8s.yaml` as desired.
 
 Then delete the deployment, and create it again:
 ```
-# One Bot on Chaosnet:
-kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
-
-# One Bot on Testnet:
-kubectl delete -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
-
-# Two Bots on both networks:
-kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
-kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+kubectl delete -f kubernetes/k8s.yaml
+kubectl create -f kubernetes/k8s.yaml
 ```
 
 Your bot(s) should send you a message that he got updated. 
@@ -261,17 +220,7 @@ He now uses the new environment variables / newest docker image.
 If you want to delete all k8s resources related to the bot(s) (namespace and persistent volume with user data), 
 first delete the deployment and then the setup:
 ```
-# One Bot on Chaosnet:
-kubectl delete -f kubernetes/k8s_setup_chaosnet.yaml
-kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
-
-# One Bot on Testnet:
-kubectl delete -f kubernetes/k8s_setup_testnet.yaml
-kubectl delete -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
-
-# Two Bots on both networks:
-kubectl delete -f kubernetes/k8s_setup_chaosnet.yaml -f kubernetes/k8s_setup_testnet.yaml
-kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubernetes/k8s_thornode_bot_deployment_testnet.yaml
+kubectl delete -f kubernetes/k8s.yaml
 ```
 
 ### [Docker Standalone](#docker-standalone)
@@ -295,7 +244,7 @@ docker volume create thornode-bot-volume
 Finally, run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IPS=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX:YYY --env BINANCE_NODE_IPS=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
@@ -318,38 +267,22 @@ there is not the possibility for the `DEBUG` mode when using docker.*
 
 
 ### [Docker Compose](#docker-compose)
-The explained steps in the Docker Standalone section are conveniently bundled into the files
-`docker-compose-chaosnet.yaml` and `docker-compose-testnet.yaml`.
+The explained steps in the Docker Standalone section are conveniently bundled into the file
+`docker-compose.yaml`.
 
-First, as before, you need to set the right values in the `variables-chaosnet.env` and/or
-`variables-testnet.env` files for `TELEGRAM_BOT_TOKEN`, `BINANCE_NODE_IPS` and `ADMIN_USER_IDS`
+First, as before, you need to set the right values in the `variables.env` file for `TELEGRAM_BOT_TOKEN`, `BINANCE_NODE_IPS` and `ADMIN_USER_IDS`.
 
-If you don't want to spin up the official docker image from our dockerhub, open any of the 
-`docker-compose-*.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
+If you don't want to spin up the official docker image from our dockerhub, open `docker-compose.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
 and comment in the line `build: .`.
 
 Finally, start the Thornode Telegram Bot with `docker-compose up -d`, and specify the correct file with the `-f` flag:
 ```
-# One Bot on Chaosnet:
-docker-compose -f docker-compose-chaosnet.yaml up -d
-
-# One Bot on Testnet:
-docker-compose -f docker-compose-testnet.yaml up -d
-
-# Two Bots on both networks:
-docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml up -d
+docker-compose -f docker-compose.yaml up -d
 ```
 
 If you want to stop your bot(s) later again, run `docker-compose down`, and specify the correct file with the `-f` flag:
 ```
-# One Bot on Chaosnet:
-docker-compose -f docker-compose-chaosnet.yaml down
-
-# One Bot on Testnet:
-docker-compose -f docker-compose-testnet.yaml down
-
-# Two Bots on both networks:
-docker-compose -f docker-compose-testnet.yaml -f docker-compose-chaosnet.yaml down
+docker-compose -f docker-compose.yaml down
 ```
 
 ---
@@ -360,7 +293,7 @@ try to this:
 ```
 docker network create vpnworkaround --subnet 10.0.1.0/24
 ```
-* Then comment in the networks configuration in any `docker-compose-*.yaml`
+* Then comment in the networks configuration in `docker-compose.yaml`
 ```
 networks:
   default:
@@ -369,7 +302,7 @@ networks:
 ```
 * Run again in your terminal
 ```
-docker-compose up -f docker-compose-*.yaml -d
+docker-compose up -f docker-compose.yaml -d
 ```
 
 This solution is taken from https://github.com/docker/for-linux/issues/418#issuecomment-491323611
