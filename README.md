@@ -13,7 +13,7 @@ If you have questions feel free to open a github issue or contact us in our Tele
 ## Quickstart
 For *kubernetes* open `kubernetes/k8s.yaml`;
 
-For *docker-compose* open `variables.env` and set:
+For *docker-compose* open `docker-compose/variables.env` and set:
  
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
@@ -22,7 +22,7 @@ Leave it empty or remove it to not monitor any Binance Node.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the 
 Admin Area (not working on K8s at the moment).
 
-### Kubernetes (k8s)
+### Kubernetes (K8s)
 
 *We assume that you already have a running K8s cluster.*
 
