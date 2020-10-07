@@ -323,8 +323,7 @@ def get_network_security(network_json):
 
     total_active_bond = int(network_json['bondMetrics']['totalActiveBond'])
     total_staked = int(network_json['totalStaked'])
-    return total_active_bond / (total_active_bond + total_staked / 2
-                               )  # only half of total_staked is RUNE
+    return total_active_bond / (total_active_bond + total_staked)
 
 
 def network_security_ratio_to_string(network_security_ratio):
@@ -391,6 +390,16 @@ def format_to_days_and_hours(duration: timedelta) -> str:
             result += ' hours'
 
     return result
+
+
+def did_churn_happen(validator, local_node_statuses, highest_churn_status_since) -> bool:
+    remote_status = validator['status']
+    local_status = local_node_statuses[validator['node_address']] if validator[
+                                                                         'node_address'] in local_node_statuses else "unknown"
+    if int(validator['status_since']) > highest_churn_status_since and \
+            ((local_status == 'ready' and remote_status == 'active') or (local_status == 'active' and remote_status == 'standby')):
+        return True
+    return False
 
 
 def error(update, context):

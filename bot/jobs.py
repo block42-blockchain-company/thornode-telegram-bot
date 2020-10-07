@@ -336,6 +336,11 @@ def check_churning(context):
 
     churned_in = []
     churned_out = []
+    highest_churn_status_since = 0
+    for validator in validators:
+        if did_churn_happen(validator, local_node_statuses, highest_churn_status_since):
+            highest_churn_status_since = int(validator['status_since'])
+
     for validator in validators:
         remote_status = validator['status']
         local_status = local_node_statuses[
