@@ -50,7 +50,9 @@ def check_thornodes(context):
 
             inactive_nodes.append(node_address)
 
-            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+            try_message_with_home_menu(context=context,
+                                       chat_id=chat_id,
+                                       text=text)
             continue
 
         # isNotBlocked = lastTimestamp < currentTimestamp - timeout
@@ -59,8 +61,10 @@ def check_thornodes(context):
                     datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))):
 
             # Check which node fields have changed
-            changed_fields = [field for field in ['status', 'bond', 'slash_points'] if
-                              local_node[field] != remote_node[field]]
+            changed_fields = [
+                field for field in ['status', 'bond', 'slash_points']
+                if local_node[field] != remote_node[field]
+            ]
 
             # If just slash_points changed, only send message if difference is min. 3 slash points
             if len(changed_fields) == 1 and 'slash_points' in changed_fields and \
@@ -77,21 +81,28 @@ def check_thornodes(context):
                 text += '\nBond: ' + tor_to_rune(int(local_node['bond']))
                 if 'bond' in changed_fields:
                     text += ' ➡️ ' + tor_to_rune(int(remote_node['bond']))
-                text += '\nSlash Points: ' + '{:,}'.format(int(local_node['slash_points']))
+                text += '\nSlash Points: ' + '{:,}'.format(
+                    int(local_node['slash_points']))
                 if 'slash_points' in changed_fields:
-                    text += ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
+                    text += ' ➡️ ' + '{:,}'.format(
+                        int(remote_node['slash_points']))
 
                 # Update data
                 local_node['status'] = remote_node['status']
                 local_node['bond'] = remote_node['bond']
                 local_node['slash_points'] = remote_node['slash_points']
                 local_node['ip_address'] = remote_node['ip_address']
-                local_node['last_notification_timestamp'] = datetime.timestamp(datetime.now())
-                local_node['notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
+                local_node['last_notification_timestamp'] = datetime.timestamp(
+                    datetime.now())
+                local_node[
+                    'notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
 
-                try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+                try_message_with_home_menu(context=context,
+                                           chat_id=chat_id,
+                                           text=text)
             else:
-                local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+                local_node[
+                    'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
         if local_node['status'] in MONITORED_STATUSES:
             check_thorchain_block_height(context, node_address=node_address)
@@ -134,13 +145,16 @@ def check_thorchain_block_height(context, node_address):
         node_data['block_height_stuck_count'] += 1
     else:
         # Check if we have to send a notification that the Height increases again
-        if 'block_height_stuck_count' in node_data and node_data['block_height_stuck_count'] > 0:
+        if 'block_height_stuck_count' in node_data and node_data[
+                'block_height_stuck_count'] > 0:
             text = 'Block height is increasing again! 👌' + '\n' + \
                    'IP: ' + node_data['ip_address'] + '\n' + \
                    'THORNode: ' + node_data['alias'] + '\n' + \
                    'Node address: ' + node_address + '\n' + \
                    'Block height now at: ' + block_height + '\n'
-            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+            try_message_with_home_menu(context=context,
+                                       chat_id=chat_id,
+                                       text=text)
             node_data['block_height_stuck_count'] = -1
         else:
             node_data['block_height_stuck_count'] = 0
@@ -173,7 +187,8 @@ def check_thorchain_catch_up_status(context, node_address):
         node_data['is_catching_up'] = False
 
     try:
-        is_currently_catching_up = is_thorchain_catching_up(node_data['ip_address'])
+        is_currently_catching_up = is_thorchain_catching_up(
+            node_data['ip_address'])
     except Exception as e:
         logger.exception(e)
         return
@@ -249,9 +264,11 @@ def check_binance_health(context):
             binance_nodes[binance_node_ip]['is_binance_node_healthy'] = True
         binance_node_data = binance_nodes[binance_node_ip]
 
-        is_binance_node_currently_healthy = is_binance_node_healthy(binance_node_ip)
+        is_binance_node_currently_healthy = is_binance_node_healthy(
+            binance_node_ip)
 
-        if binance_node_data['is_binance_node_healthy'] != is_binance_node_currently_healthy:
+        if binance_node_data[
+                'is_binance_node_healthy'] != is_binance_node_currently_healthy:
             if is_binance_node_currently_healthy:
                 binance_node_data['is_binance_node_healthy'] = True
                 text = 'Binance Node is healthy again! 👌' + '\n' + \
@@ -273,21 +290,27 @@ def check_versions_status(context):
         node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        try_message_with_home_menu(context,
+                                   chat_id=context.job.context['chat_id'],
+                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
-    highest_version = max(map(lambda n: n['version'], node_accounts), key=lambda v: version.parse(v))
+    highest_version = max(map(lambda n: n['version'], node_accounts),
+                          key=lambda v: version.parse(v))
     last_newest_version = user_data.get('newest_software_version', None)
 
-    if last_newest_version is None or version.parse(highest_version) > version.parse(last_newest_version):
+    if last_newest_version is None or version.parse(
+            highest_version) > version.parse(last_newest_version):
         user_data['newest_software_version'] = highest_version
         for node in user_data['nodes'].values():
             if version.parse(node['version']) < version.parse(highest_version):
                 message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
                           f"Your software version is *{node['version']}* " \
                           f"but one of the nodes already runs on *{highest_version}*"
-                try_message_with_home_menu(context, chat_id=context.job.context['chat_id'],
-                                           text=message)
+                try_message_with_home_menu(
+                    context,
+                    chat_id=context.job.context['chat_id'],
+                    text=message)
 
 
 def check_churning(context):
@@ -297,13 +320,16 @@ def check_churning(context):
         validators = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context, chat_id=context.job.context['chat_id'], text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        try_message_with_home_menu(context,
+                                   chat_id=context.job.context['chat_id'],
+                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
     if 'node_statuses' not in context.bot_data:
         context.bot_data['node_statuses'] = {}
         for validator in validators:
-            context.bot_data['node_statuses'][validator['node_address']] = validator['status']
+            context.bot_data['node_statuses'][
+                validator['node_address']] = validator['status']
         return
 
     local_node_statuses = context.bot_data['node_statuses']
@@ -312,13 +338,20 @@ def check_churning(context):
     churned_out = []
     for validator in validators:
         remote_status = validator['status']
-        local_status = local_node_statuses[validator['node_address']] if validator[
-                                                                             'node_address'] in local_node_statuses else "unknown"
+        local_status = local_node_statuses[
+            validator['node_address']] if validator[
+                'node_address'] in local_node_statuses else "unknown"
         if remote_status != local_status:
             if 'active' == remote_status:
-                churned_in.append({"address": validator['node_address'], "bond": validator['bond']})
+                churned_in.append({
+                    "address": validator['node_address'],
+                    "bond": validator['bond']
+                })
             elif 'active' == local_status:
-                churned_out.append({"address": validator['node_address'], "bond": validator['bond']})
+                churned_out.append({
+                    "address": validator['node_address'],
+                    "bond": validator['bond']
+                })
 
     if len(churned_in) or len(churned_out):
         text = "🔄 CHURN SUMMARY\n" \
@@ -345,4 +378,5 @@ def check_churning(context):
         try_message_to_all_users(context, text=text)
 
     for validator in validators:
-        context.bot_data['node_statuses'][validator['node_address']] = validator['status']
+        context.bot_data['node_statuses'][
+            validator['node_address']] = validator['status']

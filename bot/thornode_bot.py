@@ -3,21 +3,14 @@ import re
 import time
 
 from telegram.error import BadRequest, Unauthorized
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    PicklePersistence,
-    CallbackQueryHandler,
-    MessageHandler,
-    Filters
-)
+from telegram.ext import (Updater, CommandHandler, PicklePersistence,
+                          CallbackQueryHandler, MessageHandler, Filters)
 from telegram.ext.dispatcher import run_async
 
 from handlers.network_info import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
-
 """
 ######################################################################################################################################################
 BOT RESTART SETUP
@@ -45,17 +38,23 @@ def setup_existing_users(dispatcher):
             bot_blocked_by_ids.append(chat_id)
             continue
         except TelegramError as e:
-            logger.exception(f'USER {str(chat_id)}\n Error: {str(e)}', exc_info=True)
+            logger.exception(f'USER {str(chat_id)}\n Error: {str(e)}',
+                             exc_info=True)
 
         # Start monitoring jobs for all existing users
         if 'job_started' not in dispatcher.user_data[chat_id]:
             dispatcher.user_data[chat_id]['job_started'] = True
-        dispatcher.job_queue.run_repeating(user_specific_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
-            'chat_id': chat_id, 'user_data': dispatcher.user_data[chat_id]
-        })
+        dispatcher.job_queue.run_repeating(
+            user_specific_checks,
+            interval=JOB_INTERVAL_IN_SECONDS,
+            context={
+                'chat_id': chat_id,
+                'user_data': dispatcher.user_data[chat_id]
+            })
 
     for chat_id in bot_blocked_by_ids:
-        logger.warning("Telegram user " + str(chat_id) + " blocked me; removing him from the user list")
+        logger.warning("Telegram user " + str(chat_id) +
+                       " blocked me; removing him from the user list")
 
         del dispatcher.user_data[chat_id]
         del dispatcher.chat_data[chat_id]
@@ -71,7 +70,9 @@ def setup_existing_users(dispatcher):
     try:
         new_node_accounts = get_node_accounts()
     except:
-        logger.exception("Fatal error! I couldn't get node accounts to update the local user_data!", exc_info=True)
+        logger.exception(
+            "Fatal error! I couldn't get node accounts to update the local user_data!",
+            exc_info=True)
         return
 
     # Delete all node addresses and add them again to ensure all user_data fields are up to date
@@ -79,31 +80,35 @@ def setup_existing_users(dispatcher):
         if 'nodes' not in dispatcher.user_data[chat_id]:
             dispatcher.user_data[chat_id]['nodes'] = {}
 
-        local_node_addresses = list(dispatcher.user_data[chat_id]['nodes'].keys())
+        local_node_addresses = list(
+            dispatcher.user_data[chat_id]['nodes'].keys())
 
         for address in local_node_addresses:
             try:
-                new_node = next(n for n in new_node_accounts if n['node_address'] == address)
+                new_node = next(n for n in new_node_accounts
+                                if n['node_address'] == address)
                 del dispatcher.user_data[chat_id]['nodes'][address]
-                add_thornode_to_user_data(dispatcher.user_data[chat_id], address, new_node)
+                add_thornode_to_user_data(dispatcher.user_data[chat_id],
+                                          address, new_node)
             except StopIteration:
                 obsolete_node = dispatcher.user_data[chat_id]['nodes'][address]
-                dispatcher.bot.send_message(chat_id,
-                                            f"Your node f{obsolete_node['alias']} with address {address} "
-                                            f"is not present in the network! "
-                                            f"I'm removing it...")
+                dispatcher.bot.send_message(
+                    chat_id,
+                    f"Your node f{obsolete_node['alias']} with address {address} "
+                    f"is not present in the network! "
+                    f"I'm removing it...")
                 del dispatcher.user_data[chat_id]['nodes'][address]
 
 
 def setup_bot_data(dispatcher):
-    if 'binance_nodes'not in dispatcher.bot_data:
+    if 'binance_nodes' not in dispatcher.bot_data:
         dispatcher.bot_data['binance_nodes'] = {}
     for binance_node_ip in BINANCE_NODE_IPS:
         if binance_node_ip not in dispatcher.bot_data['binance_nodes']:
             dispatcher.bot_data['binance_nodes'][binance_node_ip] = {}
 
-    dispatcher.job_queue.run_repeating(general_bot_checks, interval=JOB_INTERVAL_IN_SECONDS)
-
+    dispatcher.job_queue.run_repeating(general_bot_checks,
+                                       interval=JOB_INTERVAL_IN_SECONDS)
 
 
 """
@@ -121,10 +126,12 @@ def start(update, context):
 
     # Start job for user
     if 'job_started' not in context.user_data:
-        context.job_queue.run_repeating(user_specific_checks, interval=JOB_INTERVAL_IN_SECONDS, context={
-            'chat_id': update.message.chat.id,
-            'user_data': context.user_data
-        })
+        context.job_queue.run_repeating(user_specific_checks,
+                                        interval=JOB_INTERVAL_IN_SECONDS,
+                                        context={
+                                            'chat_id': update.message.chat.id,
+                                            'user_data': context.user_data
+                                        })
         context.user_data['job_started'] = True
         context.user_data['nodes'] = {}
 
@@ -147,7 +154,9 @@ def start(update, context):
             '- the correct *vault addresses*.'
 
     # Send message
-    try_message_with_home_menu(context=context, chat_id=update.message.chat.id, text=text)
+    try_message_with_home_menu(context=context,
+                               chat_id=update.message.chat.id,
+                               text=text)
 
 
 @run_async
@@ -213,9 +222,10 @@ def dispatch_query(update, context):
     # Catch any 'Message is not modified' error by removing the keyboard
     if edit:
         try:
-            context.bot.edit_message_reply_markup(reply_markup=None,
-                                                  chat_id=update.callback_query.message.chat_id,
-                                                  message_id=update.callback_query.message.message_id)
+            context.bot.edit_message_reply_markup(
+                reply_markup=None,
+                chat_id=update.callback_query.message.chat_id,
+                message_id=update.callback_query.message.message_id)
         except BadRequest as e:
             if 'Message is not modified' in e.message:
                 pass
@@ -235,7 +245,9 @@ def show_home_menu_edit_msg(update, context):
     keyboard = get_home_menu_buttons()
     text = 'I am your THORNode Bot. 🤖\nChoose an action:'
     query = update.callback_query
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='markdown')
+    query.edit_message_text(text,
+                            reply_markup=InlineKeyboardMarkup(keyboard),
+                            parse_mode='markdown')
 
 
 def show_thornode_menu_edit_msg(update, context):
@@ -310,7 +322,8 @@ def plain_input(update, context):
     Handle if the users sends a message
     """
     message = update.message.text
-    expected = context.user_data['expected'] if 'expected' in context.user_data else None
+    expected = context.user_data[
+        'expected'] if 'expected' in context.user_data else None
     if message == '📡 MY NODES':
         return show_thornode_menu_handler(update, context)
     elif message == '🌎 NETWORK':
@@ -339,7 +352,8 @@ def handle_add_node(update, context):
 
     if node is None:
         update.message.reply_text(
-            '⛔️ I have not found a THORNode with this address! Please try another one.')
+            '⛔️ I have not found a THORNode with this address! Please try another one.'
+        )
         context.user_data['expected'] = 'add_node'
         return
 
@@ -360,11 +374,13 @@ def handle_change_alias(update, context):
 
     if len(alias) > 16:
         update.message.reply_text(
-            '⛔️ Alias cannot have more than 16 characters! Please try another one.')
+            '⛔️ Alias cannot have more than 16 characters! Please try another one.'
+        )
         context.user_data['expected'] = 'change_alias'
         return
 
-    context.user_data['nodes'][context.user_data['selected_node_address']]['alias'] = alias
+    context.user_data['nodes'][
+        context.user_data['selected_node_address']]['alias'] = alias
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -380,7 +396,8 @@ def confirm_thornode_deletion(update, context):
 
     keyboard = [[
         InlineKeyboardButton('YES ✅', callback_data='delete_thornode'),
-        InlineKeyboardButton('NO ❌', callback_data='thornode_details-' + address)
+        InlineKeyboardButton('NO ❌',
+                             callback_data='thornode_details-' + address)
     ]]
     text = '⚠️ Do you really want to remove this node from your monitoring list? ⚠\n️' + \
            "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
@@ -467,7 +484,9 @@ def admin_menu(update, context):
 
     if update.effective_user.id not in ADMIN_USER_IDS:
         text = "❌ You are not an Admin! ❌"
-        try_message_with_home_menu(context, chat_id=update.effective_chat.id, text=text)
+        try_message_with_home_menu(context,
+                                   chat_id=update.effective_chat.id,
+                                   text=text)
         return
 
     show_admin_menu_new_msg(context, update.effective_chat.id)
@@ -482,7 +501,9 @@ def confirm_container_restart(update, context):
     container_name = query.data.split("-#")[1]
 
     keyboard = [[
-        InlineKeyboardButton('YES ✅', callback_data='restart_container-#' + container_name),
+        InlineKeyboardButton('YES ✅',
+                             callback_data='restart_container-#' +
+                             container_name),
         InlineKeyboardButton('NO ❌', callback_data='admin_menu')
     ]]
     text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'
@@ -513,7 +534,9 @@ def restart_container(update, context):
                 break
 
     bash_command = DOCKER_CURL_CMD + ' -f -v -XPOST http://localhost/containers/' + container_id + '/restart'
-    process = subprocess.Popen(bash_command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(bash_command.split(),
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
     output, error = process.communicate()
 
     if process.returncode:
@@ -523,7 +546,9 @@ def restart_container(update, context):
         show_admin_menu_new_msg(context, chat_id=update.effective_chat.id)
         return
 
-    query.edit_message_text('Container\n*' + container_name + '*\nsuccessfully restarted!', parse_mode='markdown')
+    query.edit_message_text('Container\n*' + container_name +
+                            '*\nsuccessfully restarted!',
+                            parse_mode='markdown')
     show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
 
@@ -538,7 +563,9 @@ def show_all_thorchain_nodes(update, context):
         blocks_per_second = get_thorchain_blocks_per_second()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context=context, chat_id=update.effective_chat.id, text=NETWORK_ERROR_MSG)
+        try_message_with_home_menu(context=context,
+                                   chat_id=update.effective_chat.id,
+                                   text=NETWORK_ERROR_MSG)
         return
 
     text = "Status of all THORNodes in the THORChain network:\n\n"
@@ -546,8 +573,9 @@ def show_all_thorchain_nodes(update, context):
     for node in nodes:
         try:
             monitored_address = next(
-                filter(lambda monitored_address: monitored_address == node['node_address'], context.user_data['nodes']),
-                None)
+                filter(
+                    lambda monitored_address: monitored_address == node[
+                        'node_address'], context.user_data['nodes']), None)
             text += 'THORNode: *'
 
             if monitored_address:
@@ -556,7 +584,8 @@ def show_all_thorchain_nodes(update, context):
                 text += "not monitored"
             text += "*\n"
 
-            status_since_in_seconds = (int(latest_block_height) - int(node['status_since'])) / blocks_per_second
+            status_since_in_seconds = (int(latest_block_height) - int(
+                node['status_since'])) / blocks_per_second
 
             text += 'Address: *' + node['node_address'] + '*\n' + \
                     'Version: *' + node['version'] + '*\n' + \
@@ -568,12 +597,16 @@ def show_all_thorchain_nodes(update, context):
                     format_to_days_and_hours(timedelta(seconds=status_since_in_seconds)) + '*\n\n' + \
                     'Status Since Block: ' + '*{:,}*'.format(int(node['status_since'])) + '\n\n'
 
-            try_message(context=context, chat_id=update.effective_chat.id, text=text)
+            try_message(context=context,
+                        chat_id=update.effective_chat.id,
+                        text=text)
             text = ''
         except Exception as e:
             logger.exception(e)
             text += '\nError while getting more data about this node.\n'
-            try_message(context=context, chat_id=update.effective_chat.id, text=text)
+            try_message(context=context,
+                        chat_id=update.effective_chat.id,
+                        text=text)
             text = ''
 
 
@@ -586,19 +619,23 @@ Application
 
 def setup_debug_processes():
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    increase_block_height_path = os.sep.join([current_dir, os.path.pardir, "test", "increase_block_height.py"])
+    increase_block_height_path = os.sep.join(
+        [current_dir, os.path.pardir, "test", "increase_block_height.py"])
     test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
     mock_api_path = os.sep.join([test_dir, "mock_api.py"])
 
-    increase_block_height_process = subprocess.Popen(['python3', increase_block_height_path], cwd=test_dir)
-    mock_api_process = subprocess.Popen(['python3', mock_api_path], cwd=test_dir)
+    increase_block_height_process = subprocess.Popen(
+        ['python3', increase_block_height_path], cwd=test_dir)
+    mock_api_process = subprocess.Popen(['python3', mock_api_path],
+                                        cwd=test_dir)
 
     def cleanup():
         mock_api_process.terminate()
         increase_block_height_process.terminate()
 
     atexit.register(cleanup)
-    time.sleep(1)  # Make sure all processes started before bot starts using them
+    time.sleep(
+        1)  # Make sure all processes started before bot starts using them
 
 
 def main():
@@ -608,7 +645,9 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
-    bot = Updater(TELEGRAM_BOT_TOKEN, persistence=PicklePersistence(filename=session_data_path), use_context=True)
+    bot = Updater(TELEGRAM_BOT_TOKEN,
+                  persistence=PicklePersistence(filename=session_data_path),
+                  use_context=True)
     dispatcher = bot.dispatcher
 
     setup_existing_users(dispatcher=dispatcher)
