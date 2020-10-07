@@ -1,10 +1,10 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: thornode-bot-pvc
+  name: thornode-bot
   namespace: thornode
   labels:
-    pvclaim: thornode-bot-pvc
+    pvclaim: thornode-bot
 spec:
   accessModes:
     - ReadWriteOnce
@@ -47,4 +47,4 @@ spec:
       volumes:
         - name: thornode-bot-volume
           persistentVolumeClaim:
-            claimName: thornode-bot-pvc
+            claimName: thornode-bot
