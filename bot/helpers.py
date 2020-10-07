@@ -393,6 +393,16 @@ def format_to_days_and_hours(duration: timedelta) -> str:
     return result
 
 
+def did_churn_happen(validator, local_node_statuses, highest_churn_status_since) -> bool:
+    remote_status = validator['status']
+    local_status = local_node_statuses[validator['node_address']] if validator[
+                                                                         'node_address'] in local_node_statuses else "unknown"
+    if int(validator['status_since']) > highest_churn_status_since and \
+            ((local_status == 'ready' and remote_status == 'active') or (local_status == 'active' and remote_status == 'standby')):
+        return True
+    return False
+
+
 def error(update, context):
     """
     Log error.
