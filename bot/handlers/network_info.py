@@ -8,6 +8,10 @@ def show_network_menu(update, context):
     keyboard = [[
         InlineKeyboardButton('📊 NETWORK STATS',
                              callback_data='show_network_stats'),
+    ],
+    [
+        InlineKeyboardButton('💰 SOLVENCY',
+                             callback_data='solvency'),
         InlineKeyboardButton('🔒 VAULT ADDRESSES',
                              callback_data='vault_key_addresses')
     ]]
@@ -89,6 +93,11 @@ async def show_network_stats(update, context):
         try_message_with_home_menu(context=context,
                                    chat_id=update.effective_chat.id,
                                    text=text)
+
+
+async def solvency_check(update, context):
+    asgard_check(update, context)
+    yggdrasil_check(update, context)
 
 
 async def save_pool_address(ip_address, chain_to_node_addresses,

@@ -7,18 +7,10 @@ from constants import *
 
 
 def get_node_accounts():
-    if DEBUG:
-        url = 'http://localhost:8080/nodeaccounts.json'
-    else:
-        url = 'http://' + get_random_seed_node_endpoint(
-        ) + ':1317/thorchain/nodeaccounts'
+    url = 'http://localhost:8080/nodeaccounts.json' if DEBUG \
+        else f"http://{get_random_seed_node_endpoint()}:1317/thorchain/nodeaccounts"
 
-    validators_response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
-
-    if validators_response.status_code != 200:
-        raise BadStatusException(validators_response)
-
-    return validators_response.json()
+    return get_request_json(url=url)
 
 
 def get_node_status(node_ip=None):
@@ -30,13 +22,7 @@ def get_node_status(node_ip=None):
         "CHAOSNET": ":27147/status"
     }[NETWORK_TYPE]
 
-    status_response = requests.get(url='http://' + node_ip + status_path,
-                                   timeout=CONNECTION_TIMEOUT)
-
-    if status_response.status_code != 200:
-        raise BadStatusException(status_response)
-
-    return status_response.json()
+    return get_request_json(url=f"http://{node_ip}{status_path}")
 
 
 def get_latest_block_height(node_ip=None) -> str:
@@ -65,10 +51,9 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
         "TESTNET": ":26657/num_unconfirmed_txs",
         "CHAOSNET": ":27147/num_unconfirmed_txs"
     }[NETWORK_TYPE]
-    url = 'http://' + node_ip + unconfirmed_txs_path
+    url = f"http://{node_ip}{unconfirmed_txs_path}"
 
-    transactions_data_response = requests.get(url=url,
-                                              timeout=CONNECTION_TIMEOUT)
+    transactions_data_response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
 
     if transactions_data_response.status_code != 200:
         raise BadStatusException(transactions_data_response)
@@ -105,14 +90,7 @@ def get_network_data(node_ip=None):
     if node_ip is None:
         node_ip = get_random_seed_node_endpoint()
 
-    network_data_response = requests.get(url='http://' + node_ip +
-                                         ':8080/v1/network',
-                                         timeout=CONNECTION_TIMEOUT)
-
-    if network_data_response.status_code != 200:
-        raise BadStatusException(network_data_response)
-
-    return network_data_response.json()
+    return get_request_json(url=f"http://{node_ip}:8080/v1/network")
 
 
 def is_binance_node_healthy(binance_node_ip) -> bool:
@@ -136,14 +114,27 @@ def get_thorchain_blocks_per_year(node_ip=None):
     if node_ip is None:
         node_ip = get_random_seed_node_endpoint()
 
-    constants_response = requests.get(url='http://' + node_ip +
-                                      ':8080/v1/thorchain/constants',
-                                      timeout=CONNECTION_TIMEOUT)
+    constants = get_request_json(url=f"http://{node_ip}:8080/v1/thorchain/constants")
 
-    if constants_response.status_code != 200:
-        raise BadStatusException(constants_response)
+    return constants['int_64_values']['BlocksPerYear']
 
-    return constants_response.json()['int_64_values']['BlocksPerYear']
+
+def get_asgard_json() -> dict:
+    url = 'http://localhost:8080/asgard.json' if DEBUG \
+        else f"http://{get_random_seed_node_endpoint()}:1317/thorchain/vaults/asgard"
+
+    return get_request_json(url=url)
+
+
+def get_yggdrasil_json() -> dict:
+    url = 'http://localhost:8080/yggdrasil.json' if DEBUG \
+        else f"http://{get_random_seed_node_endpoint()}:1317/thorchain/vaults/yggdrasil"
+
+    return get_request_json(url=url)
+
+
+def get_binance_balance(address: str) -> dict:
+    return get_request_json(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
 
 
 async def get_pool_addresses(node_ip: str):
@@ -160,11 +151,21 @@ async def get_pool_addresses(node_ip: str):
             return await resp.json()
 
 
+def get_request_json(url: str) -> dict:
+    response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
+
+    if response.status_code != 200:
+        raise BadStatusException(response)
+
+    return response.json()
+
+
 class BadStatusException(Exception):
 
     def __init__(self, response: requests.Response):
-        self.message = "Error while network request.\nReceived status code: " + \
-                       str(response.status_code) + '\nReceived response: ' + response.text
+        self.message = f"Error while network request.\n" \
+                       f"Received status code: {str(response.status_code)}\n" \
+                       f"Received response: {response.text}"
 
     def __str__(self):
         return self.message

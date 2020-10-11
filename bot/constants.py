@@ -1,5 +1,6 @@
 import os
 import logging
+import random
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
@@ -16,6 +17,8 @@ else:
                   os.environ['BINANCE_NODE_IPS'].split(",")] \
         if 'BINANCE_NODE_IPS' in os.environ and os.environ['BINANCE_NODE_IPS'] != "" \
         else []
+
+BINANCE_DEX_ENDPOINT = f"{BINANCE_NODE_IPS[random.randint(0, len(BINANCE_NODE_IPS))]}:27146" if BINANCE_NODE_IPS else "https://dex.binance.org"
 
 ADMIN_USER_IDS = [
     int(admin_id) for admin_id in os.environ['ADMIN_USER_IDS'].split(",")
