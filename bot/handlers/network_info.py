@@ -96,8 +96,36 @@ async def show_network_stats(update, context):
 
 
 async def solvency_check(update, context):
-    asgard_check(update, context)
-    yggdrasil_check(update, context)
+    asgard_solvency = await asgard_solvency_check()
+    if 'connection_error' in asgard_solvency and asgard_solvency['connection_error']:
+        try_message_with_home_menu(context, update.effective_chat.id, NETWORK_ERROR_MSG)
+        return
+
+    message = "💰 Solvency Check\n"
+
+    if asgard_solvency['is_solvent']:
+        message += "THORChain is *100% Solvent* ✅\n\n" \
+                   "Tracked Balances:\n"
+    else:
+        message += "THORChain is *missing funds*! 😱\n\n" \
+                   "Tracked Balances:\n"
+
+    if 'insolvent_coins' in asgard_solvency:
+        for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
+            message += f"{coin_key}:\n" \
+                       f"  Expected: {coin_value['expected']}\n" \
+                       f"  Actual:   {coin_value['actual']}\n"
+
+    if 'solvent_coins' in asgard_solvency:
+        for coin_key, coin_value in asgard_solvency['solvent_coins'].items():
+            message += f"{coin_key}: {coin_value}\n"
+
+    try_message_with_home_menu(context, update.effective_chat.id, message)
+
+    #yggdrasil_solvency = yggdrasil_check(update, context)
+    #if yggdrasil_solvency['connection_error']:
+    #    try_message_with_home_menu(context, update.effective_chat.id, NETWORK_ERROR_MSG)
+    #    return
 
 
 async def save_pool_address(ip_address, chain_to_node_addresses,

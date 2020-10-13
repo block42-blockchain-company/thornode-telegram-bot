@@ -402,6 +402,45 @@ def did_churn_happen(validator, local_node_statuses, highest_churn_status_since)
     return False
 
 
+async def asgard_solvency_check() -> dict:
+    solvency_report = {'is_solvent': True}
+    asgard_actual = {}
+
+    try:
+        asgard_expected = get_asgard_json()
+        pool_addresses = await get_pool_addresses(get_random_seed_node_endpoint())
+        for chain_data in pool_addresses['current']:
+            chain = chain_data['chain']
+            if chain == 'BNB':
+                asgard_actual[chain] = {"json": {}}
+                asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
+    except Exception as e:
+        logger.exception(e)
+        solvency_report['connection_error'] = True
+        return solvency_report
+
+    for chain_key, chain_value in asgard_actual.items():
+        if chain_key == 'BNB':
+            for balance in chain_value['json']:
+                chain_value[balance['symbol']] = balance['free']
+
+    for chain in asgard_expected:
+        for coin in chain['coins']:
+            asset = coin['asset'].split('.')
+            if asgard_actual[asset[0]][asset[1]] != coin['amount']:
+                solvency_report['is_solvent'] = False
+                solvency_report['insolvent_coins'] = {coin['asset']:
+                                                          {
+                                                            "expected": coin['amount'],
+                                                            "actual": asgard_actual[asset[0]][asset[1]]
+                                                          }
+                                                     }
+            else:
+                solvency_report['solvent_coins'] = {coin['asset']: coin['asset']}
+
+    return solvency_report
+
+
 def error(update, context):
     """
     Log error.

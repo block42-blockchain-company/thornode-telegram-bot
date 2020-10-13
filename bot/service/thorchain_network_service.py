@@ -141,14 +141,11 @@ async def get_pool_addresses(node_ip: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(
                 f'http://{node_ip}:8080/v1/thorchain/pool_addresses',
-                timeout=CONNECTION_TIMEOUT) as resp:
-            if resp.status != 200:
-                raise Exception(
-                    f"Error while getting pool address. " +
-                    "Endpoint responded with: {await resp.text()} \n"
-                    "Code: ${str(resp.status)}")
+                timeout=CONNECTION_TIMEOUT) as response:
+            if response.status != 200:
+                raise BadStatusException(response)
 
-            return await resp.json()
+            return await response.json()
 
 
 def get_request_json(url: str) -> dict:
