@@ -112,13 +112,13 @@ async def solvency_check(update, context):
 
     if 'insolvent_coins' in asgard_solvency:
         for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
-            message += f"{coin_key}:\n" \
+            message += f"*{coin_key}*:\n" \
                        f"  Expected: {coin_value['expected']}\n" \
                        f"  Actual:   {coin_value['actual']}\n"
 
     if 'solvent_coins' in asgard_solvency:
         for coin_key, coin_value in asgard_solvency['solvent_coins'].items():
-            message += f"{coin_key}: {coin_value}\n"
+            message += f"*{coin_key}*: {coin_value}\n"
 
     try_message_with_home_menu(context, update.effective_chat.id, message)
 

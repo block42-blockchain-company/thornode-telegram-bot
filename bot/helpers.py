@@ -408,7 +408,7 @@ async def asgard_solvency_check() -> dict:
 
     try:
         asgard_expected = get_asgard_json()
-        pool_addresses = await get_pool_addresses(get_random_seed_node_endpoint())
+        pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
         for chain_data in pool_addresses['current']:
             chain = chain_data['chain']
             if chain == 'BNB':
@@ -425,18 +425,23 @@ async def asgard_solvency_check() -> dict:
                 chain_value[balance['symbol']] = balance['free']
 
     for chain in asgard_expected:
-        for coin in chain['coins']:
-            asset = coin['asset'].split('.')
-            if asgard_actual[asset[0]][asset[1]] != coin['amount']:
-                solvency_report['is_solvent'] = False
-                solvency_report['insolvent_coins'] = {coin['asset']:
-                                                          {
-                                                            "expected": coin['amount'],
-                                                            "actual": asgard_actual[asset[0]][asset[1]]
-                                                          }
-                                                     }
-            else:
-                solvency_report['solvent_coins'] = {coin['asset']: coin['asset']}
+        if chain['status'] == 'active':
+            for coin in chain['coins']:
+                asset = coin['asset'].split('.')
+                actual_amount_formatted = (asgard_actual[asset[0]][asset[1]].replace(".", "")).strip("0")
+                expected_amount_formatted = (coin['amount'].replace(".", "")).strip("0")
+                if actual_amount_formatted != expected_amount_formatted:
+                    solvency_report['is_solvent'] = False
+                    if 'insolvent_coins' not in solvency_report:
+                        solvency_report['insolvent_coins'] = {}
+                    solvency_report['insolvent_coins'][coin['asset']] = {
+                                                                            "expected": coin['amount'],
+                                                                            "actual": asgard_actual[asset[0]][asset[1]]
+                                                                        }
+                else:
+                    if 'solvent_coins' not in solvency_report:
+                        solvency_report['solvent_coins'] = {}
+                    solvency_report['solvent_coins'][coin['asset']] = asgard_actual[asset[0]][asset[1]]
 
     return solvency_report
 
