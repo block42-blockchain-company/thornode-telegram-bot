@@ -402,22 +402,18 @@ def did_churn_happen(validator, local_node_statuses, highest_churn_status_since)
     return False
 
 
-async def asgard_solvency_check() -> dict:
+def asgard_solvency_check() -> dict:
     solvency_report = {'is_solvent': True}
     asgard_actual = {}
 
-    try:
-        asgard_expected = get_asgard_json()
-        pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
-        for chain_data in pool_addresses['current']:
-            chain = chain_data['chain']
-            if chain == 'BNB':
+    asgard_expected = get_asgard_json()
+    pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
+    for chain_data in pool_addresses['current']:
+        chain = chain_data['chain']
+        if chain == 'BNB':
+            if chain not in asgard_actual:
                 asgard_actual[chain] = {"json": {}}
-                asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
-    except Exception as e:
-        logger.exception(e)
-        solvency_report['connection_error'] = True
-        return solvency_report
+            asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
 
     for chain_key, chain_value in asgard_actual.items():
         if chain_key == 'BNB':
@@ -442,6 +438,60 @@ async def asgard_solvency_check() -> dict:
                     if 'solvent_coins' not in solvency_report:
                         solvency_report['solvent_coins'] = {}
                     solvency_report['solvent_coins'][coin['asset']] = asgard_actual[asset[0]][asset[1]]
+
+    return solvency_report
+
+
+def yggdrasil_check() -> dict:
+    solvency_report = {'is_solvent': True}
+    yggdrasil_actual = {}
+
+    yggdrasil_expected = get_yggdrasil_json()
+    for vault in yggdrasil_expected:
+        if vault['status'] == 'active' and vault['vault']['status'] == 'active':
+            for chain in vault['addresses']:
+                if chain['chain'] == 'BNB':
+                    public_key = vault['vault']['pub_key']
+                    if public_key not in yggdrasil_actual:
+                        yggdrasil_actual[public_key] = {}
+                    if chain['chain'] not in yggdrasil_actual[public_key]:
+                        yggdrasil_actual[public_key][chain['chain']] = {}
+                    yggdrasil_actual[public_key][chain['chain']] = {"json": {}}
+                    yggdrasil_actual[public_key][chain['chain']]['json'] = get_binance_balance(chain['address'])
+
+    for vault in yggdrasil_actual:
+        for chain_key, chain_value in yggdrasil_actual[vault].items():
+            if chain_key == 'BNB':
+                for balance in chain_value['json']:
+                    chain_value[balance['symbol']] = balance['free']
+
+    for vault in yggdrasil_expected:
+        if vault['status'] == 'active' and vault['vault']['status'] == 'active':
+            for coin in vault['vault']['coins']:
+                asset = coin['asset'].split('.')
+                actual_amount_formatted = (yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]]
+                                           .replace(".", "")).strip("0")
+                expected_amount_formatted = (coin['amount'].replace(".", "")).strip("0")
+                if actual_amount_formatted != expected_amount_formatted:
+                    solvency_report['is_solvent'] = False
+                    if 'insolvent_coins' not in solvency_report:
+                        solvency_report['insolvent_coins'] = {}
+                    if vault['vault']['pub_key'] not in solvency_report['insolvent_coins']:
+                        solvency_report['insolvent_coins'][vault['vault']['pub_key']] = {}
+                    solvency_report['insolvent_coins'][vault['vault']['pub_key']][coin['asset']] = \
+                        {
+                            "expected": coin['amount'],
+                            "actual": yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]]
+                        }
+                else:
+                    if 'solvent_coins' not in solvency_report:
+                        solvency_report['solvent_coins'] = {}
+                    if coin['asset'] in solvency_report['solvent_coins']:
+                        solvency_report['solvent_coins'][coin['asset']] += \
+                            float(yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]])
+                    else:
+                        solvency_report['solvent_coins'][coin['asset']] = \
+                            float(yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]])
 
     return solvency_report
 
