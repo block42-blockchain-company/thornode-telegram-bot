@@ -495,6 +495,33 @@ def yggdrasil_check() -> dict:
 
     return solvency_report
 
+def get_solvency_message(asgard_solvency, yggdrasil_solvency) -> str:
+    message = "Tracked Balances of *Asgard*:\n"
+    if 'insolvent_coins' in asgard_solvency:
+        for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
+            message += f"*{coin_key}*:\n" \
+                       f"  Expected: {coin_value['expected']}\n" \
+                       f"  Actual:   {coin_value['actual']}\n"
+
+    if 'solvent_coins' in asgard_solvency:
+        for coin_key, coin_value in asgard_solvency['solvent_coins'].items():
+            message += f"*{coin_key}*: {coin_value}\n"
+
+    message += "\nTracked Balances of *Yggdrasil*:\n"
+    if 'insolvent_coins' in yggdrasil_solvency:
+        for pub_key, coins in yggdrasil_solvency['insolvent_coins'].items():
+            for coin_key, coin_value in coins.items():
+                message += f"*{pub_key}*:\n" \
+                           f"*{coin_key}*:\n" \
+                           f"  Expected: {coin_value['expected']}\n" \
+                           f"  Actual:   {coin_value['actual']}\n"
+
+    if 'solvent_coins' in yggdrasil_solvency:
+        for coin_key, coin_value in yggdrasil_solvency['solvent_coins'].items():
+            message += f"*{coin_key}*: {coin_value}\n"
+
+    return message
+
 
 def error(update, context):
     """

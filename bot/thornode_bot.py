@@ -189,7 +189,7 @@ def dispatch_query(update, context):
     elif data == 'show_network_stats':
         call = show_network_stats
     elif data == 'solvency':
-        call = solvency_check
+        call = solvency_stats
     elif data == 'vault_key_addresses':
         call = show_vault_key_addresses
     elif data == 'add_thornode':

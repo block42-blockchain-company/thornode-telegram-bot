@@ -95,7 +95,8 @@ async def show_network_stats(update, context):
                                    text=text)
 
 
-def solvency_check(update, context):
+def solvency_stats(update, context):
+    logger.info("I'm getting the Solvency Stats...")
     try:
         asgard_solvency = asgard_solvency_check()
         yggdrasil_solvency = yggdrasil_check()
@@ -110,29 +111,7 @@ def solvency_check(update, context):
         if asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent'] \
         else "THORChain is *missing funds*! 😱\n\n"
 
-    message += "Tracked Balances of *Asgard*:\n"
-    if 'insolvent_coins' in asgard_solvency:
-        for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
-            message += f"*{coin_key}*:\n" \
-                       f"  Expected: {coin_value['expected']}\n" \
-                       f"  Actual:   {coin_value['actual']}\n"
-
-    if 'solvent_coins' in asgard_solvency:
-        for coin_key, coin_value in asgard_solvency['solvent_coins'].items():
-            message += f"*{coin_key}*: {coin_value}\n"
-
-    message += "\nTracked Balances of *Yggdrasil*:\n"
-    if 'insolvent_coins' in yggdrasil_solvency:
-        for pub_key, coins in yggdrasil_solvency['insolvent_coins']:
-            for coin_key, coin_value in coins.items():
-                message += f"*{pub_key}*:\n" \
-                           f"*{coin_key}*:\n" \
-                           f"  Expected: {coin_value['expected']}\n" \
-                           f"  Actual:   {coin_value['actual']}\n"
-
-    if 'solvent_coins' in yggdrasil_solvency:
-        for coin_key, coin_value in yggdrasil_solvency['solvent_coins'].items():
-            message += f"*{coin_key}*: {coin_value}\n"
+    message += get_solvency_message(asgard_solvency, yggdrasil_solvency)
 
     try_message_with_home_menu(context, update.effective_chat.id, message)
 

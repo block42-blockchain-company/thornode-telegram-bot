@@ -12,13 +12,17 @@ NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
     BINANCE_NODE_IPS = ['localhost', '0.0.0.0']
-    BINANCE_DEX_ENDPOINT = "https://dex.binance.org"
+    BINANCE_DEX_ENDPOINT = "https://testnet-dex-atlantic.binance.org"
 else:
     BINANCE_NODE_IPS = [binance_ip for binance_ip in
                   os.environ['BINANCE_NODE_IPS'].split(",")] \
         if 'BINANCE_NODE_IPS' in os.environ and os.environ['BINANCE_NODE_IPS'] != "" \
         else []
-    BINANCE_DEX_ENDPOINT = f"http://{BINANCE_NODE_IPS[random.randint(0, len(BINANCE_NODE_IPS) - 1)]}:27146" if BINANCE_NODE_IPS else "https://dex.binance.org"
+    if BINANCE_NODE_IPS:
+        BINANCE_DEX_ENDPOINT = f"http://{BINANCE_NODE_IPS[random.randint(0, len(BINANCE_NODE_IPS) - 1)]}:27146"
+    else:
+        BINANCE_DEX_ENDPOINT = "https://dex.binance.org" if NETWORK_TYPE == 'CHAOSNET' \
+            else "https://testnet-dex-atlantic.binance.org"
 
 ADMIN_USER_IDS = [
     int(admin_id) for admin_id in os.environ['ADMIN_USER_IDS'].split(",")
