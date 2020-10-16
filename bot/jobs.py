@@ -19,6 +19,7 @@ def general_bot_checks(context):
     """
 
     check_churning(context)
+    check_solvency(context)
     if BINANCE_NODE_IPS:
         check_binance_health(context)
 
@@ -147,11 +148,11 @@ def check_thorchain_block_height(context, node_address):
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in node_data and node_data[
                 'block_height_stuck_count'] > 0:
-            text = 'Block height is increasing again! 👌' + '\n' + \
-                   'IP: ' + node_data['ip_address'] + '\n' + \
-                   'THORNode: ' + node_data['alias'] + '\n' + \
-                   'Node address: ' + node_address + '\n' + \
-                   'Block height now at: ' + block_height + '\n'
+            text = f"Block height is increasing again! 👌\n" + \
+                   f"IP: {node_data['ip_address']}\n" + \
+                   f"THORNode: {node_data['alias']}\n" + \
+                   f"Node address: {node_address}\n" + \
+                   f"Block height now at: {block_height}\n"
             try_message_with_home_menu(context=context,
                                        chat_id=chat_id,
                                        text=text)
@@ -320,9 +321,7 @@ def check_churning(context):
         validators = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context,
-                                   chat_id=context.job.context['chat_id'],
-                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        try_message_to_all_users(context, text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
         return
 
     if 'node_statuses' not in context.bot_data:
@@ -385,3 +384,30 @@ def check_churning(context):
     for validator in validators:
         context.bot_data['node_statuses'][
             validator['node_address']] = validator['status']
+
+
+def check_solvency(context):
+    logger.info("I'm checking thorchain solvency...")
+    try:
+        asgard_solvency = asgard_solvency_check()
+        yggdrasil_solvency = yggdrasil_check()
+    except Exception as e:
+        logger.exception(e)
+        try_message_to_all_users(context, text=NETWORK_ERROR_MSG)
+        return
+
+    if 'is_solvent' not in context.bot_data:
+        context.bot_data['is_solvent'] = True
+
+    is_solvent = asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent']
+
+    if context.bot_data['is_solvent'] != is_solvent:
+        if is_solvent:
+            context.bot_data['is_solvent'] = True
+            text = 'THORChain is *100% solvent* again! 👌\n'
+            try_message_to_all_users(context, text=text)
+        else:
+            context.bot_data['is_solvent'] = False
+            text = 'THORChain is *missing funds*! 💀\n\n'
+            text += get_solvency_message(asgard_solvency, yggdrasil_solvency)
+            try_message_to_all_users(context, text=text)

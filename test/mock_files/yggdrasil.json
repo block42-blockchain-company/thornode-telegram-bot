@@ -1,0 +1,4776 @@
+[
+  {
+    "vault": {
+      "block_height": "599748",
+      "pub_key": "thorpub1addwnpepq04r0c0n3l65caaqeh2wgyh7wehs207vtvr6zmju3dr3rtmxl3uhc88l85m",
+      "coins": [
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "3169105681"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "49079969934"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "12602488129"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "188613586541"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "16974318760"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "33270569"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "15123"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "197755744081"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5320300"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3335965"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "447947797175"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "791287097441"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "55271216070"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "77295"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "25149708"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "117753762"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "641147534288"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "49007183"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3093521848328"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "60432120051"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "334308808027"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "114804662864"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "279917379210"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "260897167"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "315773558390"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3483770785"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3184566269"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "186688545573"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12803697"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "59323792678"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "599748",
+      "membership": [
+        "thorpub1addwnpepq04r0c0n3l65caaqeh2wgyh7wehs207vtvr6zmju3dr3rtmxl3uhc88l85m"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "49",
+      "outbound_tx_count": "90",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "35999700000000",
+    "total_value": "7530784904489",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1ysh9qt0l70jjac0jjvat7rdlv2752sws0x34qr"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1ysh9qt0l70jjac0jjvat7rdlv2752swst9hz5j"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "650503",
+      "pub_key": "thorpub1addwnpepq0r0se9pet6ajpysflv4wq0nk73jyuzw4qpmhylrmlmhqf9z0dguukvj2wm",
+      "coins": [
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "211985604634"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "121944426"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "60207410394"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "50826646149"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4046319927332"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "27579538"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3333556538"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "17578407125"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "119760439894"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "34454614"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "71297502494"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "483190831060"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "871757439992"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "213357337844"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "386430022579"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "677283444028"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "309706104"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "15661"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "261078529730"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5424105"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3771153"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4700755032"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "13035925967"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "57146012"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "79954"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "365092833235"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3715968286"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "217840884555"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "14940224"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "69223031923"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "650503",
+      "membership": [
+        "thorpub1addwnpepq0r0se9pet6ajpysflv4wq0nk73jyuzw4qpmhylrmlmhqf9z0dguukvj2wm"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "56",
+      "outbound_tx_count": "258",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "42006900000000",
+    "total_value": "8848436111690",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1zahjwytvzqcwapsjxjj4l20f6wvqus6mh3tmqh"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1zahjwytvzqcwapsjxjj4l20f6wvqus6mnjdv5x"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "551916",
+      "pub_key": "thorpub1addwnpepq23yfhc429l8tnesluuw6jrqq4s9802u32hc48kef8clwlcrht8cv4r3hv2",
+      "coins": [
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "284134116156"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "2446594129"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6050355"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "312629156968"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "681253350782"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "30889486"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "17911837"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "41613"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "9138443931"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "162861529667"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "66177557909"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "44857487"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "322378546139"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "138592645587"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4404447"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "8142"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "60980928366"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "149025587"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "480040310687"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "52621137170"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3411770204449"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "23184264919"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "253396293"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "6784786641"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "190019257850"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3517891736"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "2093332838"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "297495520835"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "10635037"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "53761504250"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "551916",
+      "membership": [
+        "thorpub1addwnpepq23yfhc429l8tnesluuw6jrqq4s9802u32hc48kef8clwlcrht8cv4r3hv2"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "70",
+      "outbound_tx_count": "69",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "30099963084968",
+    "total_value": "8125945509869",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1jpajzz4sypk2uvdxuz4lqnfxv8dp6nyvvqdt9m"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1jpajzz4sypk2uvdxuz4lqnfxv8dp6nyvgrtu32"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "426147",
+      "pub_key": "thorpub1addwnpepq27j09tdaa8atk7ypka7hjc34n00ujg6zg9y3x046rlcks2s5cc0jw4zmxn",
+      "coins": [
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "243206526892"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "191755486801"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "58687021411"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "82017916885"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5827692"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "654636935005"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "65793083"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "32032965"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17553"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "288208200"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "136677208"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4224267232491"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "322568398226"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "977079951972"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "134229362108"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3431298"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "575686245107"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "38617267"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "19702151874"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "89717"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "56967294849"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5274767726"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "427385475223"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14627752585"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "409674590719"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3478439150"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4265974581"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "250083901118"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "17151555"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "79467057137"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "426147",
+      "membership": [
+        "thorpub1addwnpepq27j09tdaa8atk7ypka7hjc34n00ujg6zg9y3x046rlcks2s5cc0jw4zmxn"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "127",
+      "outbound_tx_count": "551",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "48224439975816",
+    "total_value": "8923398227188",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb17v87sczghkup6g6h7c4ljcseqs535rnmvgf7e2"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor17v87sczghkup6g6h7c4ljcseqs535rnmgt0fdm"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "681966",
+      "pub_key": "thorpub1addwnpepq27rrfm0maweu5252hfcf4ggu8qnduvu0fe7qwzvzad66gp7xp0w68kdfa2",
+      "coins": [
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "283001330004"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "10104784456"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "360203856804"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "206410147443"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3412939959419"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "94415989"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "4546337"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "210493333193"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "61976"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "714938306343"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "26676631"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "679175459698"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3117662831"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "162676061"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "423169386522"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "69154013875"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "13610156233"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "3643785374"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4111669"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "56518032447"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "34529015013"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "443068923746"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "12126"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "32269419"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "98560204458"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "302080988571"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3138023546"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "55845121"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "14258586"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "66064777538"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "681966",
+      "membership": [
+        "thorpub1addwnpepq27rrfm0maweu5252hfcf4ggu8qnduvu0fe7qwzvzad66gp7xp0w68kdfa2"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "45",
+      "outbound_tx_count": "88",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "40090355510992",
+    "total_value": "7921781941526",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1ygvq9rvm5thllne9y3qd0at8jjlgxq3542ff9t"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1ygvq9rvm5thllne9y3qd0at8jjlgxq353f0736"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "681946",
+      "pub_key": "thorpub1addwnpepq2ftr5tztkzzf4dzsexzur6sx4nrhcmf26lxpvsm4mgu2cxdl4zngl06q7d",
+      "coins": [
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "264546237516"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "78633233"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3453483072170"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "153513645871"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "46509929"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "57594274449"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "51616"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5939484"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "2596508388"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "22217315"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "352431587742"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3730273"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "4363489281"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "595427860492"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "3034683287"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "24393969"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "155689635"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "369004680510"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "82084693392"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "387775996966"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "44562773672"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "28757079250"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "10099"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "634654767105"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "171906234965"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "235694289907"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "11335056654"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "8415649485"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "11875093"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "55036993655"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "681946",
+      "membership": [
+        "thorpub1addwnpepq2ftr5tztkzzf4dzsexzur6sx4nrhcmf26lxpvsm4mgu2cxdl4zngl06q7d"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "36",
+      "outbound_tx_count": "55",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "33388800000000",
+    "total_value": "7186347838120",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb18x347qg5rzrffgvh92e4wattsqcpa8s8rypnnz"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor18x347qg5rzrffgvh92e4wattsqcpa8s8888y8n"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "232430",
+      "pub_key": "thorpub1addwnpepq2nfr0frd9aajmzkfks5u9u9mkdle9xyy4sy95vcrk2vegnea5ex5l4cah8",
+      "coins": [
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "449737837822"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "60317340316"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "664694590565"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "288026911572"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "4975777"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3312997227355"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "171889081838"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "45155624307"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "279385556"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "114307778807"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "76961"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "787862341567"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "48901750"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "187797251370"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "117244114"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "33126571"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "16900852507"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4261756"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "3155389530"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "48867547773"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "15058"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "32230304"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "450041068511"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "12547943520"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "312606900362"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3321364860"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3177814106"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "186292757167"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12776554"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "59215504087"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "232430",
+      "membership": [
+        "thorpub1addwnpepq2nfr0frd9aajmzkfks5u9u9mkdle9xyy4sy95vcrk2vegnea5ex5l4cah8"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "147",
+      "outbound_tx_count": "370",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "35923402116367",
+    "total_value": "7237972850108",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb18lpg80pwvfpk9nwrmj6xg3rfpgq83xwy49wtdd"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor18lpg80pwvfpk9nwrmj6xg3rfpgq83xwy3xgueu"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "488371",
+      "pub_key": "thorpub1addwnpepq2rfc6g2szsgl3lhzcvpsjsnjfvm3pj0pjlk3gzthmp92sfl0xxau7qqws3",
+      "coins": [
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "36149108"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "56103361964"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "16431"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "30017587"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "187544554150"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "18442921376"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "307267801"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4937639658"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "1078084706657"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "698548223037"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "9913093"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "83983"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "208315156829"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "97749126217"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4417769978526"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "46789757455"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6676706"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "65032954"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1041843738683"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "673691322955"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "313998593"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1379064935982"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "819572623373"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "13692843936"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "165328668198"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7132919566"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4224698782"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "726295454221"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "18622268"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "94137996892"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "488371",
+      "membership": [
+        "thorpub1addwnpepq2rfc6g2szsgl3lhzcvpsjsnjfvm3pj0pjlk3gzthmp92sfl0xxau7qqws3"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "76",
+      "outbound_tx_count": "212",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "56247963099098",
+    "total_value": "9699552098363",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1elwl8xnpz7wp79hu7a0ytcax2elry595ch06dg"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1elwl8xnpz7wp79hu7a0ytcax2elry595u5fdee"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "760438",
+      "pub_key": "thorpub1addwnpepq2rhezruaucqn3r35jz39qdez7hnlphhq3ajcwn26veyzjhavmhy5nyag65",
+      "coins": [
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "219303625239"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "61742029"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "58204181450"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "323475947"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "102905319371"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4447548477"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "99103705681"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1451809577875"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1064755187450"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14415131192"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "49257882096"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "19604578"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "19415771657"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "10436001"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5198096450"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "764606995141"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "8967123026862"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "277738304"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17298"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "344768421546"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "735396118305"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "38055946"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7509175728"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "92218176"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "1134952867010"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "8391502"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "862804465063"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "88413"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "174049631547"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "209811849982"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "760438",
+      "membership": [
+        "thorpub1addwnpepq2rhezruaucqn3r35jz39qdez7hnlphhq3ajcwn26veyzjhavmhy5nyag65"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "32",
+      "outbound_tx_count": "111",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "59215001000000",
+    "total_value": "14379726489719",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1tfnxey4ejrt2rw8kgdrrdurk25eu5rakwq4hym"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1tfnxey4ejrt2rw8kgdrrdurk25eu5rak2rnqs2"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "77047",
+      "pub_key": "thorpub1addwnpepqd8zm4gwt4fyl099jq6z5lvdkclnuz7vv9slkle9rrzxra6t9k9azd93fh4",
+      "coins": [
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9791100815763"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "132949370151"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "429201038061"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "834334844523"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6922659"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "113584600680"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "978268378307"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "646956071986"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "304469248"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "242062459479"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1602475092389"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "54369753696"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "6204183"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "811713864258"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "19093"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "21430696528"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "42005306"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "97588"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "38335309"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "101788370"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "357045549"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5737543143"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "678032595399"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "15911100905"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "192112108671"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "8288461001"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4909104999"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "843956179827"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "21639097"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "109388464119"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "77047",
+      "membership": [
+        "thorpub1addwnpepqd8zm4gwt4fyl099jq6z5lvdkclnuz7vv9slkle9rrzxra6t9k9azd93fh4"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "294",
+      "outbound_tx_count": "1810",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "65360199880467",
+    "total_value": "19417143465865",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1nqq6rhdnz4utnptxvp9fx8veqg7n52v3u59f94"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1nqq6rhdnz4utnptxvp9fx8veqg7n52v3chr73y"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "697589",
+      "pub_key": "thorpub1addwnpepqdgxq7yry8pz9g697s9xl60wwg93cprrwuma7uav3wzkp8rv4gc6xwwc5u4",
+      "coins": [
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "37144699"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "18950861964"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "131465381"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "584577978714"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "5715913675"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "667517997199"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "394052724207"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14069961588"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "16884"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "308302284870"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "208598418431"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "86296"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4341052149"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4957336"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "44037485"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "280868243786"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "997360317338"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "48078404543"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "558706657692"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "7698405"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4293498273531"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "76498136"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "277756092"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1016540972067"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "143103923078"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "94774668197"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "57397449995"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5073628287"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "19561366"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "90634344850"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "697589",
+      "membership": [
+        "thorpub1addwnpepqdgxq7yry8pz9g697s9xl60wwg93cprrwuma7uav3wzkp8rv4gc6xwwc5u4"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "67",
+      "outbound_tx_count": "482",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "55000000000000",
+    "total_value": "9514895805460",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1xgw5t5s5dud8ccf7787j8k24qaw3nq2e50d833"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1xgw5t5s5dud8ccf7787j8k24qaw3nq2esvts9q"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "584057",
+      "pub_key": "thorpub1addwnpepqdkfzxj52gsdtm9gg523wxpxhxha58y5r9x05pzafguqmswtfucq7a7lhky",
+      "coins": [
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "288482388074"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "436154692269"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "161523065"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "188994730668"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "26631044"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "47084976"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5241642"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "60163937287"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "15575"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "814957542255"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "57653114872"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "302500795806"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "50548140872"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "34265820"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "119860944708"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "12979477089"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "79607"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "121276230"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3432859096029"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "2212210693"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "174993622599"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "669705446922"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "17482086012"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4171235"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "300994998872"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3479887600"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3059772915"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "179372842602"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12301964"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "57015920512"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "584057",
+      "membership": [
+        "thorpub1addwnpepqdkfzxj52gsdtm9gg523wxpxhxha58y5r9x05pzafguqmswtfucq7a7lhky"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "48",
+      "outbound_tx_count": "122",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "34589016240276",
+    "total_value": "8057654346496",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb18md2p592zdkn440rfd3y5c26jencsryqmajpds"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "616187",
+      "pub_key": "thorpub1addwnpepqdz6sz0y25chhe0ukafhwqa8utc44atrgu4ecgwgmwphc68mmsvh6z6234f",
+      "coins": [
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "48537138"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "27100025"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "407405475271"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "44301788104"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4165776071"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "60293042001"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "30498193"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "106008357846"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3450937095727"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "4302675"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "11552345971"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "13863"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "163714599398"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4502878"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "176850260"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "70854"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "185912406385"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "15559879995"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "771654126686"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "449466759239"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "107941557"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "663631611212"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "300257640838"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "44990226304"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "310467982968"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3498551034"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3154112542"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "184903207175"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12681254"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "58758858869"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "616187",
+      "membership": [
+        "thorpub1addwnpepqdz6sz0y25chhe0ukafhwqa8utc44atrgu4ecgwgmwphc68mmsvh6z6234f"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "47",
+      "outbound_tx_count": "108",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "35655400000000",
+    "total_value": "7230605443284",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1ln3rrvvchf86t8u78kpr9mzjwqhrp3mnu06xdt"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1ln3rrvvchf86t8u78kpr9mzjwqhrp3mncvu3e6"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "206290",
+      "pub_key": "thorpub1addwnpepqf9yvj2tnk79yt7ptxjqsyxj2admqqvxz8u8mv77zxw8l5d65q9862cy0u8",
+      "coins": [
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "222983950032"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "660363793564"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3288666977201"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "58436917720"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "461593771291"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "260412045"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "170650020557"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "4259777"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "59632944621"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "132964690311"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "22162828"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3091541"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "94289"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "43374815630"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "40585233"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "20706189096"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "965254659169"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "18448"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "446374433251"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "48498627"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "143642386"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "3272438299"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "456430868094"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14970121575"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "309949216532"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3526307244"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3151582299"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "184754938850"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12671084"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "58708019852"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "206290",
+      "membership": [
+        "thorpub1addwnpepqf9yvj2tnk79yt7ptxjqsyxj2admqqvxz8u8mv77zxw8l5d65q9862cy0u8"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "162",
+      "outbound_tx_count": "505",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "35626842032402",
+    "total_value": "7905714991841",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb12qsw7s0qgjz8a422she8v06z4mf87583s3u49e"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor12qsw7s0qgjz8a422she8v06z4mf875835j6z3g"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "426150",
+      "pub_key": "thorpub1addwnpepqfg768tvsfhs84x5v8fje5f7wjhz6kktlwmkheulrm39xrmtm0e0zzgsq6y",
+      "coins": [
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "609446519864"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "58849588782"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "207624030613"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17479"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "330508692717"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3298310"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4125329362442"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "19619096132"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "89339"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5252531589"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "27123565"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "65515706"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "242181273474"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "81672141611"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "410537304924"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6137954"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "184732564"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "56727145398"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "133663509233"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "972961005933"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "136101036"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "38454473"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "416289056143"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14566088313"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "407947580018"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3496492845"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4247990786"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "249029657062"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "17079250"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "79146182578"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "426150",
+      "membership": [
+        "thorpub1addwnpepqfg768tvsfhs84x5v8fje5f7wjhz6kktlwmkheulrm39xrmtm0e0zzgsq6y"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "146",
+      "outbound_tx_count": "617",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "48021157256415",
+    "total_value": "8737842598092",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1alwkk3uk5e70c9c2mvmguanw6z57270lym3afs"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1alwkk3uk5e70c9c2mvmguanw6z57270lqch2ap"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "729067",
+      "pub_key": "thorpub1addwnpepqfgc3kmwudy7sjc2nffnsg7c5h8yg54rwlcvm472dnjyugedue38gpu7vk6",
+      "coins": [
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "16555"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1069842986382"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "26278921"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4256412982"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "654789330996"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "47141001360"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "286384091"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "36420474"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "333773906300"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "166569766467"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "69252095"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "731747648573"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "18394179"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "6535495367"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "641908262844"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "86009531389"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "56796338665"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "607398984435"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "84613"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4974705801"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "18581369704"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "13795634124"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4269517392895"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "6418450"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5797971"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "128902150"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "94844677145"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "143674387208"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "199199894745"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "677877960213"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "729067",
+      "membership": [
+        "thorpub1addwnpepqfgc3kmwudy7sjc2nffnsg7c5h8yg54rwlcvm472dnjyugedue38gpu7vk6"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "38",
+      "outbound_tx_count": "131",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "50176183766249",
+    "total_value": "9064281337919",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1andzulf7ycelmzvc8kv4f4uu9epqgne8l0llqj"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1andzulf7ycelmzvc8kv4f4uu9epqgne8mveg5r"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "729051",
+      "pub_key": "thorpub1addwnpepqfr9wmt0cqtgl8mrav8kfe6ddf5x6g3ht5ueneakqf4usj34y535k0yh76u",
+      "coins": [
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "20511"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "23022281131"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "17092764002"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "284500921"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1036243264129"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1325533391294"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "5273687453"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "413545224463"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "805827711978"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "22978054"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "691305840495"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6729396"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "436222051464"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "45496547"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "125363378700"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "602781511971"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "8164157078"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "174743039788"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "105699"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "208079366826"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "118480206737"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9413740553668"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "6214414867"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "161024886"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "58888656222"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "914100983758"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "108033173061"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "6671639"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "87000550"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "68462956"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "729051",
+      "membership": [
+        "thorpub1addwnpepqfr9wmt0cqtgl8mrav8kfe6ddf5x6g3ht5ueneakqf4usj34y535k0yh76u"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "63",
+      "outbound_tx_count": "527",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "63000200000000",
+    "total_value": "18658844310778",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1vs694ytr660egcccnrwgg4kpe5cgcd4y5yp3rk"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1vs694ytr660egcccnrwgg4kpe5cgcd4ys88xh8"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "232436",
+      "pub_key": "thorpub1addwnpepqg2fzcc5zvjkq8at6aggdavf64zx7mcghezepawdf8yhptclc74w2xaufgc",
+      "coins": [
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "163305084229"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "321546825026"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "4508583"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "89589509964"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "661833456420"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "184583105"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3405626319941"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "44936694950"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "384653605161"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "62699214521"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "56335"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "24248593"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "12371395069"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "28315132"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4192833"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "649866473715"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "11022"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "31386273513"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "187623230519"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "50628469"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "85822490"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "3312137469"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "423229473226"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "9185073151"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "257243282049"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "2715943919"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "2833901236"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "402741938056"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12929828"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "59908223120"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "232436",
+      "membership": [
+        "thorpub1addwnpepqg2fzcc5zvjkq8at6aggdavf64zx7mcghezepawdf8yhptclc74w2xaufgc"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "185",
+      "outbound_tx_count": "1738",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "36354310501435",
+    "total_value": "7225415985638",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1lqjth2c8fwnmdktvujzxmvk66ds4vmrvex3t4n"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1lqjth2c8fwnmdktvujzxmvk66ds4vmrva9hupz"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "111359",
+      "pub_key": "thorpub1addwnpepqg3g2e933fttl9nsyavray8cs9d3jhvgwun9f4hrgj8rcqsx5c0hsrlc0dk",
+      "coins": [
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9481059637298"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "124736524910"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "449916858410"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "913387772976"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6395191"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "282430785"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "633120539772"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "107718884280"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1057952360651"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "167735936764"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "56353984228"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "19790"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "43538295"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "30734272"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "22212812309"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "6950024"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "101150"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "375336078992"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1238562048505"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "86862603"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "154094090"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5946935452"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "377891007953"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "16491778397"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "131241761062"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7469171774"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "5088263362"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "811054216814"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "21989038"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "103265826262"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "111359",
+      "membership": [
+        "thorpub1addwnpepqg3g2e933fttl9nsyavray8cs9d3jhvgwun9f4hrgj8rcqsx5c0hsrlc0dk"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "524",
+      "outbound_tx_count": "5183",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "62639721999291",
+    "total_value": "18710680453599",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1766mazrxs5asuscepa227r6ekr657234dy8f8c"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1766mazrxs5asuscepa227r6ekr657234f8p7nf"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "744725",
+      "pub_key": "thorpub1addwnpepqggnpj09362tlv5feqg7x3g0jadp0d3j0lc4asuezkly038jmuh57j6ygdh",
+      "coins": [
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "700799042836"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "91593"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7653856896"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "20309805"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1243020607368"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "20114206166"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6317432"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "158823383633"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "283941046"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14933679991"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "39424915"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "653803673007"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5385085152"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4607538067"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "5635268"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "51029812943"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "106607084488"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "792111846395"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "83694713"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "102668717119"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "115516866695"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "707839694423"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "210943346189"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17920"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "180310637864"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "995726854507"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "32762170"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "329635362"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "712435648860"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9129770411227"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "744725",
+      "membership": [
+        "thorpub1addwnpepqggnpj09362tlv5feqg7x3g0jadp0d3j0lc4asuezkly038jmuh57j6ygdh"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "39",
+      "outbound_tx_count": "182",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "60006600000000",
+    "total_value": "17409756566433",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1fklxctr74waajajppecwsydrw2zhcska7atpta"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1fklxctr74waajajppecwsydrw2zhcska67dklv"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "536202",
+      "pub_key": "thorpub1addwnpepqguvu7lnlz43rxmn76dz07x7admrt6h0xq08r84pztnglp9p0ehuxs8cwzz",
+      "coins": [
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "168831314"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "377299045635"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "208110262358"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3060362600755"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "15738"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "60155915826"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4995533"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6013315"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "493409481477"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "17664183801"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "132760258"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "49127657366"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "113430468438"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "187681090189"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "40837622"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "34622741"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "29538160"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "823446344254"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "37002497759"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "80437"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "267858668742"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "2742229951"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "384049968809"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "12605808391"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "260997185411"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "2897817968"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "2653834887"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "155575547192"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "10669869"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "49435931658"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "536202",
+      "membership": [
+        "thorpub1addwnpepqguvu7lnlz43rxmn76dz07x7admrt6h0xq08r84pztnglp9p0ehuxs8cwzz"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "52",
+      "outbound_tx_count": "101",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "30000100000000",
+    "total_value": "7516266695029",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb15m6a2kzfjau03u4yyn6q9aa6g2nl3sks4tqqrs"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor15m6a2kzfjau03u4yyn6q9aa6g2nl3sks3gxhhp"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "520496",
+      "pub_key": "thorpub1addwnpepqt04kwe9zernz4pvevrvujfwv2kzm6t46rgkxka0txpsy2ly4kz5wc4atfc",
+      "coins": [
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "450166742206"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "59017658272"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "76463785123"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4322883678"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "181938163"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "49033438"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "32039485"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "25953698030"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "63164936"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "4673501"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1209876323951"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "197470690394"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "23123"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "580902957404"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4197051"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3999501180926"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "70028047056"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "108868213336"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "326692972093"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "195062489"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "118184"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "623004676338"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "335758431871"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "19497170771"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "407005742146"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "4041592448"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4104640554"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "240625959930"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "16502896"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "76463432331"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "520496",
+      "membership": [
+        "thorpub1addwnpepqt04kwe9zernz4pvevrvujfwv2kzm6t46rgkxka0txpsy2ly4kz5wc4atfc"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "157",
+      "outbound_tx_count": "1305",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "46400600000000",
+    "total_value": "8593060810067",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1sfulmhl7mltk6wdyg9yc7j3mywcw6klv248uvc"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1sfulmhl7mltk6wdyg9yc7j3mywcw6klvwkptcf"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "584045",
+      "pub_key": "thorpub1addwnpepqt0tmnvk0vckvryer4vcqtxxes0tjtcu0t2dzfr3u34s4qe0kewaqc58tqy",
+      "coins": [
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "671812089050"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5241988"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "435882396029"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "13448"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "748543052336"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "153958024049"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "29584771"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "11206352711"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "25623600"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "47084770"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "43642767087"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4041010898"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "15093860919"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "68732"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3138168651568"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "251445949122"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "395203663729"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "58487070553"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3292539"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "180344321802"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "168405912"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "104708703"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "36282182640"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "102833402960"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "303386796203"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3451869678"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "3059637831"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "179364848841"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "12301414"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "56996564311"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "584045",
+      "membership": [
+        "thorpub1addwnpepqt0tmnvk0vckvryer4vcqtxxes0tjtcu0t2dzfr3u34s4qe0kewaqc58tqy"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "71",
+      "outbound_tx_count": "162",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "34587435246276",
+    "total_value": "6479550405315",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1q2y4aapf6qqa068qvlwzerdnckgfw44r9uk8wl"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1q2y4aapf6qqa068qvlwzerdnckgfw44rplss6w"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "488360",
+      "pub_key": "thorpub1addwnpepqt0w9j5xd0l9xhcz8n5quucyu7prtttzuqgxt78mnzmqmqxzpwecgdkt8hh",
+      "coins": [
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "30312639"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "58758442838"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "24986916"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6110956"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "15465212077"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "720937490860"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "70423"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "160546035"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "44648573"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "55057390524"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "185312735690"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "44716501116"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "13778"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "3241158170008"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "2887355431"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "638469035619"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "171844841478"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "409752014212"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "4075855"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "104597921351"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "225331219591"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "107284830"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "410800416264"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "11482060303"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "285338282687"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3276735894"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "2901336761"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "170084820592"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "11664961"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "54046418661"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "488360",
+      "membership": [
+        "thorpub1addwnpepqt0w9j5xd0l9xhcz8n5quucyu7prtttzuqgxt78mnzmqmqxzpwecgdkt8hh"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "75",
+      "outbound_tx_count": "167",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "32797962079009",
+    "total_value": "7770462901644",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb147jegk6e9sum7w3svy3hy4qme4h6dqdkv936f9"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor147jegk6e9sum7w3svy3hy4qme4h6dqdkgxhda5"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "729064",
+      "pub_key": "thorpub1addwnpepqtcxwspexe8m2r8e5wylehzz026dlyn4uz2sh4dptydjrhk0x4xyx4xx7wd",
+      "coins": [
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "37294088"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1041573865502"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "118045754997"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "442388115571"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "415422287825"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "178820277766"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "696393400849"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "916738005351"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "208679639436"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "745077478172"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "20740"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "9944202"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3570590878"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "161489415"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "23278855535"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "23044342"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "616355646082"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "8868808359832"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "45627796"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "59058539704"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "6232342368"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1340305947394"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "5332460657"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6449107"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "130934651382"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "87056950"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "106004"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "301344568"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "108110896796"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "17283256235"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "729064",
+      "membership": [
+        "thorpub1addwnpepqtcxwspexe8m2r8e5wylehzz026dlyn4uz2sh4dptydjrhk0x4xyx4xx7wd"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "67",
+      "outbound_tx_count": "615",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "63054961289507",
+    "total_value": "18410740428096",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb18y4vufxpxh7whfzy88e4mw458r9fjh4mpqvnfm"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor18y4vufxpxh7whfzy88e4mw458r9fjh4m9r2ya2"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "744732",
+      "pub_key": "thorpub1addwnpepqtszdgf2p52k29vwgruqwrdln7ues0jl9827upx5ew989vsuj4n8xleuej9",
+      "coins": [
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "649534252661"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "208350418311"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "279805195"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5336791167"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "101747973752"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "78456057058"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1015742429633"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14799753249"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "5574962"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "20127664"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "281193118"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7585216339"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "50572172455"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6030086"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4566217203"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "785008107796"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "34949174"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9202231254963"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "39071349"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "82900264"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "105651021446"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "19933819945"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "1027314710397"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "90772"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1231873073711"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "290876801060"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17760"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "734209341029"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "59503647157"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "178693593953"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "744732",
+      "membership": [
+        "thorpub1addwnpepqtszdgf2p52k29vwgruqwrdln7ues0jl9827upx5ew989vsuj4n8xleuej9"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "40",
+      "outbound_tx_count": "143",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "59439900000000",
+    "total_value": "14570683494537",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1lwmh5r4g3pkygzcu89wjrw3lj48f89awxdrzha"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1lwmh5r4g3pkygzcu89wjrw3lj48f89awzw94rv"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "713320",
+      "pub_key": "thorpub1addwnpepqtv67qkpx7s623xeg9luxj6wkqxvgry89d9fltsp3cnkg7fc4u292qg8v7y",
+      "coins": [
+        {
+          "asset": "BNB.BNB",
+          "amount": "122692050151"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "22301828458"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "5108654188"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "22077157"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1068804391978"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6926631"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "30443180"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7499103909"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "19869"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "580358823430"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1243525491320"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9711477345466"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5970767342"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "6881331"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "56579818516"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "837152438674"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "311310148"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "379320680260"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "87225877"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "220879656197"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "108168812728"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "814304454644"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "131767702396"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "168408125720"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "376840209663"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "101555"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "154711610"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "43712771"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "16557867940"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "103696305098"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "713320",
+      "membership": [
+        "thorpub1addwnpepqtv67qkpx7s623xeg9luxj6wkqxvgry89d9fltsp3cnkg7fc4u292qg8v7y"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "79",
+      "outbound_tx_count": "769",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "62900700000000",
+    "total_value": "18436938589698",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1caq3k070hylvh47zguaq8x5xqe4qedh9gmavgw"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1caq3k070hylvh47zguaq8x5xqe4qedh9vcmmul"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "74894",
+      "pub_key": "thorpub1addwnpepqv8hff4sexe0vhtyaxtr4sukxzdysp24tv3km2cugu085h8te8c85mssjdn",
+      "coins": [
+        {
+          "asset": "BNB.BNB",
+          "amount": "57212095182"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4326968986183"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "404803382617"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "353052751372"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6248290"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "363528714"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "672683678776"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "765164482634"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "83935852030"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "68483502859"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "27797203"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "129674"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1327493773310"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "76835784438"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "343990508364"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "28476772252"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "214025380"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "69331851"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "53822924"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "25371"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "3571170"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4745787968"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "298869615667"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "21401381878"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "446756591793"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "3525718109"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4505527104"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "264127053405"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "18114677"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "83931359972"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "74894",
+      "membership": [
+        "thorpub1addwnpepqv8hff4sexe0vhtyaxtr4sukxzdysp24tv3km2cugu085h8te8c85mssjdn"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "574",
+      "outbound_tx_count": "5963",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "50932362014728",
+    "total_value": "9410415883283",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1nqcg6f8cfc6clhm8hac6002xq3h7l7gxh3qm34"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1nqcg6f8cfc6clhm8hac6002xq3h7l7gxnjxv9y"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "249226",
+      "pub_key": "thorpub1addwnpepqvrq54p2acq58sltzqhmfnvljs9jh0q75kh88hz9xk25edfzgwu72scmcty",
+      "coins": [
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "388522177229"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "222210950603"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "10186249"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "1149999026206"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "121827514634"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "406235283"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1609549274640"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "1002798528534"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "12181905217783"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "104269543263"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "10574352"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1471056331344"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "89585"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "38560457"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "745145322338"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17527"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "49910897703"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "69371018"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "19673168065"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "93440720"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "327764293"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5267008022"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "874242731543"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14606233717"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "176357021167"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7608725459"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4506509976"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "774743450059"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "19864478"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "100417531282"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "249226",
+      "membership": [
+        "thorpub1addwnpepqvrq54p2acq58sltzqhmfnvljs9jh0q75kh88hz9xk25edfzgwu72scmcty"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "265",
+      "outbound_tx_count": "1769",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "60000018913697",
+    "total_value": "22092537078165",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb14s0kxatv6qwla7zr6r2gwvaqzlr38j0ple0ny4"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor14s0kxatv6qwla7zr6r2gwvaqzlr38j0pm6fysy"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "331189",
+      "pub_key": "thorpub1addwnpepqvxh89taaexh8c3xwcqxeex5hnnwl3w73rtmvrqhu3zq5jgpfx05krgrktz",
+      "coins": [
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "1038044564562"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "83685526"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "5431273"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "20111998523"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "33985771"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "679040273732"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "613464440046"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "51024212145"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "9090426143622"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "39420588"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "17918"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "1036497369577"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "315073661"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "418182876124"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "1242884179144"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "6157674"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "138100759953"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "91583"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "60145977893"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "283909963"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "106595383784"
+        },
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "5384494110"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "546444880753"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "14932040939"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "180290847798"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "7653016844"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4607032364"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "792024907842"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "20307576"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "102657448673"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "331189",
+      "membership": [
+        "thorpub1addwnpepqvxh89taaexh8c3xwcqxeex5hnnwl3w73rtmvrqhu3zq5jgpfx05krgrktz"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "159",
+      "outbound_tx_count": "732",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "60000025443674",
+    "total_value": "14900453417016",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1jvhvdw52xqstael6h0pylcsr5482mh7ftpezyr"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1jvhvdw52xqstael6h0pylcsr5482mh7f0zl4sj"
+      }
+    ]
+  },
+  {
+    "vault": {
+      "block_height": "697608",
+      "pub_key": "thorpub1addwnpepqwc592nwppx06vfatd9sm5e4eyvnz6uvqh30vftgj5gjxpaualkekshxxcy",
+      "coins": [
+        {
+          "asset": "BNB.LIT-099",
+          "amount": "4854057354"
+        },
+        {
+          "asset": "BNB.MITX-CAA",
+          "amount": "590232888796"
+        },
+        {
+          "asset": "BNB.TWT-8C2",
+          "amount": "599621370689"
+        },
+        {
+          "asset": "BNB.LTC-F07",
+          "amount": "16153"
+        },
+        {
+          "asset": "BNB.AVA-645",
+          "amount": "638205042165"
+        },
+        {
+          "asset": "BNB.ERD-D06",
+          "amount": "82561"
+        },
+        {
+          "asset": "BNB.BULL-BE4",
+          "amount": "6395189"
+        },
+        {
+          "asset": "BNB.RUNE-B1A",
+          "amount": "4461277334406"
+        },
+        {
+          "asset": "BNB.BNB",
+          "amount": "57353808268"
+        },
+        {
+          "asset": "BNB.PROPEL-6D9",
+          "amount": "13461057187"
+        },
+        {
+          "asset": "BNB.XRP-BF2",
+          "amount": "4153184844"
+        },
+        {
+          "asset": "BNB.BCH-1FD",
+          "amount": "73300826"
+        },
+        {
+          "asset": "BNB.ETHBULL-D33",
+          "amount": "37019884"
+        },
+        {
+          "asset": "BNB.ETH-1C9",
+          "amount": "298698822"
+        },
+        {
+          "asset": "BNB.EOSBULL-F0D",
+          "amount": "5468546618"
+        },
+        {
+          "asset": "BNB.BTCB-1DE",
+          "amount": "5487310"
+        },
+        {
+          "asset": "BNB.BUSD-BD1",
+          "amount": "179476105036"
+        },
+        {
+          "asset": "BNB.DARC-24B",
+          "amount": "18130727297"
+        },
+        {
+          "asset": "BNB.BZNT-464",
+          "amount": "90809637492"
+        },
+        {
+          "asset": "BNB.FTM-A64",
+          "amount": "559279252645"
+        },
+        {
+          "asset": "BNB.SHR-DB6",
+          "amount": "45997719963"
+        },
+        {
+          "asset": "BNB.CAN-677",
+          "amount": "268713135280"
+        },
+        {
+          "asset": "BNB.DOS-120",
+          "amount": "136910828091"
+        },
+        {
+          "asset": "BNB.SWINGBY-888",
+          "amount": "329218549399"
+        },
+        {
+          "asset": "BNB.AWC-986",
+          "amount": "35537191"
+        },
+        {
+          "asset": "BNB.GIV-94E",
+          "amount": "376999341614"
+        },
+        {
+          "asset": "BNB.BOLT-4C6",
+          "amount": "954197648918"
+        },
+        {
+          "asset": "BNB.BEAR-14C",
+          "amount": "125775966"
+        },
+        {
+          "asset": "BNB.VIDT-F53",
+          "amount": "18741140"
+        },
+        {
+          "asset": "BNB.CBIX-3C9",
+          "amount": "86837471941"
+        }
+      ],
+      "type": "yggdrasil",
+      "status": "active",
+      "status_since": "697608",
+      "membership": [
+        "thorpub1addwnpepqwc592nwppx06vfatd9sm5e4eyvnz6uvqh30vftgj5gjxpaualkekshxxcy"
+      ],
+      "chains": [
+        "BNB"
+      ],
+      "inbound_tx_count": "57",
+      "outbound_tx_count": "328",
+      "pending_tx_heights": null,
+      "signing_party": null
+    },
+    "status": "active",
+    "bond": "52693748061451",
+    "total_value": "9154519287941",
+    "addresses": [
+      {
+        "chain": "BNB",
+        "address": "bnb1ku0jp098arp8mlv786shqs8cwa9yw9rr48mh3v"
+      },
+      {
+        "chain": "THOR",
+        "address": "thor1ku0jp098arp8mlv786shqs8cwa9yw9rr3yaq9a"
+      }
+    ]
+  }
+]

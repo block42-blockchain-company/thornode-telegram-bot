@@ -22,7 +22,7 @@ spec:
               value: "XXX"                  # Input the API Token you got from @BotFather
             - name: NETWORK_TYPE
               value: "CHAOSNET"             # Choose "CHAOSNET" or "TESTNET"
-            - name: BINANCE_NODE_IP
+            - name: BINANCE_NODE_IPS
               value: ""                     # Node IP of your Binance node, "localhost" or leave it empty to not monitor binance node
             - name: ADMIN_USER_IDS
               value: "1234,5678,42"         # Leave these values the same (Admin Area is currently not enabled on K8s)

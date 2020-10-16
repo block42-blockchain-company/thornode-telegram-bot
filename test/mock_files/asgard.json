@@ -1,0 +1,206 @@
+[
+  {
+    "block_height": "758914",
+    "pub_key": "thorpub1addwnpepqv004nkzk7ddu2catlsmq2nuunze20yf08nytyws3203rs6xzmr62nfn0s2",
+    "coins": [
+      {
+        "asset": "BNB.AVA-645",
+        "amount": "77041499673240"
+      },
+      {
+        "asset": "BNB.AWC-986",
+        "amount": "848130929"
+      },
+      {
+        "asset": "BNB.BCH-1FD",
+        "amount": "2712072886"
+      },
+      {
+        "asset": "BNB.BEAR-14C",
+        "amount": "16395892421"
+      },
+      {
+        "asset": "BNB.BNB",
+        "amount": "6681472267393"
+      },
+      {
+        "asset": "BNB.BOLT-4C6",
+        "amount": "43520815245975"
+      },
+      {
+        "asset": "BNB.BTCB-1DE",
+        "amount": "670084309"
+      },
+      {
+        "asset": "BNB.BULL-BE4",
+        "amount": "375855198"
+      },
+      {
+        "asset": "BNB.BUSD-BD1",
+        "amount": "22649660464281"
+      },
+      {
+        "asset": "BNB.BZNT-464",
+        "amount": "2815777987043"
+      },
+      {
+        "asset": "BNB.CAN-677",
+        "amount": "34669577848942"
+      },
+      {
+        "asset": "BNB.CBIX-3C9",
+        "amount": "2653803287327"
+      },
+      {
+        "asset": "BNB.DARC-24B",
+        "amount": "430943557395"
+      },
+      {
+        "asset": "BNB.DOS-120",
+        "amount": "7219180236543"
+      },
+      {
+        "asset": "BNB.EOSBULL-F0D",
+        "amount": "234290568061"
+      },
+      {
+        "asset": "BNB.ERD-D06",
+        "amount": "1961599"
+      },
+      {
+        "asset": "BNB.ETH-1C9",
+        "amount": "24744213771"
+      },
+      {
+        "asset": "BNB.ETHBULL-D33",
+        "amount": "2478359194"
+      },
+      {
+        "asset": "BNB.FTM-A64",
+        "amount": "40104567071078"
+      },
+      {
+        "asset": "BNB.GIV-94E",
+        "amount": "789086359740"
+      },
+      {
+        "asset": "BNB.LIT-099",
+        "amount": "131557055401"
+      },
+      {
+        "asset": "BNB.LTC-F07",
+        "amount": "383944"
+      },
+      {
+        "asset": "BNB.MITX-CAA",
+        "amount": "25055196072802"
+      },
+      {
+        "asset": "BNB.PROPEL-6D9",
+        "amount": "320391685662"
+      },
+      {
+        "asset": "BNB.RUNE-B1A",
+        "amount": "3935977489224727"
+      },
+      {
+        "asset": "BNB.SHR-DB6",
+        "amount": "1046305107698"
+      },
+      {
+        "asset": "BNB.SWINGBY-888",
+        "amount": "29760053270740"
+      },
+      {
+        "asset": "BNB.TWT-8C2",
+        "amount": "37357409835942"
+      },
+      {
+        "asset": "BNB.VIDT-F53",
+        "amount": "250090238"
+      },
+      {
+        "asset": "BNB.XRP-BF2",
+        "amount": "110153470283"
+      },
+      {
+        "asset": "BNB.MTXLT-286",
+        "amount": "159325000"
+      },
+      {
+        "asset": "BNB.RAVEN-F66",
+        "amount": "77081000000000"
+      }
+    ],
+    "type": "asgard",
+    "status": "active",
+    "status_since": "758914",
+    "membership": [
+      "thorpub1addwnpepq04r0c0n3l65caaqeh2wgyh7wehs207vtvr6zmju3dr3rtmxl3uhc88l85m",
+      "thorpub1addwnpepq0r0se9pet6ajpysflv4wq0nk73jyuzw4qpmhylrmlmhqf9z0dguukvj2wm",
+      "thorpub1addwnpepq23yfhc429l8tnesluuw6jrqq4s9802u32hc48kef8clwlcrht8cv4r3hv2",
+      "thorpub1addwnpepq27j09tdaa8atk7ypka7hjc34n00ujg6zg9y3x046rlcks2s5cc0jw4zmxn",
+      "thorpub1addwnpepq27rrfm0maweu5252hfcf4ggu8qnduvu0fe7qwzvzad66gp7xp0w68kdfa2",
+      "thorpub1addwnpepq2ftr5tztkzzf4dzsexzur6sx4nrhcmf26lxpvsm4mgu2cxdl4zngl06q7d",
+      "thorpub1addwnpepq2nfr0frd9aajmzkfks5u9u9mkdle9xyy4sy95vcrk2vegnea5ex5l4cah8",
+      "thorpub1addwnpepq2rfc6g2szsgl3lhzcvpsjsnjfvm3pj0pjlk3gzthmp92sfl0xxau7qqws3",
+      "thorpub1addwnpepq2rhezruaucqn3r35jz39qdez7hnlphhq3ajcwn26veyzjhavmhy5nyag65",
+      "thorpub1addwnpepqd8zm4gwt4fyl099jq6z5lvdkclnuz7vv9slkle9rrzxra6t9k9azd93fh4",
+      "thorpub1addwnpepqdgxq7yry8pz9g697s9xl60wwg93cprrwuma7uav3wzkp8rv4gc6xwwc5u4",
+      "thorpub1addwnpepqdkfzxj52gsdtm9gg523wxpxhxha58y5r9x05pzafguqmswtfucq7a7lhky",
+      "thorpub1addwnpepqdz6sz0y25chhe0ukafhwqa8utc44atrgu4ecgwgmwphc68mmsvh6z6234f",
+      "thorpub1addwnpepqf9yvj2tnk79yt7ptxjqsyxj2admqqvxz8u8mv77zxw8l5d65q9862cy0u8",
+      "thorpub1addwnpepqfg768tvsfhs84x5v8fje5f7wjhz6kktlwmkheulrm39xrmtm0e0zzgsq6y",
+      "thorpub1addwnpepqfgc3kmwudy7sjc2nffnsg7c5h8yg54rwlcvm472dnjyugedue38gpu7vk6",
+      "thorpub1addwnpepqfr9wmt0cqtgl8mrav8kfe6ddf5x6g3ht5ueneakqf4usj34y535k0yh76u",
+      "thorpub1addwnpepqg2fzcc5zvjkq8at6aggdavf64zx7mcghezepawdf8yhptclc74w2xaufgc",
+      "thorpub1addwnpepqg3g2e933fttl9nsyavray8cs9d3jhvgwun9f4hrgj8rcqsx5c0hsrlc0dk",
+      "thorpub1addwnpepqggnpj09362tlv5feqg7x3g0jadp0d3j0lc4asuezkly038jmuh57j6ygdh",
+      "thorpub1addwnpepqgkg2pd3cyghg630ym5cqr68hq6nczf59upmdj994ud9gnyr0cppj87p0rg",
+      "thorpub1addwnpepqguvu7lnlz43rxmn76dz07x7admrt6h0xq08r84pztnglp9p0ehuxs8cwzz",
+      "thorpub1addwnpepqt04kwe9zernz4pvevrvujfwv2kzm6t46rgkxka0txpsy2ly4kz5wc4atfc",
+      "thorpub1addwnpepqt0tmnvk0vckvryer4vcqtxxes0tjtcu0t2dzfr3u34s4qe0kewaqc58tqy",
+      "thorpub1addwnpepqt0w9j5xd0l9xhcz8n5quucyu7prtttzuqgxt78mnzmqmqxzpwecgdkt8hh",
+      "thorpub1addwnpepqtcxwspexe8m2r8e5wylehzz026dlyn4uz2sh4dptydjrhk0x4xyx4xx7wd",
+      "thorpub1addwnpepqtqf38jgcds2hcxf758vh7l3gqt66nvue35ev7rvtny0hruu79e0vehspkz",
+      "thorpub1addwnpepqtszdgf2p52k29vwgruqwrdln7ues0jl9827upx5ew989vsuj4n8xleuej9",
+      "thorpub1addwnpepqtv67qkpx7s623xeg9luxj6wkqxvgry89d9fltsp3cnkg7fc4u292qg8v7y",
+      "thorpub1addwnpepqtx75q9h4jwfssar4ylumkjeddll7lwdv76hx2vrn7pkqkzjkphpqulhayh",
+      "thorpub1addwnpepqv8hff4sexe0vhtyaxtr4sukxzdysp24tv3km2cugu085h8te8c85mssjdn",
+      "thorpub1addwnpepqvrq54p2acq58sltzqhmfnvljs9jh0q75kh88hz9xk25edfzgwu72scmcty",
+      "thorpub1addwnpepqvxh89taaexh8c3xwcqxeex5hnnwl3w73rtmvrqhu3zq5jgpfx05krgrktz",
+      "thorpub1addwnpepqwc592nwppx06vfatd9sm5e4eyvnz6uvqh30vftgj5gjxpaualkekshxxcy"
+    ],
+    "chains": [
+      "BNB"
+    ],
+    "inbound_tx_count": "1178",
+    "outbound_tx_count": "213",
+    "pending_tx_heights": null,
+    "signing_party": [
+      "thorpub1addwnpepqwc592nwppx06vfatd9sm5e4eyvnz6uvqh30vftgj5gjxpaualkekshxxcy",
+      "thorpub1addwnpepq27j09tdaa8atk7ypka7hjc34n00ujg6zg9y3x046rlcks2s5cc0jw4zmxn",
+      "thorpub1addwnpepqg2fzcc5zvjkq8at6aggdavf64zx7mcghezepawdf8yhptclc74w2xaufgc",
+      "thorpub1addwnpepq0r0se9pet6ajpysflv4wq0nk73jyuzw4qpmhylrmlmhqf9z0dguukvj2wm",
+      "thorpub1addwnpepqd8zm4gwt4fyl099jq6z5lvdkclnuz7vv9slkle9rrzxra6t9k9azd93fh4",
+      "thorpub1addwnpepq27rrfm0maweu5252hfcf4ggu8qnduvu0fe7qwzvzad66gp7xp0w68kdfa2",
+      "thorpub1addwnpepqt0w9j5xd0l9xhcz8n5quucyu7prtttzuqgxt78mnzmqmqxzpwecgdkt8hh",
+      "thorpub1addwnpepq04r0c0n3l65caaqeh2wgyh7wehs207vtvr6zmju3dr3rtmxl3uhc88l85m",
+      "thorpub1addwnpepqfgc3kmwudy7sjc2nffnsg7c5h8yg54rwlcvm472dnjyugedue38gpu7vk6",
+      "thorpub1addwnpepqvxh89taaexh8c3xwcqxeex5hnnwl3w73rtmvrqhu3zq5jgpfx05krgrktz",
+      "thorpub1addwnpepqtqf38jgcds2hcxf758vh7l3gqt66nvue35ev7rvtny0hruu79e0vehspkz",
+      "thorpub1addwnpepqtx75q9h4jwfssar4ylumkjeddll7lwdv76hx2vrn7pkqkzjkphpqulhayh",
+      "thorpub1addwnpepqguvu7lnlz43rxmn76dz07x7admrt6h0xq08r84pztnglp9p0ehuxs8cwzz",
+      "thorpub1addwnpepqtszdgf2p52k29vwgruqwrdln7ues0jl9827upx5ew989vsuj4n8xleuej9",
+      "thorpub1addwnpepqggnpj09362tlv5feqg7x3g0jadp0d3j0lc4asuezkly038jmuh57j6ygdh",
+      "thorpub1addwnpepqdz6sz0y25chhe0ukafhwqa8utc44atrgu4ecgwgmwphc68mmsvh6z6234f",
+      "thorpub1addwnpepq2ftr5tztkzzf4dzsexzur6sx4nrhcmf26lxpvsm4mgu2cxdl4zngl06q7d",
+      "thorpub1addwnpepqt04kwe9zernz4pvevrvujfwv2kzm6t46rgkxka0txpsy2ly4kz5wc4atfc",
+      "thorpub1addwnpepqg3g2e933fttl9nsyavray8cs9d3jhvgwun9f4hrgj8rcqsx5c0hsrlc0dk",
+      "thorpub1addwnpepqdkfzxj52gsdtm9gg523wxpxhxha58y5r9x05pzafguqmswtfucq7a7lhky",
+      "thorpub1addwnpepq2rhezruaucqn3r35jz39qdez7hnlphhq3ajcwn26veyzjhavmhy5nyag65",
+      "thorpub1addwnpepqtv67qkpx7s623xeg9luxj6wkqxvgry89d9fltsp3cnkg7fc4u292qg8v7y",
+      "thorpub1addwnpepqfr9wmt0cqtgl8mrav8kfe6ddf5x6g3ht5ueneakqf4usj34y535k0yh76u"
+    ]
+  }
+]

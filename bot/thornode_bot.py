@@ -182,14 +182,14 @@ def dispatch_query(update, context):
     edit = True
     call = None
 
-    if data == 'home':
-        call = show_home_menu_edit_msg
-    elif data == 'thornode_menu':
+    if data == 'thornode_menu':
         call = show_thornode_menu_edit_msg
     elif data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
     elif data == 'show_network_stats':
         call = show_network_stats
+    elif data == 'solvency':
+        call = solvency_stats
     elif data == 'vault_key_addresses':
         call = show_vault_key_addresses
     elif data == 'add_thornode':
@@ -235,19 +235,6 @@ def dispatch_query(update, context):
     if call:
         call = asyncio.coroutine(call)
         return asyncio.run(call(update, context))
-
-
-def show_home_menu_edit_msg(update, context):
-    """
-    Edit current message with the home menu
-    """
-
-    keyboard = get_home_menu_buttons()
-    text = 'I am your THORNode Bot. 🤖\nChoose an action:'
-    query = update.callback_query
-    query.edit_message_text(text,
-                            reply_markup=InlineKeyboardMarkup(keyboard),
-                            parse_mode='markdown')
 
 
 def show_thornode_menu_edit_msg(update, context):

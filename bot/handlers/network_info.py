@@ -8,6 +8,10 @@ def show_network_menu(update, context):
     keyboard = [[
         InlineKeyboardButton('📊 NETWORK STATS',
                              callback_data='show_network_stats'),
+    ],
+    [
+        InlineKeyboardButton('💰 SOLVENCY',
+                             callback_data='solvency'),
         InlineKeyboardButton('🔒 VAULT ADDRESSES',
                              callback_data='vault_key_addresses')
     ]]
@@ -89,6 +93,27 @@ async def show_network_stats(update, context):
         try_message_with_home_menu(context=context,
                                    chat_id=update.effective_chat.id,
                                    text=text)
+
+
+def solvency_stats(update, context):
+    logger.info("I'm getting the Solvency Stats...")
+    try:
+        asgard_solvency = asgard_solvency_check()
+        yggdrasil_solvency = yggdrasil_check()
+    except Exception as e:
+        logger.exception(e)
+        try_message_with_home_menu(context, update.effective_chat.id, NETWORK_ERROR_MSG)
+        return
+
+    message = "💰 Solvency Check\n"
+
+    message += "THORChain is *100% Solvent* ✅\n\n" \
+        if asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent'] \
+        else "THORChain is *missing funds*! 😱\n\n"
+
+    message += get_solvency_message(asgard_solvency, yggdrasil_solvency)
+
+    try_message_with_home_menu(context, update.effective_chat.id, message)
 
 
 async def save_pool_address(ip_address, chain_to_node_addresses,

@@ -1,6 +1,7 @@
 import asyncio
 import subprocess
 import json
+from collections import defaultdict
 from typing import Callable, Awaitable
 
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
@@ -400,6 +401,124 @@ def did_churn_happen(validator, local_node_statuses, highest_churn_status_since)
             ((local_status == 'ready' and remote_status == 'active') or (local_status == 'active' and remote_status == 'standby')):
         return True
     return False
+
+
+def asgard_solvency_check() -> dict:
+    solvency_report = {'is_solvent': True}
+    asgard_actual = defaultdict(lambda: {"json": {}})
+    asgard_expected = get_asgard_json()
+    pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
+    for chain_data in pool_addresses['current']:
+        chain = chain_data['chain']
+        if chain == 'BNB':
+            asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
+
+    for chain_key, chain_value in asgard_actual.items():
+        if chain_key == 'BNB':
+            for balance in chain_value['json']:
+                chain_value[balance['symbol']] = balance['free']
+
+    for chain in asgard_expected:
+        if chain['status'] == 'active':
+            for coin in chain['coins']:
+                asset = coin['asset'].split('.')
+                actual_amount_formatted = (asgard_actual[asset[0]][asset[1]].replace(".", "")).strip("0")
+                expected_amount_formatted = (coin['amount'].replace(".", "")).strip("0")
+                if actual_amount_formatted != expected_amount_formatted:
+                    solvency_report['is_solvent'] = False
+                    if 'insolvent_coins' not in solvency_report:
+                        solvency_report['insolvent_coins'] = {}
+                    solvency_report['insolvent_coins'][coin['asset']] = {
+                                                                            "expected": coin['amount'],
+                                                                            "actual": asgard_actual[asset[0]][asset[1]]
+                                                                        }
+                else:
+                    if 'solvent_coins' not in solvency_report:
+                        solvency_report['solvent_coins'] = {}
+                    solvency_report['solvent_coins'][coin['asset']] = asgard_actual[asset[0]][asset[1]]
+
+    return solvency_report
+
+
+def yggdrasil_check() -> dict:
+    solvency_report = {'is_solvent': True}
+    yggdrasil_actual = {}
+
+    yggdrasil_expected = get_yggdrasil_json()
+    for vault in yggdrasil_expected:
+        if vault['status'] == 'active' and vault['vault']['status'] == 'active':
+            for chain in vault['addresses']:
+                if chain['chain'] == 'BNB':
+                    public_key = vault['vault']['pub_key']
+                    if public_key not in yggdrasil_actual:
+                        yggdrasil_actual[public_key] = {}
+                    if chain['chain'] not in yggdrasil_actual[public_key]:
+                        yggdrasil_actual[public_key][chain['chain']] = {}
+                    yggdrasil_actual[public_key][chain['chain']] = {"json": {}}
+                    yggdrasil_actual[public_key][chain['chain']]['json'] = get_binance_balance(chain['address'])
+
+    for vault in yggdrasil_actual:
+        for chain_key, chain_value in yggdrasil_actual[vault].items():
+            if chain_key == 'BNB':
+                for balance in chain_value['json']:
+                    chain_value[balance['symbol']] = balance['free']
+
+    for vault in yggdrasil_expected:
+        if vault['status'] == 'active' and vault['vault']['status'] == 'active':
+            for coin in vault['vault']['coins']:
+                asset = coin['asset'].split('.')
+                actual_amount_formatted = (yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]]
+                                           .replace(".", "")).strip("0")
+                expected_amount_formatted = (coin['amount'].replace(".", "")).strip("0")
+                if actual_amount_formatted != expected_amount_formatted:
+                    solvency_report['is_solvent'] = False
+                    if 'insolvent_coins' not in solvency_report:
+                        solvency_report['insolvent_coins'] = {}
+                    if vault['vault']['pub_key'] not in solvency_report['insolvent_coins']:
+                        solvency_report['insolvent_coins'][vault['vault']['pub_key']] = {}
+                    solvency_report['insolvent_coins'][vault['vault']['pub_key']][coin['asset']] = \
+                        {
+                            "expected": coin['amount'],
+                            "actual": yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]]
+                        }
+                else:
+                    if 'solvent_coins' not in solvency_report:
+                        solvency_report['solvent_coins'] = {}
+                    if coin['asset'] in solvency_report['solvent_coins']:
+                        solvency_report['solvent_coins'][coin['asset']] += \
+                            float(yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]])
+                    else:
+                        solvency_report['solvent_coins'][coin['asset']] = \
+                            float(yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]])
+
+    return solvency_report
+
+def get_solvency_message(asgard_solvency, yggdrasil_solvency) -> str:
+    message = "Tracked Balances of *Asgard*:\n"
+    if 'insolvent_coins' in asgard_solvency:
+        for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
+            message += f"*{coin_key}*:\n" \
+                       f"  Expected: {coin_value['expected']}\n" \
+                       f"  Actual:   {coin_value['actual']}\n"
+
+    if 'solvent_coins' in asgard_solvency:
+        for coin_key, coin_value in asgard_solvency['solvent_coins'].items():
+            message += f"*{coin_key}*: {coin_value}\n"
+
+    message += "\nTracked Balances of *Yggdrasil*:\n"
+    if 'insolvent_coins' in yggdrasil_solvency:
+        for pub_key, coins in yggdrasil_solvency['insolvent_coins'].items():
+            for coin_key, coin_value in coins.items():
+                message += f"*{pub_key}*:\n" \
+                           f"*{coin_key}*:\n" \
+                           f"  Expected: {coin_value['expected']}\n" \
+                           f"  Actual:   {coin_value['actual']}\n"
+
+    if 'solvent_coins' in yggdrasil_solvency:
+        for coin_key, coin_value in yggdrasil_solvency['solvent_coins'].items():
+            message += f"*{coin_key}*: {coin_value}\n"
+
+    return message
 
 
 def error(update, context):
