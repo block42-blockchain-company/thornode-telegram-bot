@@ -19,7 +19,7 @@ else:
         if 'BINANCE_NODE_IPS' in os.environ and os.environ['BINANCE_NODE_IPS'] != "" \
         else []
     if BINANCE_NODE_IPS:
-        BINANCE_DEX_ENDPOINT = f"http://{BINANCE_NODE_IPS[random.randint(0, len(BINANCE_NODE_IPS) - 1)]}:27146"
+        BINANCE_DEX_ENDPOINT = f"http://{random.choice(BINANCE_NODE_IPS)}:27146"
     else:
         BINANCE_DEX_ENDPOINT = "https://dex.binance.org" if NETWORK_TYPE == 'CHAOSNET' \
             else "https://testnet-dex-atlantic.binance.org"

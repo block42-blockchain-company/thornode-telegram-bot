@@ -1,6 +1,7 @@
 import asyncio
 import subprocess
 import json
+from collections import defaultdict
 from typing import Callable, Awaitable
 
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
@@ -404,15 +405,12 @@ def did_churn_happen(validator, local_node_statuses, highest_churn_status_since)
 
 def asgard_solvency_check() -> dict:
     solvency_report = {'is_solvent': True}
-    asgard_actual = {}
-
+    asgard_actual = defaultdict(lambda: {"json": {}})
     asgard_expected = get_asgard_json()
     pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
     for chain_data in pool_addresses['current']:
         chain = chain_data['chain']
         if chain == 'BNB':
-            if chain not in asgard_actual:
-                asgard_actual[chain] = {"json": {}}
             asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
 
     for chain_key, chain_value in asgard_actual.items():

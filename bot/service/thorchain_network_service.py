@@ -7,8 +7,8 @@ from constants import *
 
 
 def get_node_accounts():
-    url = ":8080/nodeaccounts.json" if DEBUG else ":1317/thorchain/nodeaccounts"
-    return get_request_json_thorchain(url_path=url)
+    path = ":8080/nodeaccounts.json" if DEBUG else ":1317/thorchain/nodeaccounts"
+    return get_request_json_thorchain(url_path=path)
 
 
 def get_node_status(node_ip=None):
@@ -73,13 +73,13 @@ def get_thorchain_blocks_per_year(node_ip=None):
 
 
 def get_asgard_json() -> dict:
-    url = ':8080/asgard.json' if DEBUG else f":1317/thorchain/vaults/asgard"
-    return get_request_json_thorchain(url_path=url)
+    path = ':8080/asgard.json' if DEBUG else f":1317/thorchain/vaults/asgard"
+    return get_request_json_thorchain(url_path=path)
 
 
 def get_yggdrasil_json() -> dict:
-    url = ":8080/yggdrasil.json" if DEBUG else ":1317/thorchain/vaults/yggdrasil"
-    return get_request_json_thorchain(url_path=url)
+    path = ":8080/yggdrasil.json" if DEBUG else ":1317/thorchain/vaults/yggdrasil"
+    return get_request_json_thorchain(url_path=path)
 
 
 def get_binance_balance(address: str) -> dict:
