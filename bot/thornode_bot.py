@@ -11,6 +11,7 @@ from handlers.network_info import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
+
 """
 ######################################################################################################################################################
 BOT RESTART SETUP
@@ -109,6 +110,14 @@ def setup_bot_data(dispatcher):
 
     dispatcher.job_queue.run_repeating(general_bot_checks,
                                        interval=JOB_INTERVAL_IN_SECONDS)
+    dispatcher.job_queue.run_repeating(check_bitcoin_height_increase_job,
+                                       interval=BitcoinNode.max_time_to_increase_block_height_in_seconds)
+    dispatcher.job_queue.run_repeating(check_ethereum_height_increase_job,
+                                       interval=EthereumNode.max_time_to_increase_block_height_in_seconds)
+
+    syncing_checks_interval_in_seconds = 120
+    dispatcher.job_queue.run_repeating(check_syncing_job,
+                                       interval=syncing_checks_interval_in_seconds)
 
 
 """
@@ -490,7 +499,7 @@ def confirm_container_restart(update, context):
     keyboard = [[
         InlineKeyboardButton('YES ✅',
                              callback_data='restart_container-#' +
-                             container_name),
+                                           container_name),
         InlineKeyboardButton('NO ❌', callback_data='admin_menu')
     ]]
     text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'

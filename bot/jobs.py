@@ -1,7 +1,9 @@
-from helpers import *
-from service.thorchain_network_service import *
 from packaging import version
+
+from helpers import *
 from messages import *
+from models.nodes import BinanceNode, EthereumNode, Node, BitcoinNode, UnauthorizedException
+from service.thorchain_network_service import *
 
 
 def user_specific_checks(context):
@@ -20,8 +22,137 @@ def general_bot_checks(context):
 
     check_churning(context)
     check_solvency(context)
-    if BINANCE_NODE_IPS:
-        check_binance_health(context)
+
+    nodes = []
+    nodes.extend(BinanceNode.from_ips(BINANCE_NODE_IPS))
+    nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
+    nodes.extend(
+        BitcoinNode.from_ips_with_credentials(
+            BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES, BITCOIN_NODE_PASSWORDS))
+
+    for node in nodes:
+        message = check_health(node, context)
+        if message:
+            try_message_to_all_users(context, text=message)
+
+
+def check_syncing_job(context):
+    """
+    Check if node is syncing or not and send appropriate notification
+    """
+
+    nodes = []
+    nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
+    nodes.extend(
+        BitcoinNode.from_ips_with_credentials(BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES, BITCOIN_NODE_PASSWORDS))
+
+    for node in nodes:
+        message = check_syncing(node, context)
+        if message:
+            try_message_to_all_users(context, text=message)
+
+
+def check_bitcoin_height_increase_job(context):
+    for node in BitcoinNode.from_ips_with_credentials(BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES,
+                                                      BITCOIN_NODE_PASSWORDS):
+        message = check_block_height_increase(context, node)
+        if message:
+            try_message_to_all_users(context, message)
+
+
+def check_ethereum_height_increase_job(context):
+    for node in EthereumNode.from_ips(ETHEREUM_NODE_IPS):
+        message = check_block_height_increase(context, node)
+        if message:
+            try_message_to_all_users(context, message)
+
+
+def check_syncing(node: Node, context) -> [str, None]:
+    try:
+        is_synced = node.is_fully_synced()
+    except UnauthorizedException:
+        return f"😱 Your {node.network_name} node ({node.node_ip}) returns 401 - Unauthorized! 😱\n" \
+               f" Please make sure the credentials you set are correct!"
+
+    was_synced = context.bot_data.setdefault(node.node_id, {}).get('syncing', True)
+
+    if is_synced != was_synced:
+        if is_synced:
+            message = f"Your {node.network_name} node is fully synced again!👌\n" \
+                      f"IP: {node.node_ip}"
+        else:
+            message = f"Your {node.network_name} node is syncing with the network... 🚧\n" \
+                      f"IP: {node.node_ip}"
+
+        context.bot_data[node.node_id]['syncing'] = is_synced
+        return message
+    else:
+        return None
+
+
+def check_health(node: Node, context) -> [str, None]:
+    try:
+        is_node_currently_healthy = node.is_healthy()
+    except UnauthorizedException:
+        return f"😱 Your {node.network_name} node ({node.node_ip}) returns 401 - Unauthorized! 😱\n" \
+               f" Please make sure the credentials you set are correct!"
+    except Exception as e:
+        logger.error(e)
+        return None
+
+    was_node_healthy = context.bot_data.setdefault(node.node_id, {}).get('health', True)
+
+    if was_node_healthy != is_node_currently_healthy:
+        context.bot_data[node.node_id]['health'] = is_node_currently_healthy
+
+        if is_node_currently_healthy:
+            text = f'{node.network_name} Node is healthy again! 👌\n' \
+                   f'IP: {node.node_ip}\n'
+
+        else:
+            text = f'{node.network_name} Node is not healthy anymore! 💀 \n' \
+                   f'IP: {node.node_ip}\n' \
+                   f'Please check your {node.network_name} immediately '
+
+        return text
+    else:
+        return None
+
+
+def check_block_height_increase(context, node: Node) -> [str, None]:
+    try:
+        current_block_height = node.get_block_height()
+    except UnauthorizedException:
+        return f"😱 Your {node.network_name} node ({node.node_ip}) returns 401 - Unauthorized! 😱\n" \
+               f" Please make sure the credentials you set are correct!"
+    except Exception as e:
+        logger.error(e)
+        return None
+
+    # Stuck count:
+    # 0 == everthings alright
+    # 1 == just got stuck
+    # -1 == just got unstuck
+    # > 1 == still stuck
+
+    node_data = context.bot_data.setdefault(node.node_id, {})
+    last_block_height = node_data.get('block_height', float('-inf'))
+    message = None
+
+    if current_block_height <= last_block_height:
+        node_data['block_height_stuck_count'] = node_data.get('block_height_stuck_count', 0) + 1
+
+    elif node_data.get('block_height_stuck_count', 0) > 0:
+        message = f"Block height is increasing again! 👌\n"
+        node_data['block_height_stuck_count'] = -1
+
+    if node_data.get('block_height_stuck_count', 0) == 1:
+        message = 'Block height is not increasing anymore! 💀\n'
+
+    node_data['block_height'] = current_block_height
+    node_data['block_height_check_time'] = datetime.now()
+
+    return message
 
 
 def check_thornodes(context):
@@ -250,37 +381,6 @@ def check_thorchain_midgard_api(context, node_address):
                    'Node address: ' + node_address + '\n\n' + \
                    'Please check your Thornode immediately!'
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
-
-
-def check_binance_health(context):
-    """
-    Check if Binance Node is healthy
-    """
-
-    logger.info("I'm checking binance node health...")
-    binance_nodes = context.bot_data['binance_nodes']
-
-    for binance_node_ip in BINANCE_NODE_IPS:
-        if 'is_binance_node_healthy' not in binance_nodes[binance_node_ip]:
-            binance_nodes[binance_node_ip]['is_binance_node_healthy'] = True
-        binance_node_data = binance_nodes[binance_node_ip]
-
-        is_binance_node_currently_healthy = is_binance_node_healthy(
-            binance_node_ip)
-
-        if binance_node_data[
-                'is_binance_node_healthy'] != is_binance_node_currently_healthy:
-            if is_binance_node_currently_healthy:
-                binance_node_data['is_binance_node_healthy'] = True
-                text = 'Binance Node is healthy again! 👌' + '\n' + \
-                       'IP: ' + binance_node_ip + '\n'
-                try_message_to_all_users(context, text=text)
-            else:
-                binance_node_data['is_binance_node_healthy'] = False
-                text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
-                       'IP: ' + binance_node_ip + '\n\n' + \
-                       'Please check your Binance Node immediately!'
-                try_message_to_all_users(context, text=text)
 
 
 def check_versions_status(context):

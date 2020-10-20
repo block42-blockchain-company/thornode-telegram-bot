@@ -7,7 +7,6 @@ from typing import Callable, Awaitable
 from telegram import InlineKeyboardButton, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, TelegramError
 from datetime import datetime, timedelta
 
-from constants import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
 
@@ -536,3 +535,21 @@ async def for_each_async(elements: [], function: Callable[...,
         tasks.append(function(element))
 
     await asyncio.gather(*tasks)
+
+
+def btc_rpc_request(ip: str, username: str, password: str, method: str, params=None):
+    return rpc_request(url=f'http://{username}:{password}@{ip}:8332/', jsonrpc_version="1.0", method=method,
+                       params=params)
+
+
+def eth_rpc_request(ip: str, method: str, params=None):
+    return rpc_request(url=f'http://{ip}:8545/', jsonrpc_version="2.0", method=method,
+                       params=params)
+
+
+def rpc_request(url: str, method: str, jsonrpc_version: str, params=None):
+    if params is None:
+        params = []
+    json = {"jsonrpc": jsonrpc_version, "id": None, "method": method, "params": params}
+
+    return requests.post(url, json=json)
