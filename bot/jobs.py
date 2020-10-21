@@ -108,11 +108,10 @@ def check_health(node: Node, context) -> [str, None]:
         if is_node_currently_healthy:
             text = f'{node.network_name} Node is healthy again! 👌\n' \
                    f'IP: {node.node_ip}\n'
-
         else:
             text = f'{node.network_name} Node is not healthy anymore! 💀 \n' \
                    f'IP: {node.node_ip}\n' \
-                   f'Please check your {node.network_name} immediately '
+                   f'Please check your {node.network_name} immediately'
 
         return text
     else:
@@ -141,7 +140,6 @@ def check_block_height_increase(context, node: Node) -> [str, None]:
 
     if current_block_height <= last_block_height:
         node_data['block_height_stuck_count'] = node_data.get('block_height_stuck_count', 0) + 1
-
     elif node_data.get('block_height_stuck_count', 0) > 0:
         message = f"Block height is increasing again! 👌\n"
         node_data['block_height_stuck_count'] = -1
@@ -150,7 +148,6 @@ def check_block_height_increase(context, node: Node) -> [str, None]:
         message = 'Block height is not increasing anymore! 💀\n'
 
     node_data['block_height'] = current_block_height
-    node_data['block_height_check_time'] = datetime.now()
 
     return message
 

@@ -30,7 +30,7 @@ class Node(abc.ABC):
 
 
 class BitcoinNode(Node):
-    max_time_to_increase_block_height_in_seconds = 60 * 60  # 1 hour
+    max_time_for_block_height_increase_in_seconds = 60 * 60  # 1 hour
 
     def __init__(self, node_ip, username, password):
         super().__init__(node_ip, "Bitcoin")
@@ -44,7 +44,7 @@ class BitcoinNode(Node):
 
         difference = abs(public_block_count - node_block_count)
 
-        return difference <= 2  # For difference 1 and 0 we assume that it is synced
+        return difference <= 1  # For difference 1 and 0 we assume that it is synced
 
     def get_block_height(self):
         block_count_res = btc_rpc_request(ip=self.node_ip, username=self.username, password=self.password,
@@ -78,7 +78,7 @@ class BitcoinNode(Node):
 
 
 class EthereumNode(Node):
-    max_time_to_increase_block_height_in_seconds = 60 * 2  # 2 mins
+    max_time_for_block_height_increase_in_seconds = 60 * 2  # 2 mins
 
     def __init__(self, node_ip):
         super().__init__(node_ip, "Ethereum")

@@ -30,6 +30,7 @@ else:
         BINANCE_DEX_ENDPOINT = "https://dex.binance.org" if NETWORK_TYPE == 'CHAOSNET' \
             else "https://testnet-dex-atlantic.binance.org"
 
+ETHEREUM_NODE_IPS = list(filter(None, os.environ.get('ETHEREUM_NODE_IPS', '').split(",")))
 BITCOIN_NODE_IPS = list(filter(None, os.environ.get('BITCOIN_NODE_IPS', '').split(",")))
 BITCOIN_NODE_USERNAMES = list(filter(None, os.environ.get('BITCOIN_NODE_USERNAMES', '').split(",")))
 BITCOIN_NODE_PASSWORDS = list(filter(None, os.environ.get('BITCOIN_NODE_PASSWORDS', '').split(",")))
@@ -43,7 +44,6 @@ if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_I
                    f"BITCOIN_NODE_PASSWORDS array length: ({len(BITCOIN_NODE_PASSWORDS)})\n")
     BITCOIN_NODE_IPS.clear()
 
-ETHEREUM_NODE_IPS = os.environ.get('ETHEREUM_NODE_IPS', '').split(",")
 
 ADMIN_USER_IDS = [
     int(admin_id) for admin_id in os.environ['ADMIN_USER_IDS'].split(",")
