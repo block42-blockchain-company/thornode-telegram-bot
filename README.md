@@ -14,6 +14,7 @@ If you have questions feel free to open a github issue or contact us in our Tele
 For *kubernetes* open `kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml` and/or 
 `kubernetes/k8s_thornode_bot_deployment_testnet.yaml` file;
 
+### Environmental variables
 For *docker-compose* open `variables-chaosnet.env` and/or
  `variables-testnet.env` file and set:
  
@@ -21,8 +22,16 @@ For *docker-compose* open `variables-chaosnet.env` and/or
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Binance Node.
-- `ADMIN_USER_IDS` to a list of Telegram User IDs that are permissioned to access the 
+- `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs you want to monitor (or `localhost`).
+Leave it empty or remove it to not monitor any Ethereum Node.
+- `ADMIN_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
 Admin Area (not working on K8s at the moment).
+- `BITCOIN_NODE_IPS` to a list of Bitcoin Node IPs you want to monitor (or `localhost`).
+Leave it empty or remove it to not monitor any Bitcoin Node.
+- `BITCOIN_NODE_USERNAMES` corresponding usernames for each Bitcoin node ip for 
+[json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
+- `BITCOIN_NODE_PASSWORDS` corresponding passwords for each Bitcoin node ip for 
+[json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
 
 ### Kubernetes (K8s)
 
@@ -103,15 +112,27 @@ export NETWORK_TYPE=XXX
 You can set it to `TESTNET` or `CHAOSNET`. If you leave this empty or write it wrong, testnet will be 
 monitored by default.
 ---
+#### Other nodes - Binance, Bitcoin, Ethereum supported
+**If you don't have any additional nodes to monitor, just don't set these variables.**
 
-If you have any Binance Node IPs that you want to monitor, you can set `BINANCE_NODE_IPS` to these 
-IPs. Set it to `localhost` if the Binance Node runs on the same machine as the Telegram Bot.
-
-**Leave this environment variable empty or don't even set it to not do any Binance Node monitoring.**
-
-If you enter multiple Binance Node IPs, make sure to separate the IDs with `,` i.e. a comma.
+If you enter a multiple node IPs for one network make sure to separate the IDs with comma (`,`).
+Set it to `localhost` if the Node runs on the same machine as the Telegram Bot.
+##### Binance
 ```
 export BINANCE_NODE_IPS=3.228.22.197,localhost
+```
+##### Ethereum
+```
+export ETHEREUM_NODE_IPS=3.228.22.197,localhost
+```
+##### Bitcoin
+For each node ip you need to set the corresponding usernames and passwords to your node's
+[json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
+ In result, for `n` bitcoin node ips you must set `n` usernames and `n` passwords.
+```
+export BITCOIN_NODE_IPS=ip_1,ip_2
+export BITCOIN_NODE_USERNAMES=username_to_ip_1,username_to_ip_2` 
+export BITCOIN_NODE_PASSWORDS=password_to_ip_1,password_to_ip_2` 
 ```
 ---
 Next set Telegram User IDs that are permissioned to access the Admin Area in the `ADMIN_USER_IDS` environment variable.
@@ -294,6 +315,7 @@ docker volume create thornode-bot-volume
 
 Finally, run the docker container:
 
+
 ```
 docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IPS=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
@@ -303,9 +325,8 @@ Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token.
 Set the `--env NETWORK_TYPE` flag to the network you want to monitor (`TESTNET` or `CHAOSNET` while 
 the former is the default).
 
-Set the `--env BINANCE_NODE_IPS` flag to a comma separated list of IPs of running Binance Nodes, 
-or to `localhost` if Telegram Bot and Binance Node run on the same machine.
-Leave this empty i.e. `--env BINANCE_NODE_IPS=` or remove it to not do any Binance monitoring.
+If you have your node you want to monitor, set additional node variables (see [Set environment variables](#set-environment-variables) section). 
+Set it as `BINANCE_NODE_IPS` in above command.
 
 The `-v` argument passes the dockersocket to the container so that we can restart docker containers from
 inside the Telegram Bot.
@@ -322,7 +343,7 @@ The explained steps in the Docker Standalone section are conveniently bundled in
 `docker-compose-chaosnet.yaml` and `docker-compose-testnet.yaml`.
 
 First, as before, you need to set the right values in the `variables-chaosnet.env` and/or
-`variables-testnet.env` files for `TELEGRAM_BOT_TOKEN`, `BINANCE_NODE_IPS` and `ADMIN_USER_IDS`
+`variables-testnet.env` files for `TELEGRAM_BOT_TOKEN`, `ADMIN_USER_IDS` and additional nodes.
 
 If you don't want to spin up the official docker image from our dockerhub, open any of the 
 `docker-compose-*.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
