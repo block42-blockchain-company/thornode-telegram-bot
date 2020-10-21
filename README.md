@@ -28,9 +28,9 @@ Leave it empty or remove it to not monitor any Ethereum Node.
 Admin Area (not working on K8s at the moment).
 - `BITCOIN_NODE_IPS` to a list of Bitcoin Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Bitcoin Node.
-- `BITCOIN_NODE_USERNAMES` corresponding usernames for each Bitcoin node ip for 
+- `BITCOIN_NODE_USERNAMES` to corresponding usernames for each Bitcoin node ip to  
 [json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
-- `BITCOIN_NODE_PASSWORDS` corresponding passwords for each Bitcoin node ip for 
+- `BITCOIN_NODE_PASSWORDS` to corresponding passwords for each Bitcoin node ip to 
 [json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
 
 ### Kubernetes (K8s)
@@ -131,8 +131,8 @@ For each node ip you need to set the corresponding usernames and passwords to yo
  In result, for `n` bitcoin node ips you must set `n` usernames and `n` passwords.
 ```
 export BITCOIN_NODE_IPS=ip_1,ip_2
-export BITCOIN_NODE_USERNAMES=username_to_ip_1,username_to_ip_2` 
-export BITCOIN_NODE_PASSWORDS=password_to_ip_1,password_to_ip_2` 
+export BITCOIN_NODE_USERNAMES=username_to_ip_1,username_to_ip_2
+export BITCOIN_NODE_PASSWORDS=password_to_ip_1,password_to_ip_2
 ```
 ---
 Next set Telegram User IDs that are permissioned to access the Admin Area in the `ADMIN_USER_IDS` environment variable.
@@ -315,7 +315,6 @@ docker volume create thornode-bot-volume
 
 Finally, run the docker container:
 
-
 ```
 docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IPS=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
@@ -325,8 +324,8 @@ Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token.
 Set the `--env NETWORK_TYPE` flag to the network you want to monitor (`TESTNET` or `CHAOSNET` while 
 the former is the default).
 
-If you have your node you want to monitor, set additional node variables (see [Set environment variables](#set-environment-variables) section). 
-Set it as `BINANCE_NODE_IPS` in above command.
+If you have a node that you want to monitor, set additional node variables (see [Set environment variables](#set-environment-variables) section). 
+Set it as `BINANCE_NODE_IPS` in above example.
 
 The `-v` argument passes the dockersocket to the container so that we can restart docker containers from
 inside the Telegram Bot.
