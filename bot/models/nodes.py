@@ -64,7 +64,7 @@ class BitcoinNode(Node):
 
     @staticmethod
     def from_ips_with_credentials(ips, usernames, passwords) -> list:
-        if (len(ips) != len(usernames)) | (len(ips) != len(passwords)):
+        if (len(ips) != len(usernames)) or (len(ips) != len(passwords)):
             raise ValueError("Ips, usernames and passwords arguments must be of the same lenght!")
 
         btc_nodes = []

@@ -34,7 +34,7 @@ BITCOIN_NODE_IPS = list(filter(None, os.environ.get('BITCOIN_NODE_IPS', '').spli
 BITCOIN_NODE_USERNAMES = list(filter(None, os.environ.get('BITCOIN_NODE_USERNAMES', '').split(",")))
 BITCOIN_NODE_PASSWORDS = list(filter(None, os.environ.get('BITCOIN_NODE_PASSWORDS', '').split(",")))
 
-if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) | (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_PASSWORDS)):
+if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_PASSWORDS)):
     logger.warning("Error while reading your bitcoin nodes ip addresses!\n"
                    "You must set exactly the same number of IPs, usernames and passwords to the json-rpc api.\n"
                    "You set:\n"
