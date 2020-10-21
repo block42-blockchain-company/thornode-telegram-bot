@@ -138,9 +138,7 @@ async def show_vault_key_addresses(update, context):
         node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context=context,
-                                   chat_id=update.effective_chat.id,
-                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        logger.error("Couldn't get node accounts while showing vault_key_addresses.")
         return
 
     monitored_node_accounts = list(

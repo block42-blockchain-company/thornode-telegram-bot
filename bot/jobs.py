@@ -388,9 +388,7 @@ def check_versions_status(context):
         node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context,
-                                   chat_id=context.job.context['chat_id'],
-                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        logger.error("I couldn't get the node accounts while checking version status.")
         return
 
     highest_version = max(map(lambda n: n['version'], node_accounts),
@@ -418,7 +416,7 @@ def check_churning(context):
         validators = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_to_all_users(context, text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        logger.error("I couldn't get the node accounts while checking if churning occured.")
         return
 
     if 'node_statuses' not in context.bot_data:
