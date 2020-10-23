@@ -1,7 +1,9 @@
-from helpers import *
-from service.thorchain_network_service import *
 from packaging import version
+
+from helpers import *
 from messages import *
+from models.nodes import BinanceNode, EthereumNode, Node, BitcoinNode, UnauthorizedException
+from service.thorchain_network_service import *
 
 
 def user_specific_checks(context):
@@ -20,8 +22,132 @@ def general_bot_checks(context):
 
     check_churning(context)
     check_solvency(context)
-    if BINANCE_NODE_IPS:
-        check_binance_health(context)
+
+    nodes = []
+    nodes.extend(BinanceNode.from_ips(BINANCE_NODE_IPS))
+    nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
+    nodes.extend(
+        BitcoinNode.from_ips_with_credentials(
+            BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES, BITCOIN_NODE_PASSWORDS))
+
+    for node in nodes:
+        message = check_health(node, context)
+        if message:
+            try_message_to_all_users(context, text=message)
+
+
+def check_syncing_job(context):
+    """
+    Check if node is syncing or not and send appropriate notification
+    """
+
+    nodes = []
+    nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
+    nodes.extend(
+        BitcoinNode.from_ips_with_credentials(BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES, BITCOIN_NODE_PASSWORDS))
+
+    for node in nodes:
+        message = check_syncing(node, context)
+        if message:
+            try_message_to_all_users(context, text=message)
+
+
+def check_bitcoin_height_increase_job(context):
+    for node in BitcoinNode.from_ips_with_credentials(BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES,
+                                                      BITCOIN_NODE_PASSWORDS):
+        message = check_block_height_increase(context, node)
+        if message:
+            try_message_to_all_users(context, message)
+
+
+def check_ethereum_height_increase_job(context):
+    for node in EthereumNode.from_ips(ETHEREUM_NODE_IPS):
+        message = check_block_height_increase(context, node)
+        if message:
+            try_message_to_all_users(context, message)
+
+
+def check_syncing(node: Node, context) -> [str, None]:
+    try:
+        is_synced = node.is_fully_synced()
+    except UnauthorizedException:
+        return f"😱 Your {node.to_string()} returns 401 - Unauthorized! 😱\n" \
+               f" Please make sure the credentials you set are correct!"
+
+    was_synced = context.bot_data.setdefault(node.node_id, {}).get('syncing', True)
+
+    if is_synced != was_synced:
+        if is_synced:
+            message = f"Your {node.to_string()} is fully synced again!👌\n"
+        else:
+            message = f"Your {node.to_string()} node is syncing with the network... 🚧\n"
+
+        context.bot_data[node.node_id]['syncing'] = is_synced
+        return message
+    else:
+        return None
+
+
+def check_health(node: Node, context) -> [str, None]:
+    try:
+        is_node_currently_healthy = node.is_healthy()
+    except UnauthorizedException:
+        return f"😱 Your {node.to_string()} returns 401 - Unauthorized! 😱\n" \
+               f" Please make sure the credentials you set are correct!"
+    except Exception as e:
+        logger.error(e)
+        return None
+
+    was_node_healthy = context.bot_data.setdefault(node.node_id, {}).get('health', True)
+
+    if was_node_healthy != is_node_currently_healthy:
+        context.bot_data[node.node_id]['health'] = is_node_currently_healthy
+
+        if is_node_currently_healthy:
+            text = f'{node.to_string()} is healthy again! 👌\n'
+        else:
+            text = f'{node.to_string()} is not healthy anymore! 💀 \n' \
+                   f'Please check your node immediately'
+
+        return text
+    else:
+        return None
+
+
+def check_block_height_increase(context, node: Node) -> [str, None]:
+    try:
+        current_block_height = node.get_block_height()
+    except UnauthorizedException:
+        return f"😱 Your {node.to_string()} returns 401 - Unauthorized! 😱\n" \
+               f" Please make sure the credentials you set are correct!"
+    except Exception as e:
+        logger.error(e)
+        return None
+
+    # Stuck count:
+    # 0 == everthings alright
+    # 1 == just got stuck
+    # -1 == just got unstuck
+    # > 1 == still stuck
+
+    node_data = context.bot_data.setdefault(node.node_id, {})
+    last_block_height = node_data.get('block_height', float('-inf'))
+    message = None
+
+    if current_block_height <= last_block_height:
+        node_data['block_height_stuck_count'] = node_data.get('block_height_stuck_count', 0) + 1
+    elif node_data.get('block_height_stuck_count', 0) > 0:
+        message = f"Block height is increasing again! 👌\n" \
+                  f"{node.to_string()}"
+        node_data['block_height_stuck_count'] = -1
+
+    if node_data.get('block_height_stuck_count', 0) == 1:
+        message = 'Block height is not increasing anymore! 💀\n' \
+                  f"{node.to_string()}"
+
+    node_data['block_height'] = current_block_height
+
+    return message
 
 
 def check_thornodes(context):
@@ -147,7 +273,7 @@ def check_thorchain_block_height(context, node_address):
     else:
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in node_data and node_data[
-                'block_height_stuck_count'] > 0:
+            'block_height_stuck_count'] > 0:
             text = f"Block height is increasing again! 👌\n" + \
                    f"IP: {node_data['ip_address']}\n" + \
                    f"THORNode: {node_data['alias']}\n" + \
@@ -158,7 +284,7 @@ def check_thorchain_block_height(context, node_address):
                                        text=text)
             node_data['block_height_stuck_count'] = -1
         else:
-            node_data['block_height_stuck_count'] = 0
+            node_data['block_height_stuck_cołunt'] = 0
 
     # Set current block height
     node_data['block_height'] = block_height
@@ -252,37 +378,6 @@ def check_thorchain_midgard_api(context, node_address):
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 
-def check_binance_health(context):
-    """
-    Check if Binance Node is healthy
-    """
-
-    logger.info("I'm checking binance node health...")
-    binance_nodes = context.bot_data['binance_nodes']
-
-    for binance_node_ip in BINANCE_NODE_IPS:
-        if 'is_binance_node_healthy' not in binance_nodes[binance_node_ip]:
-            binance_nodes[binance_node_ip]['is_binance_node_healthy'] = True
-        binance_node_data = binance_nodes[binance_node_ip]
-
-        is_binance_node_currently_healthy = is_binance_node_healthy(
-            binance_node_ip)
-
-        if binance_node_data[
-                'is_binance_node_healthy'] != is_binance_node_currently_healthy:
-            if is_binance_node_currently_healthy:
-                binance_node_data['is_binance_node_healthy'] = True
-                text = 'Binance Node is healthy again! 👌' + '\n' + \
-                       'IP: ' + binance_node_ip + '\n'
-                try_message_to_all_users(context, text=text)
-            else:
-                binance_node_data['is_binance_node_healthy'] = False
-                text = 'Binance Node is not healthy anymore! 💀' + '\n' + \
-                       'IP: ' + binance_node_ip + '\n\n' + \
-                       'Please check your Binance Node immediately!'
-                try_message_to_all_users(context, text=text)
-
-
 def check_versions_status(context):
     logger.info("I'm checking version changes...")
     user_data = context.job.context['user_data']
@@ -291,9 +386,7 @@ def check_versions_status(context):
         node_accounts = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context,
-                                   chat_id=context.job.context['chat_id'],
-                                   text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        logger.error("I couldn't get the node accounts while checking version status.")
         return
 
     highest_version = max(map(lambda n: n['version'], node_accounts),
@@ -321,7 +414,7 @@ def check_churning(context):
         validators = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        try_message_to_all_users(context, text=NODE_LIST_UNAVAILABLE_ERROR_MSG)
+        logger.error("I couldn't get the node accounts while checking if churning occured.")
         return
 
     if 'node_statuses' not in context.bot_data:
@@ -344,7 +437,7 @@ def check_churning(context):
         remote_status = validator['status']
         local_status = local_node_statuses[
             validator['node_address']] if validator[
-                'node_address'] in local_node_statuses else "unknown"
+                                              'node_address'] in local_node_statuses else "unknown"
         if remote_status != local_status:
             if 'active' == remote_status:
                 churned_in.append({
@@ -373,11 +466,12 @@ def check_churning(context):
             text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n\n" \
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(int(get_network_security(network) * 100)) + " %*\n\n" \
-                    "↩️ Bond ROI: *" + '{:.2f}'.format(float(network['bondingROI']) * 100) + " %* APY\n\n" \
-                    "↩️ Stake ROI: *" + '{:.2f}'.format(float(network['stakingROI']) * 100) + " %* APY"
+                                                                                                              "↩️ Bond ROI: *" + '{:.2f}'.format(
+                float(network['bondingROI']) * 100) + " %* APY\n\n" \
+                                                      "↩️ Stake ROI: *" + '{:.2f}'.format(
+                float(network['stakingROI']) * 100) + " %* APY"
         except Exception as e:
             logger.exception(e)
-            text += NETWORK_ERROR_MSG
 
         try_message_to_all_users(context, text=text)
 
@@ -393,7 +487,6 @@ def check_solvency(context):
         yggdrasil_solvency = yggdrasil_check()
     except Exception as e:
         logger.exception(e)
-        try_message_to_all_users(context, text=NETWORK_ERROR_MSG)
         return
 
     if 'is_solvent' not in context.bot_data:

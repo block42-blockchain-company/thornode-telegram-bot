@@ -2,7 +2,7 @@ import atexit
 import re
 import time
 
-from telegram.error import BadRequest, Unauthorized
+from telegram.error import BadRequest, Unauthorized, InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters)
 from telegram.ext.dispatcher import run_async
@@ -11,6 +11,7 @@ from handlers.network_info import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
+
 """
 ######################################################################################################################################################
 BOT RESTART SETUP
@@ -109,6 +110,14 @@ def setup_bot_data(dispatcher):
 
     dispatcher.job_queue.run_repeating(general_bot_checks,
                                        interval=JOB_INTERVAL_IN_SECONDS)
+    dispatcher.job_queue.run_repeating(check_bitcoin_height_increase_job,
+                                       interval=BitcoinNode.max_time_for_block_height_increase_in_seconds)
+    dispatcher.job_queue.run_repeating(check_ethereum_height_increase_job,
+                                       interval=EthereumNode.max_time_for_block_height_increase_in_seconds)
+
+    syncing_checks_interval_in_seconds = 120
+    dispatcher.job_queue.run_repeating(check_syncing_job,
+                                       interval=syncing_checks_interval_in_seconds)
 
 
 """
@@ -136,15 +145,15 @@ def start(update, context):
         context.user_data['nodes'] = {}
 
     text = 'Heil ok sæll! I am your THORNode Bot running on ' + NETWORK_TYPE + '. 🤖\n\n' \
-           'I will notify you about changes of your THORNode\'s\n' \
-           '- *Status*\n' \
-           '- *Bond*\n' \
-           '- *Slash Points*\n' \
-           '- if your *Block Height* gets stuck\n' \
-           '- if your *Midgard API* gets unhealthy\n\n' \
-           'You will get a notification\n' \
-           '- once any node *upgrades its version*\n' \
-           '- after *successful churning*\n\n'
+                                                                               'I will notify you about changes of your THORNode\'s\n' \
+                                                                               '- *Status*\n' \
+                                                                               '- *Bond*\n' \
+                                                                               '- *Slash Points*\n' \
+                                                                               '- if your *Block Height* gets stuck\n' \
+                                                                               '- if your *Midgard API* gets unhealthy\n\n' \
+                                                                               'You will get a notification\n' \
+                                                                               '- once any node *upgrades its version*\n' \
+                                                                               '- after *successful churning*\n\n'
     if BINANCE_NODE_IPS:
         text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n\n'
     text += 'Moreover, in the Admin Area you can\n' \
@@ -490,7 +499,7 @@ def confirm_container_restart(update, context):
     keyboard = [[
         InlineKeyboardButton('YES ✅',
                              callback_data='restart_container-#' +
-                             container_name),
+                                           container_name),
         InlineKeyboardButton('NO ❌', callback_data='admin_menu')
     ]]
     text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'
@@ -632,9 +641,15 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
-    bot = Updater(TELEGRAM_BOT_TOKEN,
-                  persistence=PicklePersistence(filename=session_data_path),
-                  use_context=True)
+    try:
+        bot = Updater(TELEGRAM_BOT_TOKEN,
+                      persistence=PicklePersistence(filename=session_data_path),
+                      use_context=True)
+    except InvalidToken:
+        logger.error("Invalid telegram token. Please make sure to set TELEGRAM_BOT_TOKEN environmental variable with"
+                     " correct Telegram bot token. Check project docs for more details.", exc_info=True)
+        raise
+
     dispatcher = bot.dispatcher
 
     setup_existing_users(dispatcher=dispatcher)

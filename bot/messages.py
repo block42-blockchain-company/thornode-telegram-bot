@@ -1,2 +1,1 @@
 NETWORK_ERROR_MSG = '😱 There was an error while getting data 😱\nAn API endpoint is down!'
-NODE_LIST_UNAVAILABLE_ERROR_MSG = '😱 I couldn\'t check the versions of other nodes in network! 😱\nList of nodes currently unavailable!'
