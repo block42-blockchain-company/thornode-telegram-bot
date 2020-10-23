@@ -115,7 +115,7 @@ monitored by default.
 #### Other nodes - Binance, Bitcoin, Ethereum supported
 **If you don't have any additional nodes to monitor, just don't set these variables.**
 
-If you enter a multiple node IPs for one network make sure to separate the IDs with comma (`,`).
+If you enter multiple node IPs for one network make sure to separate the IDs with comma (`,`).
 Set it to `localhost` if the Node runs on the same machine as the Telegram Bot.
 ##### Binance
 ```

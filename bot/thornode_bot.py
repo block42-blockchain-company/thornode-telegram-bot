@@ -2,7 +2,7 @@ import atexit
 import re
 import time
 
-from telegram.error import BadRequest, Unauthorized
+from telegram.error import BadRequest, Unauthorized, InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters)
 from telegram.ext.dispatcher import run_async
@@ -145,15 +145,15 @@ def start(update, context):
         context.user_data['nodes'] = {}
 
     text = 'Heil ok sæll! I am your THORNode Bot running on ' + NETWORK_TYPE + '. 🤖\n\n' \
-           'I will notify you about changes of your THORNode\'s\n' \
-           '- *Status*\n' \
-           '- *Bond*\n' \
-           '- *Slash Points*\n' \
-           '- if your *Block Height* gets stuck\n' \
-           '- if your *Midgard API* gets unhealthy\n\n' \
-           'You will get a notification\n' \
-           '- once any node *upgrades its version*\n' \
-           '- after *successful churning*\n\n'
+                                                                               'I will notify you about changes of your THORNode\'s\n' \
+                                                                               '- *Status*\n' \
+                                                                               '- *Bond*\n' \
+                                                                               '- *Slash Points*\n' \
+                                                                               '- if your *Block Height* gets stuck\n' \
+                                                                               '- if your *Midgard API* gets unhealthy\n\n' \
+                                                                               'You will get a notification\n' \
+                                                                               '- once any node *upgrades its version*\n' \
+                                                                               '- after *successful churning*\n\n'
     if BINANCE_NODE_IPS:
         text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n\n'
     text += 'Moreover, in the Admin Area you can\n' \
@@ -641,9 +641,15 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
-    bot = Updater(TELEGRAM_BOT_TOKEN,
-                  persistence=PicklePersistence(filename=session_data_path),
-                  use_context=True)
+    try:
+        bot = Updater(TELEGRAM_BOT_TOKEN,
+                      persistence=PicklePersistence(filename=session_data_path),
+                      use_context=True)
+    except InvalidToken:
+        logger.error("Invalid telegram token. Please make sure to set TELEGRAM_BOT_TOKEN environmental variable with"
+                     " correct Telegram bot token. Check project docs for more details.", exc_info=True)
+        raise
+
     dispatcher = bot.dispatcher
 
     setup_existing_users(dispatcher=dispatcher)

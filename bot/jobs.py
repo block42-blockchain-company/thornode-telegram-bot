@@ -71,18 +71,16 @@ def check_syncing(node: Node, context) -> [str, None]:
     try:
         is_synced = node.is_fully_synced()
     except UnauthorizedException:
-        return f"😱 Your {node.network_name} node ({node.node_ip}) returns 401 - Unauthorized! 😱\n" \
+        return f"😱 Your {node.to_string()} returns 401 - Unauthorized! 😱\n" \
                f" Please make sure the credentials you set are correct!"
 
     was_synced = context.bot_data.setdefault(node.node_id, {}).get('syncing', True)
 
     if is_synced != was_synced:
         if is_synced:
-            message = f"Your {node.network_name} node is fully synced again!👌\n" \
-                      f"IP: {node.node_ip}"
+            message = f"Your {node.to_string()} is fully synced again!👌\n"
         else:
-            message = f"Your {node.network_name} node is syncing with the network... 🚧\n" \
-                      f"IP: {node.node_ip}"
+            message = f"Your {node.to_string()} node is syncing with the network... 🚧\n"
 
         context.bot_data[node.node_id]['syncing'] = is_synced
         return message
@@ -94,7 +92,7 @@ def check_health(node: Node, context) -> [str, None]:
     try:
         is_node_currently_healthy = node.is_healthy()
     except UnauthorizedException:
-        return f"😱 Your {node.network_name} node ({node.node_ip}) returns 401 - Unauthorized! 😱\n" \
+        return f"😱 Your {node.to_string()} returns 401 - Unauthorized! 😱\n" \
                f" Please make sure the credentials you set are correct!"
     except Exception as e:
         logger.error(e)
@@ -106,12 +104,10 @@ def check_health(node: Node, context) -> [str, None]:
         context.bot_data[node.node_id]['health'] = is_node_currently_healthy
 
         if is_node_currently_healthy:
-            text = f'{node.network_name} Node is healthy again! 👌\n' \
-                   f'IP: {node.node_ip}\n'
+            text = f'{node.to_string()} is healthy again! 👌\n'
         else:
-            text = f'{node.network_name} Node is not healthy anymore! 💀 \n' \
-                   f'IP: {node.node_ip}\n' \
-                   f'Please check your {node.network_name} immediately'
+            text = f'{node.to_string()} is not healthy anymore! 💀 \n' \
+                   f'Please check your node immediately'
 
         return text
     else:
@@ -122,7 +118,7 @@ def check_block_height_increase(context, node: Node) -> [str, None]:
     try:
         current_block_height = node.get_block_height()
     except UnauthorizedException:
-        return f"😱 Your {node.network_name} node ({node.node_ip}) returns 401 - Unauthorized! 😱\n" \
+        return f"😱 Your {node.to_string()} returns 401 - Unauthorized! 😱\n" \
                f" Please make sure the credentials you set are correct!"
     except Exception as e:
         logger.error(e)
@@ -141,11 +137,13 @@ def check_block_height_increase(context, node: Node) -> [str, None]:
     if current_block_height <= last_block_height:
         node_data['block_height_stuck_count'] = node_data.get('block_height_stuck_count', 0) + 1
     elif node_data.get('block_height_stuck_count', 0) > 0:
-        message = f"Block height is increasing again! 👌\n"
+        message = f"Block height is increasing again! 👌\n" \
+                  f"{node.to_string()}"
         node_data['block_height_stuck_count'] = -1
 
     if node_data.get('block_height_stuck_count', 0) == 1:
-        message = 'Block height is not increasing anymore! 💀\n'
+        message = 'Block height is not increasing anymore! 💀\n' \
+                  f"{node.to_string()}"
 
     node_data['block_height'] = current_block_height
 
@@ -275,7 +273,7 @@ def check_thorchain_block_height(context, node_address):
     else:
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in node_data and node_data[
-                'block_height_stuck_count'] > 0:
+            'block_height_stuck_count'] > 0:
             text = f"Block height is increasing again! 👌\n" + \
                    f"IP: {node_data['ip_address']}\n" + \
                    f"THORNode: {node_data['alias']}\n" + \
@@ -286,7 +284,7 @@ def check_thorchain_block_height(context, node_address):
                                        text=text)
             node_data['block_height_stuck_count'] = -1
         else:
-            node_data['block_height_stuck_count'] = 0
+            node_data['block_height_stuck_cołunt'] = 0
 
     # Set current block height
     node_data['block_height'] = block_height
@@ -439,7 +437,7 @@ def check_churning(context):
         remote_status = validator['status']
         local_status = local_node_statuses[
             validator['node_address']] if validator[
-                'node_address'] in local_node_statuses else "unknown"
+                                              'node_address'] in local_node_statuses else "unknown"
         if remote_status != local_status:
             if 'active' == remote_status:
                 churned_in.append({
@@ -468,11 +466,12 @@ def check_churning(context):
             text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n\n" \
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(int(get_network_security(network) * 100)) + " %*\n\n" \
-                    "↩️ Bond ROI: *" + '{:.2f}'.format(float(network['bondingROI']) * 100) + " %* APY\n\n" \
-                    "↩️ Stake ROI: *" + '{:.2f}'.format(float(network['stakingROI']) * 100) + " %* APY"
+                                                                                                              "↩️ Bond ROI: *" + '{:.2f}'.format(
+                float(network['bondingROI']) * 100) + " %* APY\n\n" \
+                                                      "↩️ Stake ROI: *" + '{:.2f}'.format(
+                float(network['stakingROI']) * 100) + " %* APY"
         except Exception as e:
             logger.exception(e)
-            text += NETWORK_ERROR_MSG
 
         try_message_to_all_users(context, text=text)
 
@@ -488,7 +487,6 @@ def check_solvency(context):
         yggdrasil_solvency = yggdrasil_check()
     except Exception as e:
         logger.exception(e)
-        try_message_to_all_users(context, text=NETWORK_ERROR_MSG)
         return
 
     if 'is_solvent' not in context.bot_data:

@@ -28,6 +28,10 @@ class Node(abc.ABC):
     def get_block_height(self):
         pass
 
+    def to_string(self):
+        return f"{self.network_name} node ({self.node_ip})"
+
+
 
 class BitcoinNode(Node):
     max_time_for_block_height_increase_in_seconds = 60 * 60  # 1 hour
@@ -40,7 +44,7 @@ class BitcoinNode(Node):
     def is_fully_synced(self) -> bool:
         node_block_count = self.get_block_height()
         public_block_count = requests.get(
-            "https://blockchain.info/q/getblockcount").json()  # todo: use 2? and add to config
+            "https://blockchain.info/q/getblockcount").json()
 
         difference = abs(public_block_count - node_block_count)
 
@@ -104,12 +108,12 @@ class BinanceNode(Node):
         super().__init__(node_ip, "Binance")
 
     def is_fully_synced(self) -> bool:
-        # Not implemented for Binance
+        # We didn't implement it for Binance yet
         return True
 
     def get_block_height(self):
-        # Not implemented for Binance
-        pass
+        # We didn't implement it for Binance yet
+        raise NotImplementedError()
 
     def is_healthy(self) -> bool:
         return is_binance_node_healthy(self.node_ip)

@@ -9,7 +9,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
-TELEGRAM_BOT_TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
 NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
 NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
@@ -43,7 +43,6 @@ if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_I
                    f"BITCOIN_NODE_USERNAMES array length: ({len(BITCOIN_NODE_USERNAMES)})\n"
                    f"BITCOIN_NODE_PASSWORDS array length: ({len(BITCOIN_NODE_PASSWORDS)})\n")
     BITCOIN_NODE_IPS.clear()
-
 
 ADMIN_USER_IDS = [
     int(admin_id) for admin_id in os.environ['ADMIN_USER_IDS'].split(",")
