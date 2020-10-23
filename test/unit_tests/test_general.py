@@ -15,3 +15,4 @@ class UnitTests(unittest.TestCase):
         self.assertEqual(format_to_days_and_hours(timedelta(days=1)), '1 day')
         self.assertEqual(format_to_days_and_hours(timedelta(days=69)), '69 days')
         self.assertEqual(format_to_days_and_hours(timedelta(days=1 + 12 / 24)), '1 day 12 hours')
+        self.assertEqual(format_to_days_and_hours(timedelta(days=1 + 1 / 24)), '1 day 1 hour')
