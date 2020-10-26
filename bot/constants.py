@@ -12,8 +12,8 @@ DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
 NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
-NETWORK_TYPE = os.environ['NETWORK_TYPE'] \
-    if 'NETWORK_TYPE' in os.environ and os.environ['NETWORK_TYPE'] in NETWORK_TYPES and not DEBUG else 'TESTNET'
+NETWORK_TYPE = os.getenv("NETWORK_TYPE").upper() \
+    if os.getenv("NETWORK_TYPE", "notFound").upper() in NETWORK_TYPES and not DEBUG else 'TESTNET'
 
 # Set BINANCE_NODE_IP depending on mode (if None, no Binance jobs are not executed)
 if DEBUG:
@@ -44,12 +44,10 @@ if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_I
                    f"BITCOIN_NODE_PASSWORDS array length: ({len(BITCOIN_NODE_PASSWORDS)})\n")
     BITCOIN_NODE_IPS.clear()
 
-ADMIN_USER_IDS = [
-    int(admin_id) for admin_id in os.environ['ADMIN_USER_IDS'].split(",")
-] if 'ADMIN_USER_IDS' in os.environ else []
-DOCKER_CURL_CMD = "curl --max-time 30 --no-buffer -s --unix-socket /var/run/docker.sock"
+ADMIN_USER_IDS = 'ALL' if os.getenv("ADMIN_USER_IDS", "notFound").upper() == 'ALL' \
+    else [int(admin_id) for admin_id in os.getenv("ADMIN_USER_IDS", []).split(",")]
 
-# By how much we multiply the notifiction timeout in case of continous Thornode attribute changes
+# By how much we multiply the notification timeout in case of continuous Thornode attribute changes
 NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
 # Base notification timeout in seconds
 INITIAL_NOTIFICATION_TIMEOUT = 15

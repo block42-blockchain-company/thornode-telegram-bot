@@ -25,18 +25,21 @@ def setup_existing_users(dispatcher):
     """
     logger.info("Setting up the user's data.")
 
-    bot_blocked_by_ids = []
+    blocked_ids = []
 
     for chat_id in dispatcher.user_data.keys():
+        if ADMIN_USER_IDS != 'ALL' and chat_id not in ADMIN_USER_IDS:
+            blocked_ids.append(chat_id)
+            continue
+
         restart_message = 'Heil ok sæll!\n' \
                           'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
                           'To make sure you have the latest features, please start ' \
                           'a fresh chat with me by typing /start.'
-
         try:
             dispatcher.bot.send_message(chat_id, restart_message)
         except Unauthorized:
-            bot_blocked_by_ids.append(chat_id)
+            blocked_ids.append(chat_id)
             continue
         except TelegramError as e:
             logger.exception(f'USER {str(chat_id)}\n Error: {str(e)}',
@@ -53,9 +56,9 @@ def setup_existing_users(dispatcher):
                 'user_data': dispatcher.user_data[chat_id]
             })
 
-    for chat_id in bot_blocked_by_ids:
-        logger.warning("Telegram user " + str(chat_id) +
-                       " blocked me; removing him from the user list")
+    for chat_id in blocked_ids:
+        logger.warning(f"Telegram user {str(chat_id)} blocked me or is "
+                       f"not Admin anymore; removing him from the user list")
 
         del dispatcher.user_data[chat_id]
         del dispatcher.chat_data[chat_id]
@@ -133,6 +136,9 @@ def start(update, context):
     Send start message and display action buttons.
     """
 
+    if not is_admin(update, context):
+        return
+
     # Start job for user
     if 'job_started' not in context.user_data:
         context.job_queue.run_repeating(user_specific_checks,
@@ -153,14 +159,15 @@ def start(update, context):
                                                                                '- if your *Midgard API* gets unhealthy\n\n' \
                                                                                'You will get a notification\n' \
                                                                                '- once any node *upgrades its version*\n' \
-                                                                               '- after *successful churning*\n\n'
-    if BINANCE_NODE_IPS:
-        text += 'Furthermore I notify you about changes of your *Binance Node\'s health*.\n\n'
-    text += 'Moreover, in the Admin Area you can\n' \
-            '- *restart any docker container* that runs alongside my container\n\n' \
-            'In the Network section you can display\n' \
+                                                                               '- after *successful churning*\n' \
+                                                                               '- if thorchain becomes *insolvent*\n\n'
+
+    text += 'If you specified Node IPs, I notify you about changes of your *Binance, ' \
+            'Ethereum and Bitcoin Node\'s health*.\n\n'
+    text += 'Moreover, in the Network section you can display\n' \
             '- the *status of the whole network*\n' \
-            '- the correct *vault addresses*.'
+            '- the correct *vault addresses*.\n' \
+            '- the current *solvency* status.\n'
 
     # Send message
     try_message_with_home_menu(context=context,
@@ -186,6 +193,9 @@ def dispatch_query(update, context):
     query = update.callback_query
     query.answer()
     data = query.data
+
+    if not is_admin(update, context):
+        return
 
     context.user_data['expected'] = None
     edit = True
@@ -219,12 +229,6 @@ def dispatch_query(update, context):
         call = delete_thornode
     elif data == 'change_alias':
         call = change_alias
-    elif data == 'admin_menu':
-        call = admin_menu
-    elif re.match('container', data):
-        call = confirm_container_restart
-    elif re.match('restart_container', data):
-        call = restart_container
     else:
         edit = False
 
@@ -317,6 +321,10 @@ def plain_input(update, context):
     """
     Handle if the users sends a message
     """
+
+    if not is_admin(update, context):
+        return
+
     message = update.message.text
     expected = context.user_data[
         'expected'] if 'expected' in context.user_data else None
@@ -326,8 +334,6 @@ def plain_input(update, context):
         return show_network_menu(update, context)
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
-    elif message == '🔑 ADMIN AREA':
-        return admin_menu(update, context)
     elif expected == 'add_node':
         context.user_data['expected'] = None
         return handle_add_node(update, context)
@@ -486,66 +492,6 @@ def admin_menu(update, context):
         return
 
     show_admin_menu_new_msg(context, update.effective_chat.id)
-
-
-def confirm_container_restart(update, context):
-    """
-    "Are you sure?" - "YES" | "NO"
-    """
-
-    query = update.callback_query
-    container_name = query.data.split("-#")[1]
-
-    keyboard = [[
-        InlineKeyboardButton('YES ✅',
-                             callback_data='restart_container-#' +
-                                           container_name),
-        InlineKeyboardButton('NO ❌', callback_data='admin_menu')
-    ]]
-    text = '⚠️ Do you really want to restart the container *' + container_name + '*? ⚠️\n'
-
-    return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
-
-
-def restart_container(update, context):
-    """
-    Restart the specified docker container
-    """
-
-    query = update.callback_query
-    container_name = query.data.split("-#")[1]
-
-    try:
-        containers = get_running_docker_container()
-    except ProcessLookupError:
-        query.edit_message_text("Error while getting running docker container")
-        show_admin_menu_new_msg(context, chat_id=update.effective_chat.id)
-        return
-
-    container_id = ''
-    for container in containers:
-        for name in container['Names']:
-            if name == "/" + container_name:
-                container_id = container['Id']
-                break
-
-    bash_command = DOCKER_CURL_CMD + ' -f -v -XPOST http://localhost/containers/' + container_id + '/restart'
-    process = subprocess.Popen(bash_command.split(),
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    output, error = process.communicate()
-
-    if process.returncode:
-        print("Restart docker container error: ", error)
-        print("Return Code: ", process.returncode)
-        query.edit_message_text("Error while restarting the docker container")
-        show_admin_menu_new_msg(context, chat_id=update.effective_chat.id)
-        return
-
-    query.edit_message_text('Container\n*' + container_name +
-                            '*\nsuccessfully restarted!',
-                            parse_mode='markdown')
-    show_admin_menu_new_msg(context=context, chat_id=update.effective_chat.id)
 
 
 def show_all_thorchain_nodes(update, context):

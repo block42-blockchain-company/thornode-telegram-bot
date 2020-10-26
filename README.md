@@ -25,7 +25,7 @@ Leave it empty or remove it to not monitor any Binance Node.
 - `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Ethereum Node.
 - `ADMIN_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
-Admin Area (not working on K8s at the moment).
+Bot. Set it to `ALL` to make it available to everybody
 - `BITCOIN_NODE_IPS` to a list of Bitcoin Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Bitcoin Node.
 - `BITCOIN_NODE_USERNAMES` to corresponding usernames for each Bitcoin node ip to  
@@ -135,10 +135,10 @@ export BITCOIN_NODE_USERNAMES=username_to_ip_1,username_to_ip_2
 export BITCOIN_NODE_PASSWORDS=password_to_ip_1,password_to_ip_2
 ```
 ---
-Next set Telegram User IDs that are permissioned to access the Admin Area in the `ADMIN_USER_IDS` environment variable.
-Leave the default dummy values if you do not intend to use the Admin Area.
+Next set Telegram User IDs that are permissioned to access the Bot in the `ADMIN_USER_IDS` environment variable.
+Set the variable to `ADMIN_USER_IDS=ALL`, to make the Bot accessible for anybody.
 
-To find out your Telegram, open your Telegram Client, and search for the Telegram Bot `@userinfobot`.
+To find out your Telegram ID, open your Telegram Client, and search for the Telegram Bot `@userinfobot`.
 Ensure that this is a Bot and not a Channel and has exactly the handle `@userinfobot`, as there
 are a lot of channels and bots with similar names.
 Start this Bot and it returns you your User ID that you need to export in `ADMIN_USER_IDS`.
@@ -316,7 +316,7 @@ docker volume create thornode-bot-volume
 Finally, run the docker container:
 
 ```
-docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IPS=XXX -v /var/run/docker.sock:/var/run/docker.sock --mount source=thornode-bot-volume,target=/storage thornode-bot
+docker run --env TELEGRAM_BOT_TOKEN=XXX --env BINANCE_NODE_IPS=XXX --mount source=thornode-bot-volume,target=/storage thornode-bot
 ```
 
 Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token. 
@@ -326,9 +326,6 @@ the former is the default).
 
 If you have a node that you want to monitor, set additional node variables (see [Set environment variables](#set-environment-variables) section). 
 Set it as `BINANCE_NODE_IPS` in above example.
-
-The `-v` argument passes the dockersocket to the container so that we can restart docker containers from
-inside the Telegram Bot.
 
 Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. 
 This is the directory where your bot saves and retrieves the `session.data` file.
@@ -419,8 +416,6 @@ in the `TELEGRAM_BOT_ID` environment variable (e.g. if your bot is named
 You also need to have set the `TELEGRAM_BOT_TOKEN` environment variable with your 
 telegram bot token, set `ADMIN_USER_IDS` with permissioned IDs and
 set `DEBUG=True` as explained in previous sections.
-If you want to test the restarting of docker containers, 
-do not forget to start at least one container on your system.
 
 Keep in mind that the test always deletes the `session.data` file inside `storage/`
 in order to have fresh starts for every integration test. If you wish to keep your

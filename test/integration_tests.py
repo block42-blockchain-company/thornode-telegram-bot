@@ -75,9 +75,8 @@ class ThornodeBot(unittest.TestCase):
 
             response = next(self.telegram.iter_history(self.BOT_ID))
             assert response.reply_markup.keyboard[0][0] == "📡 MY NODES", "📡 MY NODES not visible after /start"
-            assert response.reply_markup.keyboard[0][1] == "🌎 NETWORK", "🌎 NETWORK not visible after /start"
             assert response.reply_markup.keyboard[1][0] == "👀 SHOW ALL", "👀 SHOW ALL not visible after /start"
-            assert response.reply_markup.keyboard[1][1] == "🔑 ADMIN AREA", "🔑 ADMIN AREA not visible after /start"
+            assert response.reply_markup.keyboard[1][1] == "🌎 NETWORK", "🌎 NETWORK not visible after /start"
             print("/start ✅")
             print("------------------------")
 
@@ -219,38 +218,6 @@ class ThornodeBot(unittest.TestCase):
             print("👀 SHOW ALL ✅")
             print("------------------------")
 
-    def test_admin_area(self):
-        with self.telegram:
-            self.telegram.send_message(self.BOT_ID, "/start")
-            time.sleep(3)
-
-            self.telegram.send_message(self.BOT_ID, "🔑 ADMIN AREA")
-            time.sleep(3)
-
-            response = next(self.telegram.iter_history(self.BOT_ID))
-
-            assert response.text.find("You're in the Admin Area - proceed with care") != -1, \
-                "🔑 ADMIN AREA Message not visible after clicking on 🔑 ADMIN AREA"
-
-            print("🔑 ADMIN AREA ✅")
-            print("------------------------")
-
-    def test_restart_container(self):
-        if self.are_container_running():
-            self.assert_restart_container(confirm=False)
-            self.assert_restart_container(confirm=True)
-
-    def test_back_button_admin_area(self):
-        with self.telegram:
-            self.telegram.send_message(self.BOT_ID, "/start")
-            time.sleep(3)
-
-            self.telegram.send_message(self.BOT_ID, "🔑 ADMIN AREA")
-            time.sleep(3)
-
-            print("Back button in 🔑 ADMIN AREA ✅")
-            print("------------------------")
-
     def test_block_height_notification(self):
         self.add_valid_address()
         with self.telegram:
@@ -362,22 +329,6 @@ class ThornodeBot(unittest.TestCase):
                      expected_response2="Got it! 👌")
         return valid_address
 
-    def are_container_running(self):
-        with self.telegram:
-            self.telegram.send_message(self.BOT_ID, "/start")
-            time.sleep(3)
-            self.telegram.send_message(self.BOT_ID, "🔑 ADMIN AREA")
-            time.sleep(3)
-
-            response = next(self.telegram.iter_history(self.BOT_ID))
-
-            if response.reply_markup.inline_keyboard[0][0]:
-                print("Container are running!")
-                return True
-            else:
-                print("No container are running!")
-                return False
-
     def assert_health_notification(self, chain, healthy):
         with self.telegram:
             if chain == THORCHAIN:
@@ -460,41 +411,6 @@ class ThornodeBot(unittest.TestCase):
                     "NO button on ➕ ADD ALL confirmation does not go back to 📡 MY NODES menu"
 
             print("➕ ADD ALL with confirmation=" + str(confirm) + " ✅")
-            print("------------------------")
-
-    def assert_restart_container(self, confirm):
-        with self.telegram:
-            self.telegram.send_message(self.BOT_ID, "/start")
-            time.sleep(3)
-            self.telegram.send_message(self.BOT_ID, "🔑 ADMIN AREA")
-            time.sleep(3)
-            setup_response = next(self.telegram.iter_history(self.BOT_ID))
-
-            self.click_button(setup_response.reply_markup.inline_keyboard[0][0].text)
-
-            first_response = next(self.telegram.iter_history(self.BOT_ID))
-
-            assert first_response.text.find('Do you really want to restart the container') != -1, \
-                "Not correct response after clicking on container button!"
-
-            if confirm:
-                first_response.click("YES ✅")
-                time.sleep(3)
-                second_response_1 = next(itertools.islice(self.telegram.iter_history(self.BOT_ID), 1, None))
-                second_response_2 = next(itertools.islice(self.telegram.iter_history(self.BOT_ID), 0, None))
-                assert second_response_1.text.find("successfully restarted!") != -1, \
-                    "YES button on restart confirmation does not yield restart statement"
-                assert second_response_2.text.find("You're in the Admin Area - proceed with care") != -1, \
-                    "YES button on restart confirmation does not go back to 🔑 ADMIN AREA"
-                assert second_response_2.reply_markup.inline_keyboard[0][0].text.find("second") != -1, \
-                    "YES button on restart confirmation does not restart container"
-            else:
-                first_response.click("NO ❌")
-                time.sleep(3)
-                second_response = next(self.telegram.iter_history(self.BOT_ID))
-                assert second_response.text.find("You're in the Admin Area - proceed with care") != -1, \
-                    "NO button on restart confirmation does not go back to 🔑 ADMIN AREA"
-            print("Restart container with confirmation=" + str(confirm) + " ✅")
             print("------------------------")
 
     def assert_change_alias(self, alias, expected_response1, expected_response2):

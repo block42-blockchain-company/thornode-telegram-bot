@@ -31,13 +31,12 @@ def get_home_menu_buttons():
     """
 
     keyboard = [[
-        KeyboardButton('📡 MY NODES', callback_data='thornode_menu'),
-        KeyboardButton('🌎 NETWORK', callback_data='thornode_menu')
+        KeyboardButton('📡 MY NODES', callback_data='thornode_menu')
     ],
                 [
                     KeyboardButton('👀 SHOW ALL',
                                    callback_data='show_all_thorchain_nodes'),
-                    KeyboardButton('🔑 ADMIN AREA', callback_data='admin_menu')
+                    KeyboardButton('🌎 NETWORK', callback_data='thornode_menu')
                 ]]
 
     return keyboard
@@ -151,55 +150,6 @@ def show_detail_menu(update, context):
     query.edit_message_text(text,
                             parse_mode='markdown',
                             reply_markup=InlineKeyboardMarkup(keyboard))
-
-
-def show_admin_menu_new_msg(context, chat_id):
-    """
-    Send a new message with the admin area
-    """
-
-    try:
-        keyboard = get_admin_menu_buttons()
-    except ProcessLookupError:
-        text = "❌ Error while getting running docker container! ❌"
-        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
-        return
-
-    # Send message
-    text = "⚠️ You're in the Admin Area - proceed with care ⚠️\n" \
-           "Below is a list of docker containers running on your system.\n" \
-           "Click on any container to restart it!"
-
-    try_message(context=context,
-                chat_id=chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(keyboard))
-
-
-def get_admin_menu_buttons():
-    """
-    Return keyboard buttons for the admin menu
-    """
-
-    try:
-        containers = get_running_docker_container()
-    except ProcessLookupError:
-        raise
-
-    # build keyboard with one button for every container
-    keyboard = [[]]
-    for container in containers:
-        for name in container['Names']:
-            container_name = name.replace('/', '')
-            status = container['Status']
-            text = "🐳 " + container_name + " - " + status
-            keyboard.append([
-                InlineKeyboardButton(text,
-                                     callback_data='container-#' +
-                                     container_name)
-            ])
-
-    return keyboard
 
 
 def show_text_input_message(update, text):
@@ -421,9 +371,9 @@ def asgard_solvency_check() -> dict:
         if chain['status'] == 'active':
             for coin in chain['coins']:
                 asset = coin['asset'].split('.')
-                actual_amount_formatted = (asgard_actual[asset[0]][asset[1]].replace(".", "")).strip("0")
-                expected_amount_formatted = (coin['amount'].replace(".", "")).strip("0")
-                if actual_amount_formatted != expected_amount_formatted:
+                actual_amount_formatted = (asgard_actual.get(asset[0]).setdefault(asset[1], "0").replace(".", ""))
+                expected_amount_formatted = (coin['amount'].replace(".", ""))
+                if int(actual_amount_formatted) < int(expected_amount_formatted):
                     solvency_report['is_solvent'] = False
                     if 'insolvent_coins' not in solvency_report:
                         solvency_report['insolvent_coins'] = {}
@@ -466,10 +416,10 @@ def yggdrasil_check() -> dict:
         if vault['status'] == 'active' and vault['vault']['status'] == 'active':
             for coin in vault['vault']['coins']:
                 asset = coin['asset'].split('.')
-                actual_amount_formatted = (yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]]
-                                           .replace(".", "")).strip("0")
-                expected_amount_formatted = (coin['amount'].replace(".", "")).strip("0")
-                if actual_amount_formatted != expected_amount_formatted:
+                actual_amount = (yggdrasil_actual[vault['vault']['pub_key']].get(asset[0]).setdefault(asset[1], "0")
+                                           .replace(".", ""))
+                expected_amount = (coin['amount'].replace(".", ""))
+                if int(actual_amount) < int(expected_amount):
                     solvency_report['is_solvent'] = False
                     if 'insolvent_coins' not in solvency_report:
                         solvency_report['insolvent_coins'] = {}
@@ -526,6 +476,16 @@ def error(update, context):
     """
 
     logger.warning('Update "%s" caused error: %s', update, context.error)
+
+
+def is_admin(update, context):
+    if ADMIN_USER_IDS == 'ALL':
+        return True
+    elif update.effective_user.id not in ADMIN_USER_IDS:
+        try_message(context, update.effective_user.id, f"❌ You are not an Admin! ❌\n"
+                                                       f"I'm *THORNode Bot*, I'm a loyal bot.")
+        return False
+    return True
 
 
 async def for_each_async(elements: [], function: Callable[...,
