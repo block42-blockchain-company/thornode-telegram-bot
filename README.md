@@ -24,8 +24,8 @@ For *docker-compose* open `variables-chaosnet.env` and/or
 Leave it empty or remove it to not monitor any Binance Node.
 - `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Ethereum Node.
-- `ADMIN_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
-Bot. Set it to `ALL` to make it available to everybody
+- `ALLOWED_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
+Bot. Set it to `ALL` to make it available to everybody.
 - `BITCOIN_NODE_IPS` to a list of Bitcoin Node IPs you want to monitor (or `localhost`).
 Leave it empty or remove it to not monitor any Bitcoin Node.
 - `BITCOIN_NODE_USERNAMES` to corresponding usernames for each Bitcoin node ip to  
@@ -135,17 +135,17 @@ export BITCOIN_NODE_USERNAMES=username_to_ip_1,username_to_ip_2
 export BITCOIN_NODE_PASSWORDS=password_to_ip_1,password_to_ip_2
 ```
 ---
-Next set Telegram User IDs that are permissioned to access the Bot in the `ADMIN_USER_IDS` environment variable.
-Set the variable to `ADMIN_USER_IDS=ALL`, to make the Bot accessible for anybody.
+Next set Telegram User IDs that are permissioned to access the Bot in the `ALLOWED_USER_IDS` environment variable.
+Set the variable to `ALLOWED_USER_IDS=ALL`, to make the Bot accessible for anybody.
 
 To find out your Telegram ID, open your Telegram Client, and search for the Telegram Bot `@userinfobot`.
 Ensure that this is a Bot and not a Channel and has exactly the handle `@userinfobot`, as there
 are a lot of channels and bots with similar names.
-Start this Bot and it returns you your User ID that you need to export in `ADMIN_USER_IDS`.
+Start this Bot and it returns you your User ID that you need to export in `ALLOWED_USER_IDS`.
 
 If you enter multiple User IDs, make sure to separate the IDs with `,` i.e. a comma.
 ```
-export ADMIN_USER_IDS=12345,56789,42424
+export ALLOWED_USER_IDS=12345,56789,42424
 ```
 ---
 Finally, if you want test the Thornode Telegram Bot with data from your local machine, you
@@ -339,7 +339,7 @@ The explained steps in the Docker Standalone section are conveniently bundled in
 `docker-compose-chaosnet.yaml` and `docker-compose-testnet.yaml`.
 
 First, as before, you need to set the right values in the `variables-chaosnet.env` and/or
-`variables-testnet.env` files for `TELEGRAM_BOT_TOKEN`, `ADMIN_USER_IDS` and additional nodes.
+`variables-testnet.env` files for `TELEGRAM_BOT_TOKEN`, `ALLOWED_USER_IDS` and additional nodes.
 
 If you don't want to spin up the official docker image from our dockerhub, open any of the 
 `docker-compose-*.yaml` and comment out the line `image: "block42blockchaincompany/thornode_bot:latest"`
@@ -414,7 +414,7 @@ in the `TELEGRAM_BOT_ID` environment variable (e.g. if your bot is named
 `@thornode_test_bot`, save `thornode_test_bot` in `TELEGRAM_BOT_ID`).
 
 You also need to have set the `TELEGRAM_BOT_TOKEN` environment variable with your 
-telegram bot token, set `ADMIN_USER_IDS` with permissioned IDs and
+telegram bot token, set `ALLOWED_USER_IDS` with permissioned IDs and
 set `DEBUG=True` as explained in previous sections.
 
 Keep in mind that the test always deletes the `session.data` file inside `storage/`

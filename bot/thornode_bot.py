@@ -28,7 +28,7 @@ def setup_existing_users(dispatcher):
     blocked_ids = []
 
     for chat_id in dispatcher.user_data.keys():
-        if ADMIN_USER_IDS != 'ALL' and chat_id not in ADMIN_USER_IDS:
+        if ALLOWED_USER_IDS != 'ALL' and chat_id not in ALLOWED_USER_IDS:
             blocked_ids.append(chat_id)
             continue
 
@@ -477,21 +477,6 @@ def delete_all_thornodes(update, context):
     query.edit_message_text(text)
 
     show_thornode_menu_new_msg(update, context)
-
-
-def admin_menu(update, context):
-    """
-    Display admin area buttons
-    """
-
-    if update.effective_user.id not in ADMIN_USER_IDS:
-        text = "❌ You are not an Admin! ❌"
-        try_message_with_home_menu(context,
-                                   chat_id=update.effective_chat.id,
-                                   text=text)
-        return
-
-    show_admin_menu_new_msg(context, update.effective_chat.id)
 
 
 def show_all_thorchain_nodes(update, context):

@@ -44,8 +44,8 @@ if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_I
                    f"BITCOIN_NODE_PASSWORDS array length: ({len(BITCOIN_NODE_PASSWORDS)})\n")
     BITCOIN_NODE_IPS.clear()
 
-ADMIN_USER_IDS = 'ALL' if os.getenv("ADMIN_USER_IDS", "notFound").upper() == 'ALL' \
-    else [int(admin_id) for admin_id in os.getenv("ADMIN_USER_IDS", []).split(",")]
+ALLOWED_USER_IDS = 'ALL' if os.getenv("ALLOWED_USER_IDS", "notFound").upper() == 'ALL' \
+    else [int(admin_id) for admin_id in os.getenv("ALLOWED_USER_IDS", []).split(",")]
 
 # By how much we multiply the notification timeout in case of continuous Thornode attribute changes
 NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
@@ -72,3 +72,5 @@ storage_path = os.sep.join(
 session_data_path = os.sep.join([storage_path, 'session.data'])
 
 CONNECTION_TIMEOUT = 10
+
+REQUEST_POSTFIX = '?height=0'  # currently needed to get correct results due to a bug in thornodes

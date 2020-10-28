@@ -234,26 +234,6 @@ def show_confirmation_menu(update, text, keyboard):
                             reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def get_running_docker_container():
-    """
-    Return Json of all running container on the host machine
-    """
-
-    bash_command = DOCKER_CURL_CMD + " http://localhost/containers/json"
-    process = subprocess.Popen(bash_command.split(),
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    output, error = process.communicate()
-    rc = process.returncode
-
-    if error or rc:
-        print(error)
-        raise ProcessLookupError
-
-    container_string = output.decode('utf8')
-    return json.loads(container_string)
-
-
 def get_thornode_object_or_none(address):
     """
     Query nodeaccounts endpoints and return the Thornode object
@@ -371,7 +351,8 @@ def asgard_solvency_check() -> dict:
         if chain['status'] == 'active':
             for coin in chain['coins']:
                 asset = coin['asset'].split('.')
-                actual_amount_formatted = (asgard_actual.get(asset[0]).setdefault(asset[1], "0").replace(".", ""))
+                actual_amount_formatted = (asgard_actual.get(asset[0]).
+                                           setdefault(asset[1], "0").replace(".", ""))
                 expected_amount_formatted = (coin['amount'].replace(".", ""))
                 if int(actual_amount_formatted) < int(expected_amount_formatted):
                     solvency_report['is_solvent'] = False
@@ -479,9 +460,9 @@ def error(update, context):
 
 
 def is_admin(update, context):
-    if ADMIN_USER_IDS == 'ALL':
+    if ALLOWED_USER_IDS == 'ALL':
         return True
-    elif update.effective_user.id not in ADMIN_USER_IDS:
+    elif update.effective_user.id not in ALLOWED_USER_IDS:
         try_message(context, update.effective_user.id, f"❌ You are not an Admin! ❌\n"
                                                        f"I'm *THORNode Bot*, I'm a loyal bot.")
         return False

@@ -19,6 +19,9 @@ class RpcHttpServerHandler(http.server.SimpleHTTPRequestHandler):
             self.path = 'mock_files' + endpoint
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
+    def log_message(self, format, *args):
+        pass
+
 
 class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
     pool_addresses_counter = 0
@@ -37,6 +40,9 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.path = 'mock_files' + endpoint
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+    def log_message(self, format, *args):
+        pass
 
 
 def main():
