@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get install -y curl
 RUN apt-get install -y python3-pip
 RUN apt-get install -y python3.7
+RUN apt-get install -y python3.7-dev
 RUN python3.7 -m pip install pip
 
 RUN python3.7 -m pip install -r requirements.txt
