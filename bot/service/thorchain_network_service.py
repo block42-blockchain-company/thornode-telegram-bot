@@ -30,7 +30,7 @@ def is_thorchain_catching_up(node_ip=None) -> bool:
 
 def is_midgard_api_healthy(node_ip) -> bool:
     try:
-        get_request_json(url=f"http://{node_ip}:8080/v1/health")
+        get_request_json_thorchain(url_path=":8080/v1/health", node_ip=node_ip)
     except Exception as e:
         logger.exception(e)
         return False
@@ -43,9 +43,7 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
         "TESTNET": ":26657/num_unconfirmed_txs",
         "CHAOSNET": ":27147/num_unconfirmed_txs"
     }[NETWORK_TYPE]
-    url = f"http://{node_ip}{unconfirmed_txs_path}"
-
-    return int(get_request_json(url=url)['result']['total'])
+    return int(get_request_json_thorchain(url_path=unconfirmed_txs_path, node_ip=node_ip)['result']['total'])
 
 
 def get_network_data(node_ip=None):
@@ -114,7 +112,7 @@ def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
         node_ip = 'localhost'
 
     if node_ip:
-        return get_request_json(url=f"http://{node_ip}{url_path}")
+        return get_request_json(url=f"http://{node_ip}{url_path}{REQUEST_POSTFIX}")
 
     seeding_node_url = \
         {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[
@@ -125,7 +123,7 @@ def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
     random.shuffle(available_node_ips)
     for random_node_ip in available_node_ips:
         try:
-            return get_request_json(url=f"http://{random_node_ip}{url_path}")
+            return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
         except Exception:
             continue
     raise Exception("No seed node returned a valid response!")

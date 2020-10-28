@@ -125,7 +125,7 @@ def check_block_height_increase(context, node: Node) -> [str, None]:
         return None
 
     # Stuck count:
-    # 0 == everthings alright
+    # 0 == everything's alright
     # 1 == just got stuck
     # -1 == just got unstuck
     # > 1 == still stuck
@@ -247,8 +247,6 @@ def check_thorchain_block_height(context, node_address):
     Make sure the block height increases
     """
 
-    logger.info("I'm checking thorchain block height...")
-
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
@@ -260,16 +258,16 @@ def check_thorchain_block_height(context, node_address):
 
     # Send message if there were changes or block height just got (un)stuck
     # Stuck count:
-    # 0 == everthings alright
+    # 0 == everything's alright
     # 1 == just got stuck
     # -1 == just got unstuck
     # > 1 == still stuck
 
     # Check if block height got stuck
-    if 'block_height' in node_data and block_height <= node_data['block_height']:
+    if block_height <= node_data.get('block_height', "0"):
 
         # Increase stuck count to know if we already sent a notification
-        node_data['block_height_stuck_count'] += 1
+        node_data['block_height_stuck_count'] = node_data.get('block_height_stuck_count', 0) + 1
     else:
         # Check if we have to send a notification that the Height increases again
         if 'block_height_stuck_count' in node_data and node_data[
@@ -284,13 +282,13 @@ def check_thorchain_block_height(context, node_address):
                                        text=text)
             node_data['block_height_stuck_count'] = -1
         else:
-            node_data['block_height_stuck_cołunt'] = 0
+            node_data['block_height_stuck_count'] = 0
 
     # Set current block height
     node_data['block_height'] = block_height
 
     # If it just got stuck send a message
-    if node_data['block_height_stuck_count'] == 1:
+    if node_data.setdefault('block_height_stuck_count', 0) == 1:
         text = 'Block height is not increasing anymore! 💀' + '\n' + \
                'IP: ' + node_data['ip_address'] + '\n' + \
                'THORNode: ' + node_data['alias'] + '\n' + \
@@ -304,8 +302,6 @@ def check_thorchain_catch_up_status(context, node_address):
     """
     Check if node is some blocks behind with catch up status
     """
-
-    logger.info("I'm checking catch up status...")
 
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
@@ -350,8 +346,6 @@ def check_thorchain_midgard_api(context, node_address):
     Check that Midgard API is ok
     """
 
-    logger.info("I'm checking Midgard health...")
-
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
 
@@ -379,7 +373,6 @@ def check_thorchain_midgard_api(context, node_address):
 
 
 def check_versions_status(context):
-    logger.info("I'm checking version changes...")
     user_data = context.job.context['user_data']
 
     try:
@@ -408,8 +401,6 @@ def check_versions_status(context):
 
 
 def check_churning(context):
-    logger.info("I'm checking if churning occured...")
-
     try:
         validators = get_node_accounts()
     except Exception as e:
@@ -481,7 +472,6 @@ def check_churning(context):
 
 
 def check_solvency(context):
-    logger.info("I'm checking thorchain solvency...")
     try:
         asgard_solvency = asgard_solvency_check()
         yggdrasil_solvency = yggdrasil_check()
