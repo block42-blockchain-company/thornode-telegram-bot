@@ -21,7 +21,8 @@ def general_bot_checks(context):
     """
 
     check_churning(context)
-    check_solvency(context)
+    # TODO: Fix solvency check so it works properly and does not spam
+    # check_solvency(context)
 
     nodes = []
     nodes.extend(BinanceNode.from_ips(BINANCE_NODE_IPS))
