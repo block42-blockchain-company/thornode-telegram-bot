@@ -21,8 +21,7 @@ def general_bot_checks(context):
     """
 
     check_churning(context)
-    # TODO: Fix solvency check so it works properly and does not spam
-    # check_solvency(context)
+    check_solvency(context)
 
     nodes = []
     nodes.extend(BinanceNode.from_ips(BINANCE_NODE_IPS))
@@ -484,14 +483,20 @@ def check_solvency(context):
         context.bot_data['is_solvent'] = True
 
     is_solvent = asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent']
+    insolvency_count = context.bot_data.setdefault("insolvency_count", 0)
 
-    if context.bot_data['is_solvent'] != is_solvent:
-        if is_solvent:
-            context.bot_data['is_solvent'] = True
-            text = 'THORChain is *100% solvent* again! 👌\n'
-            try_message_to_all_users(context, text=text)
-        else:
+    if not is_solvent:
+        insolvency_count += 1
+        if insolvency_count == MISSING_FUNDS_THRESHOLD:
             context.bot_data['is_solvent'] = False
             text = 'THORChain is *missing funds*! 💀\n\n'
             text += get_solvency_message(asgard_solvency, yggdrasil_solvency)
             try_message_to_all_users(context, text=text)
+    else:
+        if insolvency_count >= MISSING_FUNDS_THRESHOLD:
+            context.bot_data['is_solvent'] = True
+            text = 'THORChain is *100% solvent* again! 👌\n'
+            try_message_to_all_users(context, text=text)
+        insolvency_count = 0
+
+    context.bot_data["insolvency_count"] = insolvency_count

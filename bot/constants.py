@@ -24,11 +24,8 @@ else:
                         os.environ['BINANCE_NODE_IPS'].split(",")] \
         if 'BINANCE_NODE_IPS' in os.environ and os.environ['BINANCE_NODE_IPS'] != "" \
         else []
-    if BINANCE_NODE_IPS:
-        BINANCE_DEX_ENDPOINT = f"http://{random.choice(BINANCE_NODE_IPS)}:27146"
-    else:
-        BINANCE_DEX_ENDPOINT = "https://dex.binance.org" if NETWORK_TYPE == 'CHAOSNET' \
-            else "https://testnet-dex-atlantic.binance.org"
+    BINANCE_DEX_ENDPOINT = "https://dex.binance.org" if NETWORK_TYPE == 'CHAOSNET' \
+        else "https://testnet-dex-atlantic.binance.org"
 
 ETHEREUM_NODE_IPS = list(filter(None, os.environ.get('ETHEREUM_NODE_IPS', '').split(",")))
 BITCOIN_NODE_IPS = list(filter(None, os.environ.get('BITCOIN_NODE_IPS', '').split(",")))
@@ -45,7 +42,7 @@ if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_I
     BITCOIN_NODE_IPS.clear()
 
 ALLOWED_USER_IDS = 'ALL' if os.getenv("ALLOWED_USER_IDS", "notFound").upper() == 'ALL' \
-    else [int(admin_id) for admin_id in os.getenv("ALLOWED_USER_IDS", []).split(",")]
+    else [int(allowed_id) for allowed_id in os.getenv("ALLOWED_USER_IDS", []).split(",")]
 
 # By how much we multiply the notification timeout in case of continuous Thornode attribute changes
 NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
@@ -72,5 +69,6 @@ storage_path = os.sep.join(
 session_data_path = os.sep.join([storage_path, 'session.data'])
 
 CONNECTION_TIMEOUT = 10
+MISSING_FUNDS_THRESHOLD = 10  # Number of cycles that thorchain can be insolvent before a message is sent
 
 REQUEST_POSTFIX = '?height=0'  # currently needed to get correct results due to a bug in thornodes
