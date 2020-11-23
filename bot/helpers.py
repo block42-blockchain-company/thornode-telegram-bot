@@ -337,6 +337,7 @@ def asgard_solvency_check() -> dict:
     asgard_actual = defaultdict(lambda: {"json": {}})
     asgard_expected = get_asgard_json()
     pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
+
     for chain_data in pool_addresses['current']:
         chain = chain_data['chain']
         if chain == 'BNB':

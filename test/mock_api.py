@@ -26,15 +26,17 @@ class RpcHttpServerHandler(http.server.SimpleHTTPRequestHandler):
 class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
     pool_addresses_counter = 0
 
+    # Midgard queries had to be with "?height=0" at the end of the endpoint.
+    # That's why we check if our keywords are "in" the whole endpoint query.
     def do_GET(self):
         endpoint = self.path.rstrip('/')
-        if endpoint == '/v1/health':
+        if '/v1/health' in endpoint:
             self.path = 'mock_files/midgard.json'
-        elif endpoint == '/v1/network':
+        elif '/v1/network' in endpoint:
             self.path = 'mock_files/network.json'
-        elif endpoint == '/v1/thorchain/constants':
+        elif '/v1/thorchain/constants' in endpoint:
             self.path = 'mock_files/thorchain_constants.json'
-        elif endpoint == '/v1/thorchain/pool_addresses':
+        elif '/v1/thorchain/pool_addresses' in endpoint:
             MidgardHttpServerHandler.pool_addresses_counter += 1
             self.path = 'mock_files/pool_addresses_' + str(MidgardHttpServerHandler.pool_addresses_counter % 3 + 1) + '.json'
         else:
