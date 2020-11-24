@@ -8,7 +8,7 @@ RPC_SERVER_PORT = 26657
 
 class RpcHttpServerHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        endpoint = self.path.rstrip('/')
+        endpoint = self.path.rstrip('/').split('?')[0]
         if endpoint == '/status':
             self.path = 'mock_files/status.json'
         elif endpoint == '/num_unconfirmed_txs':
