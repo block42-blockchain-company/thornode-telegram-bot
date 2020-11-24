@@ -61,6 +61,7 @@ def get_thornode_menu_buttons(user_data):
     """
 
     keyboard = [[]]
+    address_count = 0
 
     for address in user_data['nodes'].keys():
         emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']] \
@@ -69,10 +70,14 @@ def get_thornode_menu_buttons(user_data):
         truncated_address = address[:9] + "..." + address[-4:]
         button_text = emoji + " " + user_data['nodes'][address][
             'alias'] + " (" + truncated_address + ")"
-        keyboard.append([
-            InlineKeyboardButton(button_text,
-                                 callback_data='thornode_details-' + address)
-        ])
+        new_button = InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)
+
+        if address_count % 2 == 0:
+            keyboard.append([new_button])
+        else:
+            # Add every second entry to the last row so that we have two columns
+            keyboard[len(keyboard) - 1].append(new_button)
+        address_count += 1
 
     keyboard.append(
         [InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
