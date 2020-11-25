@@ -52,12 +52,12 @@ NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
 # Base notification timeout in seconds
 INITIAL_NOTIFICATION_TIMEOUT = 15
 
-# Emojis for status of THORNodes
+# Emojis for status of THORNodes (note that keys are displayed to the user)
 STATUS_EMOJIS = {
     "unknown": "❓",
     "whitelisted": "📋",
     "standby": "📆",
-    "ready": "🙋🏽‍♂️",
+    "ready": "✔️",
     "active": "💚",
     "disabled": "🔴"
 }

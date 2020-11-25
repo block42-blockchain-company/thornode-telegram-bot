@@ -1,6 +1,4 @@
 import asyncio
-import subprocess
-import json
 from collections import defaultdict
 from typing import Callable, Awaitable
 
@@ -17,7 +15,8 @@ def try_message_with_home_menu(context, chat_id, text):
                 chat_id=chat_id,
                 text=text,
                 reply_markup=ReplyKeyboardMarkup(keyboard,
-                                                 resize_keyboard=True))
+                                                 resize_keyboard=True)
+                )
 
 
 def try_message_to_all_users(context, text):
@@ -30,25 +29,43 @@ def get_home_menu_buttons():
     Return keyboard buttons for the home menu
     """
 
-    keyboard = [[
-        KeyboardButton('📡 MY NODES', callback_data='thornode_menu')
-    ],
-                [
-                    KeyboardButton('👀 SHOW ALL',
-                                   callback_data='show_all_thorchain_nodes'),
-                    KeyboardButton('🌎 NETWORK', callback_data='thornode_menu')
-                ]]
+    keyboard = [[KeyboardButton('📡 MY NODES')],
+                [KeyboardButton('👀 SHOW ALL'), KeyboardButton('🌎 NETWORK')]]
 
     return keyboard
 
 
-def show_thornode_menu_new_msg(update, context):
+def show_nodes_type_choice_menu(update, context):
+    keyboard = [[
+        InlineKeyboardButton('📡 THORCHAIN NODES', callback_data='show_nodes_thor')], [
+        InlineKeyboardButton('📡 BITCOIN NODES', callback_data='show_nodes_btc')], [
+        InlineKeyboardButton('📡 ETHEREUM NODES', callback_data='show_nodes_eth')]
+    ]
+
+    try_message(context=context,
+                chat_id=update.effective_message.chat_id,
+                text="*What type of nodes do you want to see?*\n"
+                     "Note that Bitcoin and Ethereum nodes need to be added manually.",
+                reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+def show_my_thorchain_nodes_menu(update, context):
     user_data = context.user_data if context.user_data else context.job.context[
         'user_data']
 
     keyboard = get_thornode_menu_buttons(user_data=user_data)
-    text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
-                                                                                           'THORNodes yet.\nAdd a Node!'
+
+    if len(keyboard) > 2:
+        text = '*Node statuses*:\n'
+        for status, emoji in STATUS_EMOJIS.items():
+            text += f"{emoji} - *{status}*\n"
+
+        text += '\n*Node health*:\n💗 - *healthy*\n‼️🖤 - *unhealthy*\n'
+
+        text += '\nClick an address from the list below or add a node:'
+    else:
+        text = 'You do not monitor any THORNodes yet.\nAdd a Node!'
+
     try_message(context=context,
                 chat_id=update.effective_message.chat_id,
                 text=text,
@@ -59,24 +76,28 @@ def get_thornode_menu_buttons(user_data):
     """
     Return keyboard buttons for the thornode menu
     """
-
     keyboard = [[]]
     address_count = 0
 
     for address in user_data['nodes'].keys():
-        emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']] \
-            if user_data['nodes'][address]['status'] in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+        node = user_data['nodes'][address]
+        status_emoji = STATUS_EMOJIS.get(node['status'], STATUS_EMOJIS["unknown"])
+        truncated_address = f"...{address[-4:]}"
 
-        truncated_address = address[:9] + "..." + address[-4:]
-        button_text = emoji + " " + user_data['nodes'][address][
-            'alias'] + " (" + truncated_address + ")"
+        if 'is_midgard_healthy' in node:
+            is_healthy = node['is_midgard_healthy']
+        else:
+            is_healthy = is_midgard_api_healthy(node['ip_address'])
+        is_healthy_emoji = '💗' if is_healthy else '‼️🖤'
+
+        button_text = f"{status_emoji} {node['alias']} ({truncated_address}) [{is_healthy_emoji}]"
         new_button = InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)
 
         if address_count % 2 == 0:
             keyboard.append([new_button])
         else:
-            # Add every second entry to the last row so that we have two columns
-            keyboard[len(keyboard) - 1].append(new_button)
+            keyboard[-1].append(new_button)
+
         address_count += 1
 
     keyboard.append(
@@ -104,13 +125,13 @@ def show_detail_menu(update, context):
     except Exception as e:
         logger.exception(e)
         query.edit_message_text(NETWORK_ERROR_MSG)
-        show_thornode_menu_new_msg(update, context)
+        show_my_thorchain_nodes_menu(update, context)
         return
 
     if node is None:
         text = 'THORNode ' + address + ' is not active anymore and will be removed shortly! 💀'
         query.edit_message_text(text)
-        show_thornode_menu_new_msg(update, context)
+        show_my_thorchain_nodes_menu(update, context)
         return
 
     text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
@@ -149,7 +170,7 @@ def show_detail_menu(update, context):
         InlineKeyboardButton('➖ REMOVE',
                              callback_data='confirm_thornode_deletion'),
         InlineKeyboardButton('✏️ CHANGE ALIAS', callback_data='change_alias')
-    ], [InlineKeyboardButton('⬅️ BACK', callback_data='thornode_menu')]]
+    ], [InlineKeyboardButton('⬅️ BACK', callback_data='show_nodes_thor')]]
 
     # Modify message
     query.edit_message_text(text,
@@ -216,7 +237,7 @@ def add_thornode_to_user_data(user_data, address, node):
         if not next(
                 filter(
                     lambda current_address: user_data['nodes'][current_address][
-                        'alias'] == alias, user_data['nodes']), None):
+                                                'alias'] == alias, user_data['nodes']), None):
             break
 
     user_data['nodes'][address] = node
@@ -332,7 +353,8 @@ def did_churn_happen(validator, local_node_statuses, highest_churn_status_since)
     local_status = local_node_statuses[validator['node_address']] if validator[
                                                                          'node_address'] in local_node_statuses else "unknown"
     if int(validator['status_since']) > highest_churn_status_since and \
-            ((local_status == 'ready' and remote_status == 'active') or (local_status == 'active' and remote_status == 'standby')):
+            ((local_status == 'ready' and remote_status == 'active') or (
+                    local_status == 'active' and remote_status == 'standby')):
         return True
     return False
 
@@ -365,9 +387,9 @@ def asgard_solvency_check() -> dict:
                     if 'insolvent_coins' not in solvency_report:
                         solvency_report['insolvent_coins'] = {}
                     solvency_report['insolvent_coins'][coin['asset']] = {
-                                                                            "expected": coin['amount'],
-                                                                            "actual": asgard_actual[asset[0]][asset[1]]
-                                                                        }
+                        "expected": coin['amount'],
+                        "actual": asgard_actual[asset[0]][asset[1]]
+                    }
                 else:
                     if 'solvent_coins' not in solvency_report:
                         solvency_report['solvent_coins'] = {}
@@ -404,7 +426,7 @@ def yggdrasil_check() -> dict:
             for coin in vault['vault']['coins']:
                 asset = coin['asset'].split('.')
                 actual_amount = (yggdrasil_actual[vault['vault']['pub_key']].get(asset[0]).setdefault(asset[1], "0")
-                                           .replace(".", ""))
+                                 .replace(".", ""))
                 expected_amount = (coin['amount'].replace(".", ""))
                 if int(actual_amount) < int(expected_amount):
                     solvency_report['is_solvent'] = False
@@ -428,6 +450,7 @@ def yggdrasil_check() -> dict:
                             float(yggdrasil_actual[vault['vault']['pub_key']][asset[0]][asset[1]])
 
     return solvency_report
+
 
 def get_solvency_message(asgard_solvency, yggdrasil_solvency) -> str:
     message = "Tracked Balances of *Asgard*:\n"

@@ -55,12 +55,12 @@ def start(update, context):
 
 
 @run_async
-def show_thornode_menu_handler(update, context):
+def my_nodes_menu_handler(update, context):
     """
     Thornode Menu Command handler
     """
 
-    show_thornode_menu_new_msg(update, context)
+    show_nodes_type_choice_menu(update, context)
 
 
 @run_async
@@ -80,9 +80,7 @@ def dispatch_query(update, context):
     edit = True
     call = None
 
-    if data == 'thornode_menu':
-        call = show_thornode_menu_edit_msg
-    elif data == 'show_all_thorchain_nodes':
+    if data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
     elif data == 'show_network_stats':
         call = show_network_stats
@@ -108,6 +106,8 @@ def dispatch_query(update, context):
         call = delete_thornode
     elif data == 'change_alias':
         call = change_alias
+    elif data == 'show_nodes_thor':
+        call = show_my_thorchain_nodes_menu
     else:
         edit = False
 
@@ -129,18 +129,6 @@ def dispatch_query(update, context):
         return asyncio.run(call(update, context))
 
 
-def show_thornode_menu_edit_msg(update, context):
-    """
-    Show Thornode Menu
-    """
-
-    keyboard = get_thornode_menu_buttons(user_data=context.user_data)
-    text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
-                                                                                           'THORNodes yet.\nAdd a Node!'
-    query = update.callback_query
-    query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-
-
 @run_async
 def confirm_add_all_thornodes(update, context):
     """
@@ -149,7 +137,7 @@ def confirm_add_all_thornodes(update, context):
 
     keyboard = [[
         InlineKeyboardButton('YES ✅', callback_data='add_all_thornodes'),
-        InlineKeyboardButton('NO ❌', callback_data='thornode_menu')
+        InlineKeyboardButton('NO ❌', callback_data='show_nodes_thor')
     ]]
     text = '⚠️ Do you really want to *add all* available THORNodes to your monitoring list? ⚠️'
 
@@ -164,7 +152,7 @@ def confirm_delete_all_thornodes(update, context):
 
     keyboard = [[
         InlineKeyboardButton('YES ✅', callback_data='delete_all_thornodes'),
-        InlineKeyboardButton('NO ❌', callback_data='thornode_menu')
+        InlineKeyboardButton('NO ❌', callback_data='show_nodes_thor')
     ]]
     text = '⚠️ Do you really want to *remove all* THORNodes from your monitoring list? ⚠️'
 
@@ -208,7 +196,7 @@ def plain_input(update, context):
     expected = context.user_data[
         'expected'] if 'expected' in context.user_data else None
     if message == '📡 MY NODES':
-        return show_thornode_menu_handler(update, context)
+        return my_nodes_menu_handler(update, context)
     elif message == '🌎 NETWORK':
         return show_network_menu(update, context)
     elif message == '👀 SHOW ALL':
@@ -242,7 +230,7 @@ def handle_add_node(update, context):
 
     # Send message
     update.message.reply_text('Got it! 👌')
-    show_thornode_menu_new_msg(update, context)
+    show_my_thorchain_nodes_menu(update, context)
 
 
 def handle_change_alias(update, context):
@@ -265,7 +253,7 @@ def handle_change_alias(update, context):
 
     # Send message
     update.message.reply_text('Got it! 👌')
-    show_thornode_menu_new_msg(update, context)
+    show_my_thorchain_nodes_menu(update, context)
 
 
 def confirm_thornode_deletion(update, context):
@@ -302,7 +290,7 @@ def delete_thornode(update, context):
     del context.user_data['nodes'][address]
 
     query.edit_message_text(text, parse_mode='markdown')
-    show_thornode_menu_new_msg(update, context)
+    show_my_thorchain_nodes_menu(update, context)
 
 
 def thornode_details(update, context):
@@ -334,7 +322,7 @@ def add_all_thornodes(update, context):
 
     # Send message
     query.edit_message_text('Added all THORNodes! 👌')
-    show_thornode_menu_new_msg(update, context)
+    show_my_thorchain_nodes_menu(update, context)
 
 
 def delete_all_thornodes(update, context):
@@ -355,7 +343,7 @@ def delete_all_thornodes(update, context):
     # Send message
     query.edit_message_text(text)
 
-    show_thornode_menu_new_msg(update, context)
+    show_my_thorchain_nodes_menu(update, context)
 
 
 def show_all_thorchain_nodes(update, context):
