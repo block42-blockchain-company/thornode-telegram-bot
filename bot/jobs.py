@@ -256,46 +256,31 @@ def check_thorchain_block_height(context, node_address):
         logger.exception(e)
         return
 
-    # Send message if there were changes or block height just got (un)stuck
-    # Stuck count:
-    # 0 == everything's alright
-    # 1 == just got stuck
-    # -1 == just got unstuck
-    # > 1 == still stuck
+    is_stuck = block_height <= node_data.setdefault('block_height', 0)
+    block_height_stuck_count = node_data.setdefault("block_height_stuck_count", 0)
 
-    # Check if block height got stuck
-    if block_height <= node_data.get('block_height', "0"):
-
-        # Increase stuck count to know if we already sent a notification
-        node_data['block_height_stuck_count'] = node_data.get('block_height_stuck_count', 0) + 1
+    if is_stuck:
+        block_height_stuck_count += 1
+        if block_height_stuck_count == 1:
+            text = 'Block height is not increasing anymore! 💀' + '\n' + \
+                   'IP: ' + node_data['ip_address'] + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address + '\n' + \
+                   'Block height stuck at: ' + block_height + '\n\n' + \
+                   'Please check your Thornode immediately!'
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
     else:
-        # Check if we have to send a notification that the Height increases again
-        if 'block_height_stuck_count' in node_data and node_data[
-            'block_height_stuck_count'] > 0:
+        if block_height_stuck_count >= 1:
             text = f"Block height is increasing again! 👌\n" + \
                    f"IP: {node_data['ip_address']}\n" + \
                    f"THORNode: {node_data['alias']}\n" + \
                    f"Node address: {node_address}\n" + \
                    f"Block height now at: {block_height}\n"
-            try_message_with_home_menu(context=context,
-                                       chat_id=chat_id,
-                                       text=text)
-            node_data['block_height_stuck_count'] = -1
-        else:
-            node_data['block_height_stuck_count'] = 0
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+        block_height_stuck_count = 0
 
-    # Set current block height
     node_data['block_height'] = block_height
-
-    # If it just got stuck send a message
-    if node_data.setdefault('block_height_stuck_count', 0) == 1:
-        text = 'Block height is not increasing anymore! 💀' + '\n' + \
-               'IP: ' + node_data['ip_address'] + '\n' + \
-               'THORNode: ' + node_data['alias'] + '\n' + \
-               'Node address: ' + node_address + '\n' + \
-               'Block height stuck at: ' + block_height + '\n\n' + \
-               'Please check your Thornode immediately!'
-        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+    node_data["block_height_stuck_count"] = block_height_stuck_count
 
 
 def check_thorchain_catch_up_status(context, node_address):
@@ -479,22 +464,17 @@ def check_solvency(context):
         logger.exception(e)
         return
 
-    if 'is_solvent' not in context.bot_data:
-        context.bot_data['is_solvent'] = True
-
     is_solvent = asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent']
     insolvency_count = context.bot_data.setdefault("insolvency_count", 0)
 
     if not is_solvent:
         insolvency_count += 1
         if insolvency_count == MISSING_FUNDS_THRESHOLD:
-            context.bot_data['is_solvent'] = False
             text = 'THORChain is *missing funds*! 💀\n\n'
             text += get_solvency_message(asgard_solvency, yggdrasil_solvency)
             try_message_to_all_users(context, text=text)
     else:
         if insolvency_count >= MISSING_FUNDS_THRESHOLD:
-            context.bot_data['is_solvent'] = True
             text = 'THORChain is *100% solvent* again! 👌\n'
             try_message_to_all_users(context, text=text)
         insolvency_count = 0

@@ -41,8 +41,12 @@ if (len(BITCOIN_NODE_IPS) != len(BITCOIN_NODE_USERNAMES)) or (len(BITCOIN_NODE_I
                    f"BITCOIN_NODE_PASSWORDS array length: ({len(BITCOIN_NODE_PASSWORDS)})\n")
     BITCOIN_NODE_IPS.clear()
 
-ALLOWED_USER_IDS = 'ALL' if os.getenv("ALLOWED_USER_IDS", "notFound").upper() == 'ALL' \
-    else [int(allowed_id) for allowed_id in os.getenv("ALLOWED_USER_IDS", []).split(",")]
+if os.getenv("ALLOWED_USER_IDS", "notFound").upper() == 'ALL':
+    ALLOWED_USER_IDS = 'ALL'
+elif os.getenv("ALLOWED_USER_IDS"):
+    ALLOWED_USER_IDS = [int(allowed_id) for allowed_id in os.getenv("ALLOWED_USER_IDS").split(",")]
+else:
+    ALLOWED_USER_IDS = []
 
 # By how much we multiply the notification timeout in case of continuous Thornode attribute changes
 NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5

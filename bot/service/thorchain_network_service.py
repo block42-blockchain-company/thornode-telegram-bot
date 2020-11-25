@@ -20,8 +20,8 @@ def get_node_status(node_ip=None):
     return get_request_json_thorchain(url_path=status_path, node_ip=node_ip)
 
 
-def get_latest_block_height(node_ip=None) -> str:
-    return str(get_node_status(node_ip)['result']['sync_info']['latest_block_height'])
+def get_latest_block_height(node_ip=None) -> int:
+    return int(get_node_status(node_ip)['result']['sync_info']['latest_block_height'])
 
 
 def is_thorchain_catching_up(node_ip=None) -> bool:
