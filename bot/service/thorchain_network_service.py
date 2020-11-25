@@ -4,6 +4,7 @@ import aiohttp
 import requests
 
 from constants import *
+from service.general_network_service import get_request_json, get_request_json_with_retries
 
 
 def get_node_accounts():
@@ -81,7 +82,7 @@ def get_yggdrasil_json() -> dict:
 
 
 def get_binance_balance(address: str) -> dict:
-    return get_request_json(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
+    return get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
 
 
 async def get_pool_addresses(node_ip: str):
@@ -96,15 +97,6 @@ async def get_pool_addresses(node_ip: str):
                     "Code: ${str(resp.status)}")
 
             return await response.json()
-
-
-def get_request_json(url: str) -> dict:
-    response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
-
-    if response.status_code != 200:
-        raise BadStatusException(response)
-
-    return response.json()
 
 
 def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
@@ -129,12 +121,4 @@ def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
     raise Exception("No seed node returned a valid response!")
 
 
-class BadStatusException(Exception):
 
-    def __init__(self, response: requests.Response):
-        self.message = f"Error while network request.\n" \
-                       f"Received status code: {str(response.status_code)}\n" \
-                       f"Received response: {response.text}"
-
-    def __str__(self):
-        return self.message

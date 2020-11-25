@@ -1,6 +1,5 @@
 import os
 import logging
-import random
 
 # Enable logging
 logging.basicConfig(
