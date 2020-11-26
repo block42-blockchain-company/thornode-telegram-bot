@@ -21,7 +21,7 @@ def try_message_with_home_menu(context, chat_id, text):
 
 
 def try_message_to_all_users(context, text):
-    for chat_id in context.dispatcher.user_data.keys():
+    for chat_id in context.dispatcher.chat_data.keys():
         try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 
@@ -43,10 +43,10 @@ def get_home_menu_buttons():
 
 
 def show_thornode_menu_new_msg(update, context):
-    user_data = context.user_data if context.user_data else context.job.context[
-        'user_data']
+    chat_data = context.chat_data if context.chat_data else context.job.context[
+        'chat_data']
 
-    keyboard = get_thornode_menu_buttons(user_data=user_data)
+    keyboard = get_thornode_menu_buttons(chat_data=chat_data)
     text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
                                                                                            'THORNodes yet.\nAdd a Node!'
     try_message(context=context,
@@ -55,7 +55,7 @@ def show_thornode_menu_new_msg(update, context):
                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def get_thornode_menu_buttons(user_data):
+def get_thornode_menu_buttons(chat_data):
     """
     Return keyboard buttons for the thornode menu
     """
@@ -63,12 +63,12 @@ def get_thornode_menu_buttons(user_data):
     keyboard = [[]]
     address_count = 0
 
-    for address in user_data['nodes'].keys():
-        emoji = STATUS_EMOJIS[user_data['nodes'][address]['status']] \
-            if user_data['nodes'][address]['status'] in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+    for address in chat_data['nodes'].keys():
+        emoji = STATUS_EMOJIS[chat_data['nodes'][address]['status']] \
+            if chat_data['nodes'][address]['status'] in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
 
         truncated_address = address[:9] + "..." + address[-4:]
-        button_text = emoji + " " + user_data['nodes'][address][
+        button_text = emoji + " " + chat_data['nodes'][address][
             'alias'] + " (" + truncated_address + ")"
         new_button = InlineKeyboardButton(button_text, callback_data='thornode_details-' + address)
 
@@ -97,7 +97,7 @@ def show_detail_menu(update, context):
     """
 
     query = update.callback_query
-    address = context.user_data['selected_node_address']
+    address = context.chat_data['selected_node_address']
 
     try:
         node = get_thornode_object_or_none(address=address)
@@ -113,7 +113,7 @@ def show_detail_menu(update, context):
         show_thornode_menu_new_msg(update, context)
         return
 
-    text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
+    text = 'THORNode: *' + context.chat_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
@@ -186,14 +186,14 @@ def try_message(context, chat_id, text, reply_markup=None):
         if 'bot was blocked by the user' in e.message:
             print("Telegram user " + str(chat_id) +
                   " blocked me; removing him from the user list")
-            del context.dispatcher.user_data[chat_id]
             del context.dispatcher.chat_data[chat_id]
-            del context.dispatcher.persistence.user_data[chat_id]
+            del context.dispatcher.chat_data[chat_id]
+            del context.dispatcher.persistence.chat_data[chat_id]
             del context.dispatcher.persistence.chat_data[chat_id]
 
             # Somehow session.data does not get updated if all users block the bot.
             # That makes problems on bot restart. That's why we delete the file ourselves.
-            if len(context.dispatcher.persistence.user_data) == 0:
+            if len(context.dispatcher.persistence.chat_data) == 0:
                 if os.path.exists(session_data_path):
                     os.remove(session_data_path)
             context.job.enabled = False
@@ -203,7 +203,7 @@ def try_message(context, chat_id, text, reply_markup=None):
                   str(chat_id))
 
 
-def add_thornode_to_user_data(user_data, address, node):
+def add_thornode_to_chat_data(chat_data, address, node):
     """
     Add a node in the user specific dictionary
     """
@@ -215,15 +215,15 @@ def add_thornode_to_user_data(user_data, address, node):
         alias = "Thor-" + str(i)
         if not next(
                 filter(
-                    lambda current_address: user_data['nodes'][current_address][
-                        'alias'] == alias, user_data['nodes']), None):
+                    lambda current_address: chat_data['nodes'][current_address][
+                        'alias'] == alias, chat_data['nodes']), None):
             break
 
-    user_data['nodes'][address] = node
-    user_data['nodes'][address]['alias'] = alias
-    user_data['nodes'][address][
+    chat_data['nodes'][address] = node
+    chat_data['nodes'][address]['alias'] = alias
+    chat_data['nodes'][address][
         'last_notification_timestamp'] = datetime.timestamp(datetime.now())
-    user_data['nodes'][address][
+    chat_data['nodes'][address][
         'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
 

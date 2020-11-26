@@ -1,5 +1,5 @@
 from packaging import version
-
+from requests.exceptions import Timeout, ConnectionError
 from helpers import *
 from messages import *
 from models.nodes import BinanceNode, EthereumNode, Node, BitcoinNode, UnauthorizedException
@@ -156,11 +156,11 @@ def check_thornodes(context):
     """
 
     chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    chat_data = context.job.context['chat_data']
 
     inactive_nodes = []
 
-    for node_address, node_data in user_data['nodes'].items():
+    for node_address, node_data in chat_data['nodes'].items():
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
@@ -168,10 +168,10 @@ def check_thornodes(context):
             logger.exception(e)
             continue
 
-        local_node = user_data['nodes'][node_address]
+        local_node = chat_data['nodes'][node_address]
 
         if remote_node is None:
-            text = 'THORNode ' + user_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
+            text = 'THORNode ' + chat_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
                    'Address: ' + node_address + '\n\n' + \
                    'Please enter another THORNode address.'
 
@@ -200,7 +200,7 @@ def check_thornodes(context):
 
             # Check if there are any changes
             if len(changed_fields) > 0:
-                text = 'THORNode: ' + user_data['nodes'][node_address]['alias'] + '\n' + \
+                text = 'THORNode: ' + chat_data['nodes'][node_address]['alias'] + '\n' + \
                        'Address: ' + node_address + '\n' + \
                        'Status: ' + local_node['status'].capitalize()
                 if 'status' in changed_fields:
@@ -239,7 +239,7 @@ def check_thornodes(context):
             check_thorchain_midgard_api(context, node_address=node_address)
 
     for node_address in inactive_nodes:
-        del user_data['nodes'][node_address]
+        del chat_data['nodes'][node_address]
 
 
 def check_thorchain_block_height(context, node_address):
@@ -248,10 +248,13 @@ def check_thorchain_block_height(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     try:
         block_height = get_latest_block_height(node_data['ip_address'])
+    except (Timeout, ConnectionError):
+        logger.info(f"Timeout or Connection error with {node_data['ip_address']}")
+        return
     except Exception as e:
         logger.exception(e)
         return
@@ -289,14 +292,16 @@ def check_thorchain_catch_up_status(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     if 'is_catching_up' not in node_data:
         node_data['is_catching_up'] = False
 
     try:
-        is_currently_catching_up = is_thorchain_catching_up(
-            node_data['ip_address'])
+        is_currently_catching_up = is_thorchain_catching_up(node_data['ip_address'])
+    except (Timeout, ConnectionError):
+        logger.info(f"Timeout or Connection error with {node_data['ip_address']}")
+        return
     except Exception as e:
         logger.exception(e)
         return
@@ -304,6 +309,9 @@ def check_thorchain_catch_up_status(context, node_address):
     if node_data['is_catching_up'] != is_currently_catching_up:
         try:
             block_height = get_latest_block_height(node_data['ip_address'])
+        except (Timeout, ConnectionError):
+            logger.info(f"Timeout or Connection error with {node_data['ip_address']}")
+            block_height = "currently unavailable"
         except Exception as e:
             logger.exception(e)
             block_height = "currently unavailable"
@@ -332,7 +340,7 @@ def check_thorchain_midgard_api(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     if 'is_midgard_healthy' not in node_data:
         node_data['is_midgard_healthy'] = True
@@ -358,7 +366,7 @@ def check_thorchain_midgard_api(context, node_address):
 
 
 def check_versions_status(context):
-    user_data = context.job.context['user_data']
+    chat_data = context.job.context['chat_data']
 
     try:
         node_accounts = get_node_accounts()
@@ -369,12 +377,12 @@ def check_versions_status(context):
 
     highest_version = max(map(lambda n: n['version'], node_accounts),
                           key=lambda v: version.parse(v))
-    last_newest_version = user_data.get('newest_software_version', None)
+    last_newest_version = chat_data.get('newest_software_version', None)
 
     if last_newest_version is None or version.parse(
             highest_version) > version.parse(last_newest_version):
-        user_data['newest_software_version'] = highest_version
-        for node in user_data['nodes'].values():
+        chat_data['newest_software_version'] = highest_version
+        for node in chat_data['nodes'].values():
             if version.parse(node['version']) < version.parse(highest_version):
                 message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
                           f"Your software version is *{node['version']}* " \
