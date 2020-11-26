@@ -28,7 +28,7 @@ def setup_existing_users(dispatcher):
     blocked_ids = []
 
     for chat_id in dispatcher.chat_data.keys():
-        if ALLOWED_USER_IDS != 'ALL' and chat_id not in ALLOWED_USER_IDS:
+        if ALLOWED_USER_IDS != 'ALL' and chat_id > 0 and chat_id not in ALLOWED_USER_IDS:
             blocked_ids.append(chat_id)
             continue
 
@@ -58,12 +58,15 @@ def setup_existing_users(dispatcher):
 
     for chat_id in blocked_ids:
         logger.warning(f"Telegram chat {str(chat_id)} blocked me or is "
-                       f"not Admin anymore; removing it from the user list")
+                       f"not Admin anymore; removing it from the chat list")
+
+        if chat_id > 0:
+            del dispatcher.user_data[chat_id]
+            del dispatcher.persistence.user_data[chat_id]
 
         del dispatcher.chat_data[chat_id]
-        del dispatcher.chat_data[chat_id]
         del dispatcher.persistence.chat_data[chat_id]
-        del dispatcher.persistence.chat_data[chat_id]
+
 
         # Somehow session.data does not get updated if all users block the bot.
         # That's why we delete the file ourselves.
