@@ -177,11 +177,14 @@ def try_message(context, chat_id, text, reply_markup=None):
     if context.job and not context.job.enabled:
         return
 
+    is_group = (chat_id < 0)
+
     try:
         context.bot.send_message(chat_id,
                                  text,
                                  parse_mode='markdown',
-                                 reply_markup=reply_markup)
+                                 reply_markup=reply_markup,
+                                 isgroup=is_group)
     except TelegramError as e:
         if 'bot was blocked by the user' in e.message:
             print("Telegram user " + str(chat_id) +

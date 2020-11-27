@@ -4,13 +4,15 @@ import time
 
 from telegram.error import BadRequest, Unauthorized, InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
-                          CallbackQueryHandler, MessageHandler, Filters)
+                          CallbackQueryHandler, MessageHandler, Filters, messagequeue)
 from telegram.ext.dispatcher import run_async
+from telegram.utils.request import Request
 
 from handlers.network_info import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
+from message_queue import MQBot
 
 """
 ######################################################################################################################################################
@@ -36,13 +38,13 @@ def setup_existing_users(dispatcher):
                           'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
                           'To make sure you have the latest features, please start ' \
                           'a fresh chat with me by typing /start.'
-        try:
-            dispatcher.bot.send_message(chat_id, restart_message)
-        except Unauthorized:
+
+        message_result = dispatcher.bot.send_message(chat_id, restart_message)
+        if isinstance(message_result.exception, Unauthorized):
             blocked_ids.append(chat_id)
             continue
-        except TelegramError as e:
-            logger.exception(f'USER {str(chat_id)}\n Error: {str(e)}',
+        elif isinstance(message_result.exception, TelegramError):
+            logger.exception(f'USER {str(chat_id)}\n Error: {str(message_result.exception)}',
                              exc_info=True)
 
         # Start monitoring jobs for all existing users
@@ -575,14 +577,26 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
+    # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
+    m_queue = messagequeue.MessageQueue(all_burst_limit=20, all_time_limit_ms=1000,
+                                        group_burst_limit=2, group_time_limit_ms=7000)
+    # set connection pool size for bot because
+    # it only happens automatically when creating Updater() with the telegram token.
+    # But we use the mq_bot to create the Updater() instance.
+    # Increased 'read_timeout' from default 5 seconds to 20 seconds to mitigate Timeouts due
+    # to the MessageQueue delay for group chats.
+    request = Request(con_pool_size=8, read_timeout=20)
+
     try:
-        bot = Updater(TELEGRAM_BOT_TOKEN,
-                      persistence=PicklePersistence(filename=session_data_path),
-                      use_context=True)
+        mq_bot = MQBot(TELEGRAM_BOT_TOKEN, request=request, mqueue=m_queue)
     except InvalidToken:
         logger.error("Invalid telegram token. Please make sure to set TELEGRAM_BOT_TOKEN environmental variable with"
                      " correct Telegram bot token. Check project docs for more details.", exc_info=True)
         raise
+
+    bot = Updater(bot=mq_bot,
+                  persistence=PicklePersistence(filename=session_data_path),
+                  use_context=True)
 
     dispatcher = bot.dispatcher
 
