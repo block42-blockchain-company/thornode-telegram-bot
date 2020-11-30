@@ -578,6 +578,7 @@ def main():
         setup_debug_processes()
 
     # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
+    # We cannot set burst_limit to 1, because of some off-by-one if check in the library
     m_queue = messagequeue.MessageQueue(all_burst_limit=20, all_time_limit_ms=1000,
                                         group_burst_limit=2, group_time_limit_ms=7000)
     # set connection pool size for bot because

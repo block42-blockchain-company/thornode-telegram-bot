@@ -468,6 +468,9 @@ def check_solvency(context):
     try:
         asgard_solvency = asgard_solvency_check()
         yggdrasil_solvency = yggdrasil_check()
+    except (Timeout, ConnectionError):
+        logger.info(f"Timeout or Connection error while querying Asgard and Yggdrasil.")
+        return
     except Exception as e:
         logger.exception(e)
         return
