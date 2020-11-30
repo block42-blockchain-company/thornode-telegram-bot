@@ -251,11 +251,11 @@ def show_all_thorchain_nodes(update, context):
             text = ''
 
 
-async def show_my_thorchain_nodes_menu(update, context):
+def show_my_thorchain_nodes_menu(update, context):
     user_data = context.user_data if context.user_data else context.job.context[
         'user_data']
 
-    keyboard = await get_thornode_menu_buttons(user_data=user_data)
+    keyboard = get_thornode_menu_buttons(user_data=user_data)
 
     if len(keyboard) > 2:
         text = '*Node statuses*:\n'
@@ -273,29 +273,14 @@ async def show_my_thorchain_nodes_menu(update, context):
                 reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# FIXME - its running outside the loop q
-async def get_thornode_menu_buttons(user_data):
-    node_to_health = {}
-
-    async def save_health_to_dict(address):
-        node = user_data['nodes'][address]
-        ip = node['ip_address']
-
-        if 'is_midgard_healthy' in node:
-            is_healthy = node['is_midgard_healthy']
-        else:
-            is_healthy = await is_midgard_api_healthy_async(ip)
-
-        node_to_health[address] = is_healthy
-
-    await for_each_async(user_data.get('nodes', {}).keys(), save_health_to_dict)
-
+def get_thornode_menu_buttons(user_data):
     buttons = []
     for address in user_data.get('nodes', {}).keys():
         node = user_data['nodes'][address]
+        is_healthy = node.get('is_midgard_healthy', None)
         status_emoji = STATUS_EMOJIS.get(node['status'], STATUS_EMOJIS["unknown"])
         truncated_address = f"...{address[-3:]}"
-        is_healthy_emoji = HEALTH_EMOJIS[node_to_health[address]]
+        is_healthy_emoji = HEALTH_EMOJIS[is_healthy]
 
         button_text = f"{status_emoji} {node['alias']} ({truncated_address}) [{is_healthy_emoji}]"
 

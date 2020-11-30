@@ -39,18 +39,6 @@ def is_midgard_api_healthy(node_ip) -> bool:
     return True
 
 
-async def is_midgard_api_healthy_async(node_ip, timeout=CONNECTION_TIMEOUT) -> bool:
-    async with aiohttp.ClientSession() as session:
-        try:
-            response = await session.get(
-                f'{node_ip}:8080/v1/health',
-                timeout=timeout)
-        except:
-            return False
-
-        return response.status < 400
-
-
 def get_number_of_unconfirmed_transactions(node_ip) -> int:
     unconfirmed_txs_path = {
         "TESTNET": ":26657/num_unconfirmed_txs",

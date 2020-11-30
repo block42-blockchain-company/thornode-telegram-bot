@@ -1,6 +1,6 @@
 import os
 
-from constants.globals import DEBUG, logger
+from constants.globals import DEBUG
 
 NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
 NETWORK_TYPE = os.getenv("NETWORK_TYPE").upper() \

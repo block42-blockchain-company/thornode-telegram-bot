@@ -324,25 +324,23 @@ def check_thorchain_midgard_api(context, node_address):
 
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['user_data']['nodes'][node_address]
-
-    if 'is_midgard_healthy' not in node_data:
-        node_data['is_midgard_healthy'] = True
+    was_healthy = node_data.setdefault('is_midgard_healthy', True)
 
     is_midgard_healthy = is_midgard_api_healthy(node_data['ip_address'])
 
-    if node_data['is_midgard_healthy'] != is_midgard_healthy:
+    if was_healthy != is_midgard_healthy:
         if is_midgard_healthy:
-            node_data['is_midgard_healthy'] = True
             text = 'Midgard API is healthy again! 👌' + '\n' + \
                    'IP: ' + node_data['ip_address'] + '\n' + \
                    'THORNode: ' + node_data['alias'] + '\n' + \
                    'Node address: ' + node_address
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
         else:
-            node_data['is_midgard_healthy'] = False
             text = 'Midgard API is not healthy anymore! 💀' + '\n' + \
                    'IP: ' + node_data['ip_address'] + '\n' + \
                    'THORNode: ' + node_data['alias'] + '\n' + \
                    'Node address: ' + node_address + '\n\n' + \
                    'Please check your Thornode immediately!'
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
+
+        node_data['is_midgard_healthy'] = is_midgard_healthy
