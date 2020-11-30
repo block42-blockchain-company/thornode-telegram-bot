@@ -30,9 +30,7 @@ def main():
     dispatcher.add_handler(CommandHandler('start', on_start_command))
     dispatcher.add_handler(CallbackQueryHandler(dispatch_query))
     dispatcher.add_handler(MessageHandler(Filters.text, dispatch_plain_input_query))
-
-    # Add error handler
-    dispatcher.add_error_handler(error)
+    dispatcher.add_error_handler(error_handler)
 
     # Start the bot
     bot.start_polling()

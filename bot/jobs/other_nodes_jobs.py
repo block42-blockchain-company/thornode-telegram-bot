@@ -7,9 +7,7 @@ def check_other_nodes_health(context):
     nodes = []
     nodes.extend(BinanceNode.from_ips(BINANCE_NODE_IPS))
     nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
-    nodes.extend(
-        BitcoinNode.from_ips_with_credentials(
-            BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES, BITCOIN_NODE_PASSWORDS))
+    nodes.extend(BitcoinNode.from_ips(BITCOIN_NODE_IPS))
 
     for node in nodes:
         message = check_health(node, context)
@@ -44,8 +42,7 @@ def check_health(node: Node, context) -> [str, None]:
 
 
 def check_bitcoin_height_increase_job(context):
-    for node in BitcoinNode.from_ips_with_credentials(BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES,
-                                                      BITCOIN_NODE_PASSWORDS):
+    for node in BitcoinNode.from_ips(BITCOIN_NODE_IPS):
         message = check_block_height_increase(context, node)
         if message:
             try_message_to_all_users(context, message)
@@ -101,8 +98,7 @@ def check_other_nodes_syncing_job(context):
 
     nodes = []
     nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
-    nodes.extend(
-        BitcoinNode.from_ips_with_credentials(BITCOIN_NODE_IPS, BITCOIN_NODE_USERNAMES, BITCOIN_NODE_PASSWORDS))
+    nodes.extend(BitcoinNode.from_ips(BITCOIN_NODE_IPS))
 
     for node in nodes:
         message = check_other_nodes_syncing(node, context)

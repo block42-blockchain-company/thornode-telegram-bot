@@ -19,21 +19,17 @@ spec:
           imagePullPolicy: Always
           env:
             - name: TELEGRAM_BOT_TOKEN
-              value: "XXX"                  # Input the API Token you got from @BotFather
+              value: "XXX"              # Input the API Token you got from @BotFather
             - name: NETWORK_TYPE
-              value: "CHAOSNET"             # Choose "CHAOSNET" or "TESTNET"
+              value: "CHAOSNET"         # Choose "CHAOSNET" or "TESTNET"
             - name: ALLOWED_USER_IDS
-              value: "1234,5678,42"         # Leave these values the same (Admin Area is currently not enabled on K8s)
+              value: "1234,5678,42"     # Leave these values the same (Admin Area is currently not enabled on K8s)
             - name: BINANCE_NODE_IPS
-              value: ""                     # Node IPs of your Binance nodes, "localhost" or leave it empty to not monitor binance node
+              value: ""                 # Node IPs of your Binance nodes, leave it empty to not monitor binance node
             - name: ETHEREUM_NODE_IPS
-              value: ""                     # Node IPs of your Ethereum nodes, "localhost" or leave it empty to not monitor Ethereum node
+              value: ""                 # Node IPs of your Ethereum nodes, leave it empty to not monitor Ethereum node
             - name: BITCOIN_NODE_IPS
-              value: ""                     # Node IPs of your Bitcoin nodes, "localhost" or leave it empty to not monitor Bitcoin node
-            - name: BITCOIN_NODE_USERNAMES
-              value: ""                     # Comma separated usernames for your bitcoin nodes (for each Bitcoin node ip exactly one username)
-            - name: BITCOIN_NODE_PASSWORDS
-              value: ""                     # Comma separated passwords for your bitcoin nodes (for each Bitcoin node ip exactly one password)
+              value: ""                 # Addresses of your Bitcoin nodes, use format `username:password@ip:port'
       volumes:
         - name: thornode-bot-chaosnet-volume
           persistentVolumeClaim:

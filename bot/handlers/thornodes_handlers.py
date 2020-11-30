@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton
 from telegram.ext import run_async
 
-from constants.messages import NETWORK_ERROR_MSG
+from constants.messages import NETWORK_ERROR_MSG, HEALTH_LEGEND
 from handlers.chat_helpers import *
 from service.utils import *
 from datetime import timedelta
@@ -262,8 +262,7 @@ async def show_my_thorchain_nodes_menu(update, context):
         for status, emoji in STATUS_EMOJIS.items():
             text += f"{emoji} - *{status}*\n"
 
-        text += f'\n*Node health*:\n{HEALTH_EMOJIS[True]} - *healthy*\n{HEALTH_EMOJIS[False]} - *unhealthy*\n'
-
+        text += HEALTH_LEGEND
         text += '\nClick an address from the list below or add a node:'
     else:
         text = 'You do not monitor any THORNodes yet.\nAdd a Node!'

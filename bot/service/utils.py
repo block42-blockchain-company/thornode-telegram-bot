@@ -15,8 +15,8 @@ async def for_each_async(elements: [], function: Callable[...,
     await asyncio.gather(*tasks)
 
 
-def btc_rpc_request(ip: str, username: str, password: str, method: str, params=None):
-    return rpc_request(url=f'http://{username}:{password}@{ip}:8332/', jsonrpc_version="1.0", method=method,
+def btc_rpc_request(address: str, method: str, params=None):
+    return rpc_request(url=f'http://{address}', jsonrpc_version="1.0", method=method,
                        params=params)
 
 

@@ -110,12 +110,3 @@ def is_admin(update, context):
                                                        f"I'm *THORNode Bot*, I'm a loyal bot.")
         return False
     return True
-
-
-# FIXME am i used?
-def error(update, context):
-    """
-    Log error.
-    """
-
-    logger.warning('Update "%s" caused error: %s', update, context.error)

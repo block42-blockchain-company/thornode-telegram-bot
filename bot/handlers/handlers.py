@@ -2,7 +2,6 @@ import re
 
 from telegram.error import BadRequest
 
-from handlers.network_handlers import *
 from handlers.network_info_handlers import *
 from handlers.other_nodes_handlers import *
 from handlers.thornodes_handlers import *
@@ -147,7 +146,7 @@ def dispatch_plain_input_query(update, context):
 def on_my_nodes_clicked(update, context):
     keyboard = [[
         InlineKeyboardButton('📡 THORCHAIN NODES', callback_data='show_nodes_thor')], [
-        InlineKeyboardButton('📡 OTHER CHAINS NODES', callback_data='show_nodes_other'),
+        InlineKeyboardButton('📡 OTHER CHAIN NODES', callback_data='show_nodes_other'),
     ]]
 
     try_message(context=context,
@@ -155,3 +154,11 @@ def on_my_nodes_clicked(update, context):
                 text="*What type of nodes do you want to see?*\n"
                      "Note that Bitcoin and Ethereum nodes need to be added manually.",
                 reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+def error_handler(update, context):
+    """
+    Log error.
+    """
+
+    logger.warning('Update "%s" caused error: %s', update, context.error)

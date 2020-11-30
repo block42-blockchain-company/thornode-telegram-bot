@@ -26,12 +26,10 @@ Leave it empty or remove it to not monitor any Binance Node.
 Leave it empty or remove it to not monitor any Ethereum Node.
 - `ALLOWED_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
 Bot. Set it to `ALL` to make it available to everybody.
-- `BITCOIN_NODE_IPS` to a list of Bitcoin Node IPs you want to monitor (or `localhost`).
+- `BITCOIN_NODE_IPS` to a list of Bitcoin Node addresses you want to monitor.
+Bitcoin [json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC))
+requires authentication, so the format is `username:password@ip:port`.
 Leave it empty or remove it to not monitor any Bitcoin Node.
-- `BITCOIN_NODE_USERNAMES` to corresponding usernames for each Bitcoin node ip to  
-[json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
-- `BITCOIN_NODE_PASSWORDS` to corresponding passwords for each Bitcoin node ip to 
-[json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
 
 ### Kubernetes (K8s)
 
@@ -126,13 +124,11 @@ export BINANCE_NODE_IPS=3.228.22.197,localhost
 export ETHEREUM_NODE_IPS=3.228.22.197,localhost
 ```
 ##### Bitcoin
-For each node ip you need to set the corresponding usernames and passwords to your node's
+For each node ip you need to also set the corresponding usernames and passwords to your node's
 [json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC)).
- In result, for `n` bitcoin node ips you must set `n` usernames and `n` passwords.
+The format is  `username:password@ip:port`
 ```
-export BITCOIN_NODE_IPS=ip_1,ip_2
-export BITCOIN_NODE_USERNAMES=username_to_ip_1,username_to_ip_2
-export BITCOIN_NODE_PASSWORDS=password_to_ip_1,password_to_ip_2
+export BITCOIN_NODE_IPS=u1:p1@ip1:port1,u2:p2@ip2:port2
 ```
 ---
 Next set Telegram User IDs that are permissioned to access the Bot in the `ALLOWED_USER_IDS` environment variable.
