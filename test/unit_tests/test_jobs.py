@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import Mock
-from jobs import check_block_height_increase, check_health, check_syncing
+
+from jobs.other_nodes_jobs import *
+from jobs.other_nodes_jobs import check_health
 from models.nodes import Node, UnauthorizedException
 
 
@@ -64,19 +66,19 @@ class JobTests(unittest.TestCase):
 
     def test_syncing_check(self):
         self.node_mock.is_fully_synced.return_value = True
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
         self.node_mock.is_fully_synced.return_value = False
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIn(f"is syncing with the network".lower(), message.lower())
 
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
         self.node_mock.is_fully_synced.return_value = True
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIn(f"is fully synced again".lower(), message.lower())
 
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)

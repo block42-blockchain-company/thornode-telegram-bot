@@ -7,7 +7,7 @@ import random
 import unittest
 import sys
 
-from bot.helpers import tor_to_rune
+from service.utils import tor_to_rune
 
 sys.path.append('..')
 
@@ -90,16 +90,19 @@ class ThornodeBot(unittest.TestCase):
 
             response = next(self.telegram.iter_history(self.BOT_ID))
             inline_keyboard_len = len(response.reply_markup.inline_keyboard)
-            assert response.reply_markup.inline_keyboard[inline_keyboard_len - 2][0].text == "1️⃣ ADD NODE", "1️⃣ ADD NODE not visible after clicking on 📡 MY NODES"
-            assert response.reply_markup.inline_keyboard[inline_keyboard_len - 1][0].text == "➕ ADD ALL", "➕ ADD ALL not visible after clicking on 📡 MY NODES"
-            assert response.reply_markup.inline_keyboard[inline_keyboard_len - 1][1].text == "➖ REMOVE ALL", "➖ REMOVE ALL not visible after clicking on 📡 MY NODES"
+            assert response.reply_markup.inline_keyboard[inline_keyboard_len - 2][
+                       0].text == "1️⃣ ADD NODE", "1️⃣ ADD NODE not visible after clicking on 📡 MY NODES"
+            assert response.reply_markup.inline_keyboard[inline_keyboard_len - 1][
+                       0].text == "➕ ADD ALL", "➕ ADD ALL not visible after clicking on 📡 MY NODES"
+            assert response.reply_markup.inline_keyboard[inline_keyboard_len - 1][
+                       1].text == "➖ REMOVE ALL", "➖ REMOVE ALL not visible after clicking on 📡 MY NODES"
             print("📡 MY NODES ✅")
             print("------------------------")
 
     def test_add_address_invalid(self):
         self.assert_add_address(address="invalidAddress",
-                     expected_response1="What's the address of your THORNode?",
-                     expected_response2="⛔️ I have not found a THORNode with this address! Please try another one.")
+                                expected_response1="What's the address of your THORNode?",
+                                expected_response2="⛔️ I have not found a THORNode with this address! Please try another one.")
 
     def test_add_address_valid(self):
         self.add_valid_address()
@@ -128,7 +131,8 @@ class ThornodeBot(unittest.TestCase):
                 "➖ REMOVE Button not in Thornode Details"
             assert response.reply_markup.inline_keyboard[0][1].text == "✏️ CHANGE ALIAS", \
                 "✏️ CHANGE ALIAS Button not in Thornode Details"
-            assert response.reply_markup.inline_keyboard[1][0].text == "⬅️ BACK", "⬅️ BACK Show Button not in Thornode Details"
+            assert response.reply_markup.inline_keyboard[1][
+                       0].text == "⬅️ BACK", "⬅️ BACK Show Button not in Thornode Details"
 
             print("Thornode Details with " + valid_address + " ✅")
             print("------------------------")
@@ -159,13 +163,13 @@ class ThornodeBot(unittest.TestCase):
 
     def test_change_alias_invalid(self):
         self.assert_change_alias(alias="SomeNewAliasThatIsUnfortunatelyTooLong",
-                              expected_response1='How would you like to name your THORNode?',
-                              expected_response2="⛔️ Alias cannot have more than 16 characters! Please try another one.")
+                                 expected_response1='How would you like to name your THORNode?',
+                                 expected_response2="⛔️ Alias cannot have more than 16 characters! Please try another one.")
 
     def test_change_alias_valid(self):
         self.assert_change_alias(alias="newAlias",
-                              expected_response1='How would you like to name your THORNode?',
-                              expected_response2="Got it! 👌")
+                                 expected_response1='How would you like to name your THORNode?',
+                                 expected_response2="Got it! 👌")
 
     def test_add_all_addresses_confirm_false(self):
         self.assert_add_all_addresses(confirm=False)
@@ -214,7 +218,7 @@ class ThornodeBot(unittest.TestCase):
 
             expected_response = 'THORNode: not monitored'
             assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                                      "'\nbut got\n'" + response.text + "'"
+                                                                "'\nbut got\n'" + response.text + "'"
             print("👀 SHOW ALL ✅")
             print("------------------------")
 
@@ -295,7 +299,6 @@ class ThornodeBot(unittest.TestCase):
         self.assert_health_notification(BINANCE, healthy=False)
         self.assert_health_notification(BINANCE, healthy=True)
 
-
     """
     ######################################################################################################################################################
     HELPER
@@ -325,8 +328,8 @@ class ThornodeBot(unittest.TestCase):
     def add_valid_address(self):
         valid_address = json.load(open('mock_files/nodeaccounts.json'))[0]['node_address']
         self.assert_add_address(address=valid_address,
-                     expected_response1="What's the address of your THORNode?",
-                     expected_response2="Got it! 👌")
+                                expected_response1="What's the address of your THORNode?",
+                                expected_response2="Got it! 👌")
         return valid_address
 
     def assert_health_notification(self, chain, healthy):
@@ -354,7 +357,7 @@ class ThornodeBot(unittest.TestCase):
                 expected_response = messageContent + ' is not healthy anymore'
 
             assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                                      "'\nbut got\n'" + response.text + "'"
+                                                                "'\nbut got\n'" + response.text + "'"
 
             print("Check " + messageContent + " with healthy==" + str(healthy) + " ✅")
             print("------------------------")
@@ -401,7 +404,7 @@ class ThornodeBot(unittest.TestCase):
                     "YES button on ➕ ADD ALL confirmation does not yield addition statement"
                 assert second_response_2.text == "Click an address from the list below or add a node:", \
                     "YES button on ➕ ADD ALL confirmation does not go back to 📡 MY NODES menu"
-                assert second_response_2.reply_markup.inline_keyboard[1][0].text.find('thor') != -1,\
+                assert second_response_2.reply_markup.inline_keyboard[1][0].text.find('thor') != -1, \
                     "Nodes are not added after YES button on ➕ ADD ALL confirmation"
             else:
                 self.click_button("NO ❌")
@@ -464,8 +467,8 @@ class ThornodeBot(unittest.TestCase):
 
             if field == "node_address":
                 expected_response = 'is not active anymore! 💀' + '\n' + \
-                                   'Address: ' + node_data_original[0]['node_address'] + '\n\n' + \
-                                   'Please enter another THORNode address.'
+                                    'Address: ' + node_data_original[0]['node_address'] + '\n\n' + \
+                                    'Please enter another THORNode address.'
             else:
                 expected_response = 'Address: ' + node_data_original[0]['node_address'] + '\n' + \
                                     'Status: ' + node_data_original[0]['status'].capitalize()
@@ -503,7 +506,7 @@ class ThornodeBot(unittest.TestCase):
             response2 = next(itertools.islice(self.telegram.iter_history(self.BOT_ID), 0, None))
 
             expected_response1 = 'Address: ' + node_data_original[0]['node_address'] + '\n' + \
-                                'Status: ' + node_data_original[0]['status'].capitalize()
+                                 'Status: ' + node_data_original[0]['status'].capitalize()
             expected_response1 += ' ➡️ ' + node_data_new[0]['status'].capitalize()
             expected_response1 += '\nBond: ' + tor_to_rune(node_data_original[0]['bond'])
             expected_response1 += '\nSlash Points: ' + '{:,}'.format(int(node_data_original[0]['slash_points']))
@@ -534,8 +537,9 @@ class ThornodeBot(unittest.TestCase):
 
             first_response = next(self.telegram.iter_history(self.BOT_ID))
 
-            assert first_response.text.find('Do you really want to remove this node from your monitoring list?') != -1 and \
-                first_response.text.find(valid_address) != -1, \
+            assert first_response.text.find(
+                'Do you really want to remove this node from your monitoring list?') != -1 and \
+                   first_response.text.find(valid_address) != -1, \
                 "➖ REMOVE button doesn't work!"
 
             if confirm:
@@ -548,7 +552,8 @@ class ThornodeBot(unittest.TestCase):
                     "YES button on deletion confirmation does not yield deletion statement"
                 assert second_response_2.text == "Click an address from the list below or add a node:", \
                     "YES button on deletion confirmation does not go back to thornodes menu"
-                assert second_response_2.reply_markup.inline_keyboard[0][0].text == "1️⃣ ADD NODE", "Node is NOT deleted after deletion"
+                assert second_response_2.reply_markup.inline_keyboard[0][
+                           0].text == "1️⃣ ADD NODE", "Node is NOT deleted after deletion"
             else:
                 self.click_button("NO ❌")
                 time.sleep(3)
@@ -586,7 +591,7 @@ class ThornodeBot(unittest.TestCase):
                 assert second_response_2.text == "Click an address from the list below or add a node:", \
                     "YES button on ➖ REMOVE ALL confirmation does not go back to 📡 MY NODES menu"
                 assert second_response_2.reply_markup.inline_keyboard[0][0].text == '1️⃣ ADD NODE' and \
-                    "Nodes are not deleted after YES button on ➖ REMOVE ALL confirmation"
+                       "Nodes are not deleted after YES button on ➖ REMOVE ALL confirmation"
             else:
                 self.click_button("NO ❌")
                 time.sleep(3)
@@ -616,7 +621,7 @@ class ThornodeBot(unittest.TestCase):
                 expected_response = 'The node caught up to the latest block height again!'
 
             assert response.text.find(expected_response) != -1, "Expected '" + expected_response + \
-                                                                      "'\nbut got\n'" + response.text + "'"
+                                                                "'\nbut got\n'" + response.text + "'"
 
             print("Check catch up status with catching_up=" + str(catching_up) + " ✅")
             print("------------------------")

@@ -3,7 +3,8 @@ import random
 import aiohttp
 import requests
 
-from constants import *
+from constants.globals import *
+from constants.node_ips import *
 
 
 def get_node_accounts():
@@ -38,6 +39,18 @@ def is_midgard_api_healthy(node_ip) -> bool:
     return True
 
 
+async def is_midgard_api_healthy_async(node_ip, timeout=CONNECTION_TIMEOUT) -> bool:
+    async with aiohttp.ClientSession() as session:
+        try:
+            response = await session.get(
+                f'{node_ip}:8080/v1/health',
+                timeout=timeout)
+        except:
+            return False
+
+        return response.status < 400
+
+
 def get_number_of_unconfirmed_transactions(node_ip) -> int:
     unconfirmed_txs_path = {
         "TESTNET": ":26657/num_unconfirmed_txs",
@@ -68,6 +81,15 @@ def is_binance_node_healthy(binance_node_ip) -> bool:
 def get_thorchain_blocks_per_year(node_ip=None):
     constants = get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants", node_ip=node_ip)
     return constants['int_64_values']['BlocksPerYear']
+
+
+def get_thorchain_blocks_per_second():
+    return get_thorchain_blocks_per_year() / (365 * 24 * 60 * 60)
+
+
+def get_thorchain_last_block(node_ip=None):
+    last_block = get_request_json_thorchain(url_path=f":8080/v1/thorchain/lastblock", node_ip=node_ip)
+    return last_block['thorchain']
 
 
 def get_asgard_json() -> dict:
@@ -104,10 +126,13 @@ def get_request_json(url: str) -> dict:
     if response.status_code != 200:
         raise BadStatusException(response)
 
-    return response.json()
+    if response.content:
+        return response.json()
+    else:
+        return {}
 
 
-def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
+def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
     if DEBUG:
         node_ip = 'localhost'
 
@@ -127,6 +152,14 @@ def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
         except Exception:
             continue
     raise Exception("No seed node returned a valid response!")
+
+
+def get_thornode_object_or_none(address):
+    nodes = get_node_accounts()
+
+    node = next(filter(lambda n: n['node_address'] == address, nodes), None)
+
+    return node
 
 
 class BadStatusException(Exception):

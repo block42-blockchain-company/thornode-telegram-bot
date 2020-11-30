@@ -27,18 +27,21 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
     pool_addresses_counter = 0
 
     # Midgard queries had to be with "?height=0" at the end of the endpoint.
-    # That's why we check if our keywords are "in" the whole endpoint query.
+    # That's why we remove http arguments
     def do_GET(self):
-        endpoint = self.path.rstrip('/')
-        if '/v1/health' in endpoint:
+        endpoint = self.path.rstrip('/').split('?')[0]
+        if '/v1/health' == endpoint:
             self.path = 'mock_files/midgard.json'
-        elif '/v1/network' in endpoint:
+        elif '/v1/network' == endpoint:
             self.path = 'mock_files/network.json'
-        elif '/v1/thorchain/constants' in endpoint:
+        elif '/v1/thorchain/constants' == endpoint:
             self.path = 'mock_files/thorchain_constants.json'
-        elif '/v1/thorchain/pool_addresses' in endpoint:
+        elif '/v1/thorchain/pool_addresses' == endpoint:
             MidgardHttpServerHandler.pool_addresses_counter += 1
-            self.path = 'mock_files/pool_addresses_' + str(MidgardHttpServerHandler.pool_addresses_counter % 3 + 1) + '.json'
+            self.path = 'mock_files/pool_addresses_' + str(
+                MidgardHttpServerHandler.pool_addresses_counter % 3 + 1) + '.json'
+        elif '/v1/thorchain/lastblock' == endpoint:
+            self.path = 'mock_files/lastblock.json'
         else:
             self.path = 'mock_files' + endpoint
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
@@ -49,7 +52,8 @@ class MidgardHttpServerHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     socketserver.TCPServer.allow_reuse_address = True
-    midgard_process = Thread(target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever)
+    midgard_process = Thread(
+        target=socketserver.TCPServer(("", MIDGARD_SERVER_PORT), MidgardHttpServerHandler).serve_forever)
     midgard_process.daemon = True
     midgard_process.start()
     print('Midgard mock server is running on localhost:' + str(MIDGARD_SERVER_PORT))

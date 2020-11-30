@@ -3,7 +3,8 @@ import time
 
 from future.moves import subprocess
 from telegram.error import Unauthorized
-from jobs import *
+
+from jobs.jobs import *
 from service.thorchain_network_service import *
 
 
@@ -90,25 +91,6 @@ def setup_existing_users(dispatcher):
                     f"is not present in the network! "
                     f"I'm removing it...")
                 del dispatcher.user_data[chat_id]['nodes'][address]
-
-
-def setup_bot_data(dispatcher):
-    if 'binance_nodes' not in dispatcher.bot_data:
-        dispatcher.bot_data['binance_nodes'] = {}
-    for binance_node_ip in BINANCE_NODE_IPS:
-        if binance_node_ip not in dispatcher.bot_data['binance_nodes']:
-            dispatcher.bot_data['binance_nodes'][binance_node_ip] = {}
-
-    dispatcher.job_queue.run_repeating(general_bot_checks,
-                                       interval=JOB_INTERVAL_IN_SECONDS)
-    dispatcher.job_queue.run_repeating(check_bitcoin_height_increase_job,
-                                       interval=BitcoinNode.max_time_for_block_height_increase_in_seconds)
-    dispatcher.job_queue.run_repeating(check_ethereum_height_increase_job,
-                                       interval=EthereumNode.max_time_for_block_height_increase_in_seconds)
-
-    syncing_checks_interval_in_seconds = 120
-    dispatcher.job_queue.run_repeating(check_syncing_job,
-                                       interval=syncing_checks_interval_in_seconds)
 
 
 def setup_debug_processes():

@@ -1,7 +1,7 @@
 import unittest
 from datetime import timedelta
 
-from bot.helpers import format_to_days_and_hours
+from service.utils import format_to_days_and_hours
 
 
 class UnitTests(unittest.TestCase):

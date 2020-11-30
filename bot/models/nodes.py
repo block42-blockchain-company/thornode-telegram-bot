@@ -2,19 +2,21 @@ import abc
 
 import requests
 
-from helpers import eth_rpc_request, btc_rpc_request
 from service.thorchain_network_service import is_binance_node_healthy
+from service.utils import btc_rpc_request, eth_rpc_request
 
 
 class Node(abc.ABC):
     node_id: str
     node_ip: str
     network_name: str
+    network_short_name: str
 
-    def __init__(self, node_ip, network_name):
+    def __init__(self, node_ip, network_name, network_short_name):
         self.node_ip = node_ip
         self.network_name = network_name
         self.node_id = f'{network_name}-{node_ip}'
+        self.network_short_name = network_short_name
 
     @abc.abstractmethod
     def is_healthy(self) -> bool:
@@ -32,12 +34,11 @@ class Node(abc.ABC):
         return f"{self.network_name} node ({self.node_ip})"
 
 
-
 class BitcoinNode(Node):
     max_time_for_block_height_increase_in_seconds = 60 * 60  # 1 hour
 
     def __init__(self, node_ip, username, password):
-        super().__init__(node_ip, "Bitcoin")
+        super().__init__(node_ip, "Bitcoin", "BTC"),
         self.username = username
         self.password = password
 
@@ -85,7 +86,7 @@ class EthereumNode(Node):
     max_time_for_block_height_increase_in_seconds = 60 * 2  # 2 mins
 
     def __init__(self, node_ip):
-        super().__init__(node_ip, "Ethereum")
+        super().__init__(node_ip, "Ethereum", "ETH")
 
     def is_fully_synced(self) -> bool:
         is_syncing = eth_rpc_request(self.node_ip, method="eth_syncing").json()['result']
@@ -105,7 +106,7 @@ class EthereumNode(Node):
 
 class BinanceNode(Node):
     def __init__(self, node_ip):
-        super().__init__(node_ip, "Binance")
+        super().__init__(node_ip, "Binance", "BNB")
 
     def is_fully_synced(self) -> bool:
         # We didn't implement it for Binance yet
