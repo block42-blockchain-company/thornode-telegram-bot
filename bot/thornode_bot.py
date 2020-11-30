@@ -2,8 +2,8 @@ from telegram.error import InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters)
 
-from handlers.handlers import start, dispatch_query, plain_input
-from setup import *
+from handlers.handlers import *
+from service.setup import *
 
 
 def main():
@@ -27,9 +27,9 @@ def main():
     setup_existing_users(dispatcher=dispatcher)
     setup_bot_data(dispatcher=dispatcher)
 
-    dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('start', on_start_command))
     dispatcher.add_handler(CallbackQueryHandler(dispatch_query))
-    dispatcher.add_handler(MessageHandler(Filters.text, plain_input))
+    dispatcher.add_handler(MessageHandler(Filters.text, dispatch_plain_input_query))
 
     # Add error handler
     dispatcher.add_error_handler(error)
