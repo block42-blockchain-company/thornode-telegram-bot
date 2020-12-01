@@ -12,10 +12,7 @@ def show_other_nodes_menu(update, context):
     all_nodes = itertools.chain(EthereumNode.from_ips(ETHEREUM_NODE_IPS),
                                 BitcoinNode.from_ips(BITCOIN_NODE_IPS),
                                 BinanceNode.from_ips(BINANCE_NODE_IPS))
-    # todo: implement and fix binance nodes.
     all_nodes = list(all_nodes)
-    leng = len(all_nodes)
-    print(leng)
 
     text = HEALTH_LEGEND
     text += '\nClick an address from the list below or add a node:'
