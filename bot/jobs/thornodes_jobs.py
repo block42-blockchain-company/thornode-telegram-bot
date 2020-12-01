@@ -221,7 +221,7 @@ def check_thorchain_block_height(context, node_address):
         logger.exception(e)
         return
 
-    is_stuck = block_height <= node_data.setdefault('block_height', "0")
+    is_stuck = block_height <= node_data.setdefault('block_height', 0)
     block_height_stuck_count = node_data.setdefault("block_height_stuck_count", 0)
 
     if is_stuck:

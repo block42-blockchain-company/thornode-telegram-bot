@@ -1,8 +1,8 @@
 import requests
-from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
-from constants import *
+from constants.globals import CONNECTION_TIMEOUT
 
 
 def get_request_json(url: str) -> dict:
@@ -27,10 +27,10 @@ def requests_retry_session(retries=6,
 
     session = session or requests.Session()
     retry = Retry(total=retries,
-                 read=retries,
-                 connect=retries,
-                 backoff_factor=backoff_factor,
-                 status_forcelist=status_forcelist)
+                  read=retries,
+                  connect=retries,
+                  backoff_factor=backoff_factor,
+                  status_forcelist=status_forcelist)
 
     adapter = HTTPAdapter(max_retries=retry)
     session.mount("http://", adapter)

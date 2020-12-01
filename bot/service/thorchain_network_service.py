@@ -3,7 +3,6 @@ import random
 import aiohttp
 import requests
 
-from constants import *
 from service.general_network_service import get_request_json, get_request_json_with_retries
 from constants.globals import *
 from constants.node_ips import *
@@ -138,13 +137,3 @@ def get_thornode_object_or_none(address):
     node = next(filter(lambda n: n['node_address'] == address, nodes), None)
 
     return node
-
-
-class BadStatusException(Exception):
-    def __init__(self, response: requests.Response):
-        self.message = f"Error while network request.\n" \
-                       f"Received status code: {str(response.status_code)}\n" \
-                       f"Received response: {response.text}"
-
-    def __str__(self):
-        return self.message
