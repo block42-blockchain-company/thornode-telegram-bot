@@ -54,14 +54,13 @@ def show_other_nodes_details(update, context):
 
     text += f"Is fully synced: *{is_synced}*\n"
 
-    node_height = context.bot_data.get(node.node_id, {}).get('block_height', None)
+    node_height = None
     network_block_height = None
 
-    if node_height is None:
-        try:
-            node_height = node.get_block_height()
-        except Exception as e:
-            logger.debug(e, exc_info=True)
+    try:
+        node_height = node.get_block_height()
+    except Exception as e:
+        logger.debug(e, exc_info=True)
 
     try:
         network_block_height = node.get_real_block_count()
