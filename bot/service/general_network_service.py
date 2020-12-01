@@ -45,6 +45,24 @@ def parse_response(response) -> dict:
     return response.json()
 
 
+def btc_rpc_request(address: str, method: str, params=None):
+    return rpc_request(url=f'http://{address}', jsonrpc_version="1.0", method=method,
+                       params=params)
+
+
+def eth_rpc_request(ip: str, method: str, params=None):
+    return rpc_request(url=f'http://{ip}:8545/', jsonrpc_version="2.0", method=method,
+                       params=params)
+
+
+def rpc_request(url: str, method: str, jsonrpc_version: str, params=None):
+    if params is None:
+        params = []
+    json = {"jsonrpc": jsonrpc_version, "id": None, "method": method, "params": params}
+
+    return requests.post(url, json=json)
+
+
 class BadStatusException(Exception):
 
     def __init__(self, response: requests.Response):
