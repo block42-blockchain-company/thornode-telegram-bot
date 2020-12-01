@@ -95,9 +95,8 @@ def setup_existing_users(dispatcher):
 
 def setup_debug_processes():
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    increase_block_height_path = os.sep.join(
-        [current_dir, os.path.pardir, "test", "increase_block_height.py"])
-    test_dir = os.sep.join([current_dir, os.path.pardir, "test"])
+    test_dir = os.sep.join([current_dir, os.path.pardir, os.path.pardir, "test"])
+    increase_block_height_path = os.sep.join([test_dir, "increase_block_height.py"])
     mock_api_path = os.sep.join([test_dir, "mock_api.py"])
 
     increase_block_height_process = subprocess.Popen(
