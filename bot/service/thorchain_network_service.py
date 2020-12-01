@@ -3,6 +3,8 @@ import random
 import aiohttp
 import requests
 
+from constants import *
+from service.general_network_service import get_request_json, get_request_json_with_retries
 from constants.globals import *
 from constants.node_ips import *
 
@@ -21,8 +23,8 @@ def get_node_status(node_ip=None):
     return get_request_json_thorchain(url_path=status_path, node_ip=node_ip)
 
 
-def get_latest_block_height(node_ip=None) -> str:
-    return str(get_node_status(node_ip)['result']['sync_info']['latest_block_height'])
+def get_latest_block_height(node_ip=None) -> int:
+    return int(get_node_status(node_ip)['result']['sync_info']['latest_block_height'])
 
 
 def is_thorchain_catching_up(node_ip=None) -> bool:
@@ -91,7 +93,7 @@ def get_yggdrasil_json() -> dict:
 
 
 def get_binance_balance(address: str) -> dict:
-    return get_request_json(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
+    return get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
 
 
 async def get_pool_addresses(node_ip: str):
@@ -106,18 +108,6 @@ async def get_pool_addresses(node_ip: str):
                     "Code: ${str(resp.status)}")
 
             return await response.json()
-
-
-def get_request_json(url: str) -> dict:
-    response = requests.get(url=url, timeout=CONNECTION_TIMEOUT)
-
-    if response.status_code != 200:
-        raise BadStatusException(response)
-
-    if response.content:
-        return response.json()
-    else:
-        return {}
 
 
 def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
@@ -151,7 +141,6 @@ def get_thornode_object_or_none(address):
 
 
 class BadStatusException(Exception):
-
     def __init__(self, response: requests.Response):
         self.message = f"Error while network request.\n" \
                        f"Received status code: {str(response.status_code)}\n" \
