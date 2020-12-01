@@ -1,10 +1,8 @@
 import abc
 
-import requests
-
 from constants.node_ips import BITCOIN_NODE_IPS
+from service.general_network_service import *
 from service.thorchain_network_service import is_binance_node_healthy
-from service.utils import btc_rpc_request, eth_rpc_request
 
 
 class Node(abc.ABC):
