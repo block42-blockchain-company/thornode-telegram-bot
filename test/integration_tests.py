@@ -87,6 +87,8 @@ class ThornodeBot(unittest.TestCase):
 
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
             time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
+            time.sleep(3)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
             inline_keyboard_len = len(response.reply_markup.inline_keyboard)
@@ -114,6 +116,8 @@ class ThornodeBot(unittest.TestCase):
             self.telegram.send_message(self.BOT_ID, "/start")
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
+            time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
             time.sleep(3)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
@@ -144,6 +148,8 @@ class ThornodeBot(unittest.TestCase):
             self.telegram.send_message(self.BOT_ID, "/start")
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
+            time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
             time.sleep(3)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
@@ -368,6 +374,8 @@ class ThornodeBot(unittest.TestCase):
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
             time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
+            time.sleep(3)
 
             self.click_button("1️⃣ ADD NODE")
 
@@ -388,6 +396,8 @@ class ThornodeBot(unittest.TestCase):
             self.telegram.send_message(self.BOT_ID, "/start")
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
+            time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
             time.sleep(3)
             self.click_button("➕ ADD ALL")
 
@@ -423,6 +433,8 @@ class ThornodeBot(unittest.TestCase):
             self.telegram.send_message(self.BOT_ID, "/start")
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
+            time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
             time.sleep(3)
 
             response = next(self.telegram.iter_history(self.BOT_ID))
@@ -529,6 +541,8 @@ class ThornodeBot(unittest.TestCase):
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
             time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
+            time.sleep(3)
             response = next(self.telegram.iter_history(self.BOT_ID))
             self.click_button(response.reply_markup.inline_keyboard[0][0].text)
             time.sleep(5)
@@ -569,11 +583,15 @@ class ThornodeBot(unittest.TestCase):
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
             time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
+            time.sleep(3)
             self.click_button("➕ ADD ALL")
 
             self.telegram.send_message(self.BOT_ID, "/start")
             time.sleep(3)
             self.telegram.send_message(self.BOT_ID, "📡 MY NODES")
+            time.sleep(3)
+            self.click_button("📡 THORCHAIN NODES")
             time.sleep(3)
             self.click_button("➖ REMOVE ALL")
 
