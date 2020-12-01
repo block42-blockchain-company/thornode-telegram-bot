@@ -100,7 +100,7 @@ def handle_change_alias(update, context):
         context.user_data['expected'] = 'change_alias'
         return
 
-    context.user_data.get('nodes', {})[
+    context.user_data.setdefault('nodes', {})[
         context.user_data['selected_node_address']]['alias'] = alias
 
     # Send message

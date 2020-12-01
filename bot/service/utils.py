@@ -213,20 +213,18 @@ def add_thornode_to_user_data(user_data, address, node):
     Add a node in the user specific dictionary
     """
 
+    nodes = user_data.setdefault('nodes', {})
     # Find an alias that does not exist yet
     i = 0
     while True:
         i += 1
         alias = "Thor-" + str(i)
-        if not next(
-                filter(
-                    lambda current_address: user_data['nodes'][current_address][
-                                                'alias'] == alias, user_data['nodes']), None):
+        if not next(filter(lambda current_address: nodes[current_address]['alias'] == alias, nodes), None):
             break
 
-    user_data['nodes'][address] = node
-    user_data['nodes'][address]['alias'] = alias
-    user_data['nodes'][address][
+    nodes[address] = node
+    nodes[address]['alias'] = alias
+    nodes[address][
         'last_notification_timestamp'] = datetime.timestamp(datetime.now())
-    user_data['nodes'][address][
+    nodes[address][
         'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT

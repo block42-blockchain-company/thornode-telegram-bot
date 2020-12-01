@@ -1,8 +1,10 @@
 import random
+from time import sleep
 
 import aiohttp
 import requests
 
+from constants.mock_values import thorchain_last_block_mock
 from service.general_network_service import get_request_json, get_request_json_with_retries
 from constants.globals import *
 from constants.node_ips import *
@@ -77,7 +79,12 @@ def get_thorchain_blocks_per_second():
 
 
 def get_thorchain_last_block(node_ip=None):
-    last_block = get_request_json_thorchain(url_path=f":8080/v1/thorchain/lastblock", node_ip=node_ip)
+    if DEBUG:
+        sleep(0.5)
+        last_block = thorchain_last_block_mock
+    else:
+        last_block = get_request_json_thorchain(url_path=f":8080/v1/thorchain/lastblock", node_ip=node_ip)
+
     return last_block['thorchain']
 
 
