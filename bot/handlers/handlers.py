@@ -4,6 +4,7 @@ from telegram.error import BadRequest
 
 from handlers.network_info_handlers import *
 from handlers.other_nodes_handlers import *
+from handlers.settings_handlers import show_settings, set_threshold
 from handlers.thornodes_handlers import *
 from jobs.jobs import start_user_job
 
@@ -94,6 +95,8 @@ def dispatch_query(update, context):
         call = show_other_nodes_menu
     elif data.startswith("other_node_details"):
         call = show_other_nodes_details
+    elif data == 'set_threshold':
+        call = set_threshold
     else:
         edit = False
 
@@ -134,6 +137,8 @@ def dispatch_plain_input_query(update, context):
         return show_network_menu(update, context)
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
+    elif message == '⚙️ SETTINGS':
+        return show_settings(update, context)
     elif expected == 'add_node':
         context.user_data['expected'] = None
         return handle_add_node(update, context)
