@@ -4,13 +4,15 @@ import time
 
 from telegram.error import BadRequest, Unauthorized, InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
-                          CallbackQueryHandler, MessageHandler, Filters)
+                          CallbackQueryHandler, MessageHandler, Filters, messagequeue)
 from telegram.ext.dispatcher import run_async
+from telegram.utils.request import Request
 
 from handlers.network_info import *
 from jobs import *
 from messages import NETWORK_ERROR_MSG
 from service.thorchain_network_service import *
+from message_queue import MQBot
 
 """
 ######################################################################################################################################################
@@ -27,8 +29,9 @@ def setup_existing_users(dispatcher):
 
     blocked_ids = []
 
-    for chat_id in dispatcher.user_data.keys():
-        if ALLOWED_USER_IDS != 'ALL' and chat_id not in ALLOWED_USER_IDS:
+    for chat_id in dispatcher.chat_data.keys():
+        # about `not is_group_chat(chat_id)`: Filter out group chats, as they can't get whitelisted.
+        if ALLOWED_USER_IDS != 'ALL' and not is_group_chat(chat_id) and chat_id not in ALLOWED_USER_IDS:
             blocked_ids.append(chat_id)
             continue
 
@@ -36,38 +39,40 @@ def setup_existing_users(dispatcher):
                           'Me, your THORNode Bot, just got restarted on the server! 🤖\n' \
                           'To make sure you have the latest features, please start ' \
                           'a fresh chat with me by typing /start.'
-        try:
-            dispatcher.bot.send_message(chat_id, restart_message)
-        except Unauthorized:
+
+        message_result = dispatcher.bot.send_message(chat_id, restart_message)
+        if isinstance(message_result.exception, Unauthorized):
             blocked_ids.append(chat_id)
             continue
-        except TelegramError as e:
-            logger.exception(f'USER {str(chat_id)}\n Error: {str(e)}',
+        elif isinstance(message_result.exception, TelegramError):
+            logger.exception(f'USER {str(chat_id)}\n Error: {str(message_result.exception)}',
                              exc_info=True)
 
         # Start monitoring jobs for all existing users
-        if 'job_started' not in dispatcher.user_data[chat_id]:
-            dispatcher.user_data[chat_id]['job_started'] = True
+        if 'job_started' not in dispatcher.chat_data[chat_id]:
+            dispatcher.chat_data[chat_id]['job_started'] = True
         dispatcher.job_queue.run_repeating(
             user_specific_checks,
             interval=JOB_INTERVAL_IN_SECONDS,
             context={
                 'chat_id': chat_id,
-                'user_data': dispatcher.user_data[chat_id]
+                'chat_data': dispatcher.chat_data[chat_id]
             })
 
     for chat_id in blocked_ids:
-        logger.warning(f"Telegram user {str(chat_id)} blocked me or is "
-                       f"not Admin anymore; removing him from the user list")
+        logger.info(f"Telegram chat {str(chat_id)} blocked me or is "
+                    f"not Admin anymore; removing it from the chat list")
 
-        del dispatcher.user_data[chat_id]
+        if not is_group_chat(chat_id):
+            del dispatcher.user_data[chat_id]
+            del dispatcher.persistence.user_data[chat_id]
+
         del dispatcher.chat_data[chat_id]
-        del dispatcher.persistence.user_data[chat_id]
         del dispatcher.persistence.chat_data[chat_id]
 
         # Somehow session.data does not get updated if all users block the bot.
         # That's why we delete the file ourselves.
-        if len(dispatcher.persistence.user_data) == 0:
+        if len(dispatcher.persistence.chat_data) == 0:
             if os.path.exists(session_data_path):
                 os.remove(session_data_path)
 
@@ -75,33 +80,33 @@ def setup_existing_users(dispatcher):
         new_node_accounts = get_node_accounts()
     except:
         logger.exception(
-            "Fatal error! I couldn't get node accounts to update the local user_data!",
+            "Fatal error! I couldn't get node accounts to update the local chat_data!",
             exc_info=True)
         return
 
-    # Delete all node addresses and add them again to ensure all user_data fields are up to date
-    for chat_id in dispatcher.user_data.keys():
-        if 'nodes' not in dispatcher.user_data[chat_id]:
-            dispatcher.user_data[chat_id]['nodes'] = {}
+    # Delete all node addresses and add them again to ensure all chat_data fields are up to date
+    for chat_id in dispatcher.chat_data.keys():
+        if 'nodes' not in dispatcher.chat_data[chat_id]:
+            dispatcher.chat_data[chat_id]['nodes'] = {}
 
         local_node_addresses = list(
-            dispatcher.user_data[chat_id]['nodes'].keys())
+            dispatcher.chat_data[chat_id]['nodes'].keys())
 
         for address in local_node_addresses:
             try:
                 new_node = next(n for n in new_node_accounts
                                 if n['node_address'] == address)
-                del dispatcher.user_data[chat_id]['nodes'][address]
-                add_thornode_to_user_data(dispatcher.user_data[chat_id],
+                del dispatcher.chat_data[chat_id]['nodes'][address]
+                add_thornode_to_chat_data(dispatcher.chat_data[chat_id],
                                           address, new_node)
             except StopIteration:
-                obsolete_node = dispatcher.user_data[chat_id]['nodes'][address]
+                obsolete_node = dispatcher.chat_data[chat_id]['nodes'][address]
                 dispatcher.bot.send_message(
                     chat_id,
                     f"Your node {obsolete_node['alias']} with address {address} "
                     f"is not present in the network! "
                     f"I'm removing it...")
-                del dispatcher.user_data[chat_id]['nodes'][address]
+                del dispatcher.chat_data[chat_id]['nodes'][address]
 
 
 def setup_bot_data(dispatcher):
@@ -140,15 +145,15 @@ def start(update, context):
         return
 
     # Start job for user
-    if 'job_started' not in context.user_data:
+    if 'job_started' not in context.chat_data:
         context.job_queue.run_repeating(user_specific_checks,
                                         interval=JOB_INTERVAL_IN_SECONDS,
                                         context={
                                             'chat_id': update.message.chat.id,
-                                            'user_data': context.user_data
+                                            'chat_data': context.chat_data
                                         })
-        context.user_data['job_started'] = True
-        context.user_data['nodes'] = {}
+        context.chat_data['job_started'] = True
+        context.chat_data['nodes'] = {}
 
     text = 'Heil ok sæll! I am your THORNode Bot running on ' + NETWORK_TYPE + '. 🤖\n\n' \
                                                                                'I will notify you about changes of your THORNode\'s\n' \
@@ -197,7 +202,7 @@ def dispatch_query(update, context):
     if not is_admin(update, context):
         return
 
-    context.user_data['expected'] = None
+    context.chat_data['expected'] = None
     edit = True
     call = None
 
@@ -255,7 +260,7 @@ def show_thornode_menu_edit_msg(update, context):
     Show Thornode Menu
     """
 
-    keyboard = get_thornode_menu_buttons(user_data=context.user_data)
+    keyboard = get_thornode_menu_buttons(chat_data=context.chat_data)
     text = 'Click an address from the list below or add a node:' if len(keyboard) > 2 else 'You do not monitor any ' \
                                                                                            'THORNodes yet.\nAdd a Node!'
     query = update.callback_query
@@ -298,7 +303,7 @@ def add_thornode(update, context):
     Initiate a conversation and prompt for user input (thornode address).
     """
 
-    context.user_data['expected'] = 'add_node'
+    context.chat_data['expected'] = 'add_node'
 
     text = 'What\'s the address of your THORNode?'
     return show_text_input_message(update, text)
@@ -310,7 +315,7 @@ def change_alias(update, context):
     Initiate a conversation and prompt for user input (new alias).
     """
 
-    context.user_data['expected'] = 'change_alias'
+    context.chat_data['expected'] = 'change_alias'
 
     text = 'How would you like to name your THORNode?'
     return show_text_input_message(update, text)
@@ -326,8 +331,8 @@ def plain_input(update, context):
         return
 
     message = update.message.text
-    expected = context.user_data[
-        'expected'] if 'expected' in context.user_data else None
+    expected = context.chat_data[
+        'expected'] if 'expected' in context.chat_data else None
     if message == '📡 MY NODES':
         return show_thornode_menu_handler(update, context)
     elif message == '🌎 NETWORK':
@@ -335,10 +340,10 @@ def plain_input(update, context):
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
     elif expected == 'add_node':
-        context.user_data['expected'] = None
+        context.chat_data['expected'] = None
         return handle_add_node(update, context)
     elif expected == 'change_alias':
-        context.user_data['expected'] = None
+        context.chat_data['expected'] = None
         return handle_change_alias(update, context)
 
 
@@ -356,10 +361,10 @@ def handle_add_node(update, context):
         update.message.reply_text(
             '⛔️ I have not found a THORNode with this address! Please try another one.'
         )
-        context.user_data['expected'] = 'add_node'
+        context.chat_data['expected'] = 'add_node'
         return
 
-    add_thornode_to_user_data(context.user_data, address, node)
+    add_thornode_to_chat_data(context.chat_data, address, node)
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -378,11 +383,11 @@ def handle_change_alias(update, context):
         update.message.reply_text(
             '⛔️ Alias cannot have more than 16 characters! Please try another one.'
         )
-        context.user_data['expected'] = 'change_alias'
+        context.chat_data['expected'] = 'change_alias'
         return
 
-    context.user_data['nodes'][
-        context.user_data['selected_node_address']]['alias'] = alias
+    context.chat_data['nodes'][
+        context.chat_data['selected_node_address']]['alias'] = alias
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -394,7 +399,7 @@ def confirm_thornode_deletion(update, context):
     Initiate process of thornode address removal
     """
 
-    address = context.user_data['selected_node_address']
+    address = context.chat_data['selected_node_address']
 
     keyboard = [[
         InlineKeyboardButton('YES ✅', callback_data='delete_thornode'),
@@ -402,7 +407,7 @@ def confirm_thornode_deletion(update, context):
                              callback_data='thornode_details-' + address)
     ]]
     text = '⚠️ Do you really want to remove this node from your monitoring list? ⚠\n️' + \
-           "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
+           "*" + context.chat_data['nodes'][address]['alias'] + "*\n" + \
            "*" + address + "*"
 
     return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
@@ -414,13 +419,13 @@ def delete_thornode(update, context):
     """
 
     query = update.callback_query
-    address = context.user_data['selected_node_address']
+    address = context.chat_data['selected_node_address']
 
     text = "❌ Thornode got deleted! ❌\n" + \
-           "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
+           "*" + context.chat_data['nodes'][address]['alias'] + "*\n" + \
            "*" + address + "*"
 
-    del context.user_data['nodes'][address]
+    del context.chat_data['nodes'][address]
 
     query.edit_message_text(text, parse_mode='markdown')
     show_thornode_menu_new_msg(update, context)
@@ -434,7 +439,7 @@ def thornode_details(update, context):
     query = update.callback_query
 
     address = query.data.split("-")[1]
-    context.user_data['selected_node_address'] = address
+    context.chat_data['selected_node_address'] = address
 
     return show_detail_menu(update=update, context=context)
 
@@ -450,8 +455,8 @@ def add_all_thornodes(update, context):
 
     for node in nodes:
         address = node['node_address']
-        if address not in context.user_data['nodes']:
-            add_thornode_to_user_data(context.user_data, address, node)
+        if address not in context.chat_data['nodes']:
+            add_thornode_to_chat_data(context.chat_data, address, node)
 
     # Send message
     query.edit_message_text('Added all THORNodes! 👌')
@@ -466,11 +471,11 @@ def delete_all_thornodes(update, context):
     query = update.callback_query
 
     addresses = []
-    for address in context.user_data['nodes']:
+    for address in context.chat_data['nodes']:
         addresses.append(address)
 
     for address in addresses:
-        del context.user_data['nodes'][address]
+        del context.chat_data['nodes'][address]
 
     text = '❌ Deleted all THORNodes! ❌'
     # Send message
@@ -502,11 +507,11 @@ def show_all_thorchain_nodes(update, context):
             monitored_address = next(
                 filter(
                     lambda monitored_address: monitored_address == node[
-                        'node_address'], context.user_data['nodes']), None)
+                        'node_address'], context.chat_data['nodes']), None)
             text += 'THORNode: *'
 
             if monitored_address:
-                text += context.user_data['nodes'][monitored_address]['alias']
+                text += context.chat_data['nodes'][monitored_address]['alias']
             else:
                 text += "not monitored"
             text += "*\n"
@@ -572,14 +577,27 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
+    # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
+    # We cannot set burst_limit to 1, because of some off-by-one if check in the library
+    m_queue = messagequeue.MessageQueue(all_burst_limit=20, all_time_limit_ms=1000,
+                                        group_burst_limit=2, group_time_limit_ms=7000)
+    # set connection pool size for bot because
+    # it only happens automatically when creating Updater() with the telegram token.
+    # But we use the mq_bot to create the Updater() instance.
+    # Increased 'read_timeout' from default 5 seconds to 20 seconds to mitigate Timeouts due
+    # to the MessageQueue delay for group chats.
+    request = Request(con_pool_size=8, read_timeout=20)
+
     try:
-        bot = Updater(TELEGRAM_BOT_TOKEN,
-                      persistence=PicklePersistence(filename=session_data_path),
-                      use_context=True)
+        mq_bot = MQBot(TELEGRAM_BOT_TOKEN, request=request, mqueue=m_queue)
     except InvalidToken:
         logger.error("Invalid telegram token. Please make sure to set TELEGRAM_BOT_TOKEN environmental variable with"
                      " correct Telegram bot token. Check project docs for more details.", exc_info=True)
         raise
+
+    bot = Updater(bot=mq_bot,
+                  persistence=PicklePersistence(filename=session_data_path),
+                  use_context=True)
 
     dispatcher = bot.dispatcher
 
