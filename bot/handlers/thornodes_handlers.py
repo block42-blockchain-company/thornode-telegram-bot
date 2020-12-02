@@ -287,15 +287,16 @@ def get_thornode_menu_buttons(user_data):
         buttons.append(InlineKeyboardButton(button_text, callback_data='thornode_details-' + address))
 
     keyboard = build_2_columns_keyboard(buttons)
-
-    keyboard.append(
-        [InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
-    keyboard.append([
+    buttons = [[
+        InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')], [
         InlineKeyboardButton('➕ ADD ALL',
                              callback_data='confirm_add_all_thornodes'),
         InlineKeyboardButton('➖ REMOVE ALL',
                              callback_data='confirm_delete_all_thornodes')
-    ])
+    ], [
+        InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu'),
+    ]]
+    keyboard.extend(buttons)
 
     return keyboard
 

@@ -26,6 +26,7 @@ def show_other_nodes_menu(update, context):
                                             callback_data='other_node_details-' + node.node_id))
 
     keyboard = build_2_columns_keyboard(buttons)
+    keyboard.append([InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu')])
 
     try_message(context=context,
                 chat_id=update.effective_message.chat_id,
