@@ -1,29 +1,22 @@
-import itertools
-
 from telegram import InlineKeyboardButton
 
 from constants.messages import HEALTH_LEGEND
-from constants.node_ips import *
+from data.other_nodes_dao import OtherNodesDao
 from handlers.chat_helpers import *
-from models.nodes import *
 
 
 def show_other_nodes_menu(update, context):
-    all_nodes = itertools.chain(EthereumNode.from_ips(ETHEREUM_NODE_IPS),
-                                BitcoinNode.from_ips(BITCOIN_NODE_IPS),
-                                BinanceNode.from_ips(BINANCE_NODE_IPS))
-    all_nodes = list(all_nodes)
-
+    dao = OtherNodesDao()
     text = HEALTH_LEGEND
     text += '\nClick an address from the list below or add a node:'
 
     buttons = []
-    for node in all_nodes:
+    for node in dao.get_all_nodes():
         is_healthy = context.bot_data.get(node.node_id, {}).get('health', None)
         emoji = HEALTH_EMOJIS[is_healthy]
 
         buttons.append(InlineKeyboardButton(f'{emoji} {node.network_short_name} {node.node_ip}',
-                                            callback_data='other_node_details-' + node.node_id))
+                                            callback_data=f'other_node-{hash(node)}'))
 
     keyboard = build_2_columns_keyboard(buttons)
     keyboard.append([InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu')])
@@ -36,8 +29,8 @@ def show_other_nodes_menu(update, context):
 
 def show_other_nodes_details(update, context):
     query = update.callback_query
-    node_id = query.data.split('other_node_details-')[-1]
-    node = Node.from_id(node_id)
+    node_hash = query.data.split('other_node-')[-1]
+    node = OtherNodesDao().get_node_by_hash(node_hash)
 
     text = f"Details of node: *{node.network_name}* (*{node.node_ip}*)\n\n "
 

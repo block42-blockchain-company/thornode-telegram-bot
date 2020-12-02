@@ -1,6 +1,5 @@
 import abc
 
-from constants.node_ips import BITCOIN_NODE_IPS
 from service.general_network_service import *
 from service.thorchain_network_service import is_binance_node_healthy
 
@@ -33,27 +32,11 @@ class Node(abc.ABC):
     def get_real_block_count(self):
         pass
 
+    def __hash__(self):
+        return hash(self.node_id)
+
     def to_string(self):
         return f"{self.network_name} node ({self.node_ip})"
-
-    @staticmethod
-    def from_id(node_id):
-        split = node_id.split('-')
-        network_name = split[0]
-        split.pop(0)
-        network_ip = '-'.join(split)
-
-        if network_name == BitcoinNode.network_name:
-            ip_with_credentials = next(filter(lambda ip_with_creds: network_ip in ip_with_creds, BITCOIN_NODE_IPS),
-                                       None)
-
-            return BitcoinNode(ip_with_credentials)
-        elif network_name == EthereumNode.network_name:
-            return EthereumNode(network_ip)
-        elif network_name == BinanceNode.network_name:
-            return BinanceNode(network_ip)
-        else:
-            raise Exception("No matching node type for node " + node_id)
 
 
 class BitcoinNode(Node):

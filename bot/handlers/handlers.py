@@ -94,7 +94,7 @@ def dispatch_query(update, context):
         call = show_my_thorchain_nodes_menu
     elif data == 'show_nodes_other':
         call = show_other_nodes_menu
-    elif data.startswith("other_node_details"):
+    elif data.startswith("other_node"):
         call = show_other_nodes_details
     else:
         edit = False
@@ -147,8 +147,10 @@ def dispatch_plain_input_query(update, context):
 @run_async
 def on_my_nodes_clicked(update, context):
     keyboard = [[
-        InlineKeyboardButton('📡 THORCHAIN NODES', callback_data='show_nodes_thor')], [
-        InlineKeyboardButton('📡  NODES OF OTHER CHAINS', callback_data='show_nodes_other'),
+        InlineKeyboardButton('🦸 THORCHAIN NODES',
+                             callback_data='show_nodes_thor')], [
+        InlineKeyboardButton('👽 👺 👻 NODES OF OTHER CHAINS',
+                             callback_data='show_nodes_other'),
     ], ]
 
     try_message(context=context,
