@@ -20,7 +20,7 @@ def check_health(node: Node, context) -> [str, None]:
         logger.error(e)
         return None
 
-    was_node_healthy = context.bot_data.setdefault(node.node_id, {}).get('health', True)
+    was_node_healthy = context.bot_data.setdefault(node.node_id, {}).setdefault('health', True)
 
     if was_node_healthy != is_node_currently_healthy:
         context.bot_data[node.node_id]['health'] = is_node_currently_healthy
