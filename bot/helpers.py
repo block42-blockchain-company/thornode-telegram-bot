@@ -177,14 +177,12 @@ def try_message(context, chat_id, text, reply_markup=None):
     if context.job and not context.job.enabled:
         return
 
-    is_group = (chat_id < 0)
-
     try:
         context.bot.send_message(chat_id,
                                  text,
                                  parse_mode='markdown',
                                  reply_markup=reply_markup,
-                                 isgroup=is_group)
+                                 isgroup=is_group_chat(chat_id))
     except TelegramError as e:
         if 'bot was blocked by the user' in e.message:
             print("Telegram user " + str(chat_id) +
@@ -476,6 +474,10 @@ def is_admin(update, context):
                                                        f"I'm *THORNode Bot*, I'm a loyal bot.")
         return False
     return True
+
+
+def is_group_chat(chat_id: int):
+    return chat_id < 0
 
 
 async def for_each_async(elements: [], function: Callable[...,

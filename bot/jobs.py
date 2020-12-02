@@ -253,7 +253,7 @@ def check_thorchain_block_height(context, node_address):
     try:
         block_height = get_latest_block_height(node_data['ip_address'])
     except (Timeout, ConnectionError):
-        logger.info(f"Timeout or Connection error with {node_data['ip_address']}")
+        logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
         return
     except Exception as e:
         logger.exception(e)
@@ -300,7 +300,7 @@ def check_thorchain_catch_up_status(context, node_address):
     try:
         is_currently_catching_up = is_thorchain_catching_up(node_data['ip_address'])
     except (Timeout, ConnectionError):
-        logger.info(f"Timeout or Connection error with {node_data['ip_address']}")
+        logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
         return
     except Exception as e:
         logger.exception(e)
@@ -310,7 +310,7 @@ def check_thorchain_catch_up_status(context, node_address):
         try:
             block_height = get_latest_block_height(node_data['ip_address'])
         except (Timeout, ConnectionError):
-            logger.info(f"Timeout or Connection error with {node_data['ip_address']}")
+            logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
             block_height = "currently unavailable"
         except Exception as e:
             logger.exception(e)
@@ -469,7 +469,7 @@ def check_solvency(context):
         asgard_solvency = asgard_solvency_check()
         yggdrasil_solvency = yggdrasil_check()
     except (Timeout, ConnectionError):
-        logger.info(f"Timeout or Connection error while querying Asgard and Yggdrasil.")
+        logger.warning(f"Timeout or Connection error while querying Asgard and Yggdrasil.")
         return
     except Exception as e:
         logger.exception(e)

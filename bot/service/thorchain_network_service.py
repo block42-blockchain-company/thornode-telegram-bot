@@ -1,3 +1,5 @@
+import random
+
 import aiohttp
 import requests
 from requests.exceptions import Timeout, ConnectionError
@@ -32,10 +34,10 @@ def is_midgard_api_healthy(node_ip) -> bool:
     try:
         get_request_json_thorchain(url_path=":8080/v1/health", node_ip=node_ip)
     except (Timeout, ConnectionError):
-        logger.info(f"Timeout or Connection error with {node_ip}")
+        logger.warning(f"Timeout or Connection error with {node_ip}")
         return False
     except Exception as e:
-        if e.args[0].status_code == 502:
+        if len(e.args) > 0 and "status_code" in e.args[0] and e.args[0].status_code == 502:
             logger.info(f"Bad Status Request (status code 502) in 'is_midgard_api_healthy(node_ip)' with {node_ip}")
         else:
             logger.exception(e)
