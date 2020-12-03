@@ -20,7 +20,6 @@ def show_settings(update, context):
         try_message(context=context,
                     chat_id=update.effective_message.chat_id,
                     reply_markup=InlineKeyboardMarkup(keyboard),
-                    parse_mode='markdown',
                     text=title)
 
 
