@@ -4,7 +4,7 @@ from telegram.error import BadRequest
 
 from handlers.network_info_handlers import *
 from handlers.other_nodes_handlers import *
-from handlers.settings_handlers import show_settings, set_threshold
+from handlers.settings_handlers import show_settings, set_threshold_menu, handle_change_threshold
 from handlers.thornodes_handlers import *
 from jobs.jobs import start_user_job
 
@@ -96,7 +96,7 @@ def dispatch_query(update, context):
     elif data.startswith("other_node_details"):
         call = show_other_nodes_details
     elif data == 'set_threshold':
-        call = set_threshold
+        call = set_threshold_menu
     else:
         edit = False
 
@@ -129,8 +129,8 @@ def dispatch_plain_input_query(update, context):
         return
 
     message = update.message.text
-    expected = context.user_data[
-        'expected'] if 'expected' in context.user_data else None
+    expected = context.user_data.pop('expected', None)
+
     if message == '📡 MY NODES':
         return on_my_nodes_clicked(update, context)
     elif message == '🌎 NETWORK':
@@ -140,11 +140,11 @@ def dispatch_plain_input_query(update, context):
     elif message == '⚙️ SETTINGS':
         return show_settings(update, context)
     elif expected == 'add_node':
-        context.user_data['expected'] = None
         return handle_add_node(update, context)
     elif expected == 'change_alias':
-        context.user_data['expected'] = None
         return handle_change_alias(update, context)
+    elif expected == 'change_threshold':
+        return handle_change_threshold(update, context)
 
 
 @run_async
