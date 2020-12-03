@@ -61,7 +61,7 @@ def handle_change_threshold(update, context):
         context.user_data['expected'] = 'change_threshold'
         return
 
-    __set_slash_points_threshold(new_threshold, context)
+    set_slash_points_threshold(new_threshold, context)
 
     text = f'✅ Successfully set your new threshold for slash points notification as *{new_threshold}*'
     if new_threshold == 0:
@@ -71,6 +71,9 @@ def handle_change_threshold(update, context):
     show_settings(update, context)
 
 
-def __set_slash_points_threshold(new_val, context):
+def set_slash_points_threshold(new_val, context):
+    if int(new_val) < 0:
+        raise Exception("Threshold must be a positive integer")
+
     settings = context.bot_data.setdefault("settings", {})
     settings["slash_points_threshold"] = new_val

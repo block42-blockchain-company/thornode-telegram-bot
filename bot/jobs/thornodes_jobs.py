@@ -11,10 +11,9 @@ def check_thornodes(context):
 
     chat_id = context.job.context['chat_id']
     user_data = context.job.context['user_data']
-
     inactive_nodes = []
 
-    for node_address, node_data in user_data.get('nodes', {}).items():
+    for node_address, local_node in user_data.get('nodes', {}).items():
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
@@ -22,10 +21,8 @@ def check_thornodes(context):
             logger.exception(e)
             continue
 
-        local_node = user_data['nodes'][node_address]
-
         if remote_node is None:
-            text = 'THORNode ' + user_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
+            text = 'THORNode ' + local_node['alias'] + ' is not active anymore! 💀' + '\n' + \
                    'Address: ' + node_address + '\n\n' + \
                    'Please enter another THORNode address.'
 
@@ -36,39 +33,14 @@ def check_thornodes(context):
                                        text=text)
             continue
 
-        # isNotBlocked = lastTimestamp < currentTimestamp - timeout
-        if float(local_node['last_notification_timestamp']) < \
-                float(datetime.timestamp(
-                    datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))):
+        is_not_blocked = float(local_node['last_notification_timestamp']) < \
+                         datetime.timestamp(
+                             datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))
+        if is_not_blocked:
 
-            # Check which node fields have changed
-            changed_fields = [
-                field for field in ['status', 'bond', 'slash_points']
-                if local_node[field] != remote_node[field]
-            ]
+            message = build_notification_message_for_active_node(local_node, remote_node, context)
 
-            threshold = get_slash_points_threshold(context)
-            # If just slash_points changed, only send message if difference is higher than threshold
-            if len(changed_fields) <= 1 and 'slash_points' in changed_fields and \
-                    abs(int(local_node['slash_points']) - int(remote_node['slash_points'])) <= threshold:
-                continue
-
-            # Check if there are any changes
-            if len(changed_fields) > 0:
-                text = 'THORNode: ' + user_data['nodes'][node_address]['alias'] + '\n' + \
-                       'Address: ' + node_address + '\n' + \
-                       'Status: ' + local_node['status'].capitalize()
-                if 'status' in changed_fields:
-                    text += ' ➡️ ' + remote_node['status'].capitalize()
-                text += '\nBond: ' + tor_to_rune(int(local_node['bond']))
-                if 'bond' in changed_fields:
-                    text += ' ➡️ ' + tor_to_rune(int(remote_node['bond']))
-                text += '\nSlash Points: ' + '{:,}'.format(
-                    int(local_node['slash_points']))
-                if 'slash_points' in changed_fields:
-                    text += ' ➡️ ' + '{:,}'.format(
-                        int(remote_node['slash_points']))
-
+            if message:
                 # Update data
                 local_node['status'] = remote_node['status']
                 local_node['bond'] = remote_node['bond']
@@ -81,10 +53,10 @@ def check_thornodes(context):
 
                 try_message_with_home_menu(context=context,
                                            chat_id=chat_id,
-                                           text=text)
+                                           text=message)
+
             else:
-                local_node[
-                    'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+                local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
         if local_node['status'] in MONITORED_STATUSES:
             check_thorchain_block_height(context, node_address=node_address)
@@ -95,6 +67,38 @@ def check_thornodes(context):
 
     for node_address in inactive_nodes:
         del user_data['nodes'][node_address]
+
+
+def build_notification_message_for_active_node(local_node, remote_node, context) -> [str, None]:
+    changed_fields = [
+        field for field in ['status', 'bond', 'slash_points']
+        if local_node[field] != remote_node[field]
+    ]
+    threshold = get_slash_points_threshold(context)
+
+    slash_point_change = abs(int(local_node['slash_points']) - int(remote_node['slash_points']))
+    if (len(changed_fields) <= 1) and ('slash_points' in changed_fields) and (slash_point_change <= threshold):
+        return None
+
+    if len(changed_fields) > 0:
+        text = f"THORNode: {local_node['alias']}\n" \
+               f"Address: {local_node['node_address']}\n" \
+               f"Status: {local_node['status'].capitalize()}"
+
+        if 'status' in changed_fields:
+            text += f' ➡️ {remote_node["status"].capitalize()}'
+
+        text += f"\nBond: {tor_to_rune(int(local_node['bond']))}"
+        if 'bond' in changed_fields:
+            text += f" ➡️ {tor_to_rune(int(remote_node['bond']))}"
+
+        text += '\nSlash Points: ' + '{:,}'.format(int(local_node['slash_points']))
+        if 'slash_points' in changed_fields:
+            text += ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
+
+        return text
+    else:
+        return None
 
 
 def check_versions_status(context):
@@ -228,12 +232,12 @@ def check_thorchain_block_height(context, node_address):
     if is_stuck:
         block_height_stuck_count += 1
         if block_height_stuck_count == 1:
-            text = 'Block height is not increasing anymore! 💀' + '\n' + \
-                   'IP: ' + node_data['ip_address'] + '\n' + \
-                   'THORNode: ' + node_data['alias'] + '\n' + \
-                   'Node address: ' + node_address + '\n' + \
-                   'Block height stuck at: ' + block_height + '\n\n' + \
-                   'Please check your Thornode immediately!'
+            text = f'Block height is not increasing anymore! 💀\n' + \
+                   f"IP: {node_data['ip_address']}\n" + \
+                   f"THORNode: {node_data['alias']}\n" + \
+                   f'Node address: {node_address}\n' + \
+                   f'Block height stuck at: {block_height}\n\n' + \
+                   f'Please check your Thornode immediately!'
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
     else:
         if block_height_stuck_count >= 1:

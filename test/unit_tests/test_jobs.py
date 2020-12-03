@@ -4,10 +4,7 @@ from unittest.mock import Mock
 from jobs.other_nodes_jobs import *
 from jobs.other_nodes_jobs import check_health
 from models.nodes import Node, UnauthorizedException
-
-
-class ContextMock:
-    bot_data = {}
+from test.unit_tests.helpers import ContextMock
 
 
 class JobTests(unittest.TestCase):
