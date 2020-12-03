@@ -47,9 +47,10 @@ def check_thornodes(context):
                 if local_node[field] != remote_node[field]
             ]
 
-            # If just slash_points changed, only send message if difference is min. 3 slash points
-            if len(changed_fields) == 1 and 'slash_points' in changed_fields and \
-                    abs(int(local_node['slash_points']) - int(remote_node['slash_points'])) < 5:
+            threshold = get_slash_points_threshold(context)
+            # If just slash_points changed, only send message if difference is higher than threshold
+            if len(changed_fields) <= 1 and 'slash_points' in changed_fields and \
+                    abs(int(local_node['slash_points']) - int(remote_node['slash_points'])) <= threshold:
                 continue
 
             # Check if there are any changes

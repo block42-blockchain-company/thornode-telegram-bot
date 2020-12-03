@@ -2,10 +2,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from constants.globals import SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT
 from handlers.chat_helpers import try_message
+from service.utils import get_slash_points_threshold
 
 
 def show_settings(update, context):
-    current_threshold = __get_slash_points_threshold(context)
+    current_threshold = get_slash_points_threshold(context)
     keyboard = [[InlineKeyboardButton(f'🔪 ({current_threshold} points) Slash points notification threshold',
                                       callback_data='set_threshold')]]
     was_back_button_clicked = hasattr(update.callback_query, 'data') and (
@@ -25,11 +26,14 @@ def show_settings(update, context):
 
 def set_threshold_menu(update, context):
     query = update.callback_query
-    current_threshold = __get_slash_points_threshold(context)
+    current_threshold = get_slash_points_threshold(context)
 
     keyboard = [[InlineKeyboardButton(f'⬅️ BACK', callback_data='show_settings-edit')]]
 
-    text = f"Slash points notification threshold: *{current_threshold}*\n" \
+    text = f"*Slash points notification threshold* is a minimal change of slash points in a node " \
+           f"that should trigger a notification. For example, when you set it to 1 you will get the notification " \
+           f"when the change of points is 2 or more.\n\n" \
+           f"Slash points notification threshold: *{current_threshold}*\n" \
            f"Default: *{SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT}* \n" \
            f"(0 = always notify)\n\n" \
            f"*Insert threshold for slash points notification*"
@@ -67,11 +71,6 @@ def handle_change_threshold(update, context):
     show_settings(update, context)
 
 
-def __get_slash_points_threshold(context):
-    settings = context.user_data.setdefault("settings", {})
-    return settings.get("slash_points_threshold", SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT)
-
-
 def __set_slash_points_threshold(new_val, context):
-    settings = context.user_data.setdefault("settings", {})
+    settings = context.bot_data.setdefault("settings", {})
     settings["slash_points_threshold"] = new_val

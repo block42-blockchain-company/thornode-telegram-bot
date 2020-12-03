@@ -228,3 +228,8 @@ def add_thornode_to_user_data(user_data, address, node):
         'last_notification_timestamp'] = datetime.timestamp(datetime.now())
     nodes[address][
         'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+
+
+def get_slash_points_threshold(context):
+    settings = context.bot_data.setdefault("settings", {})
+    return settings.get("slash_points_threshold", SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT)
