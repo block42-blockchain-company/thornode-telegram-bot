@@ -19,12 +19,12 @@ def show_other_nodes_menu(update, context):
                                             callback_data=f'other_node-{hash(node)}'))
 
     keyboard = build_2_columns_keyboard(buttons)
-    keyboard.append([InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu')])
+    keyboard.append([InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu-edit')])
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.edit_message_text(context=context,
+                                            text=text,
+                                            parse_mode='markdown',
+                                            reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_other_nodes_details(update, context):
@@ -69,8 +69,8 @@ def show_other_nodes_details(update, context):
     else:
         text += f"*currently unavailable*"
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton('⬅️ BACK', callback_data='show_nodes_other')]]))
+    query.edit_message_text(context=context,
+                            text=text,
+                            parse_mode='markdown',
+                            reply_markup=InlineKeyboardMarkup(
+                                [[InlineKeyboardButton('⬅️ BACK', callback_data='show_nodes_other')]]))

@@ -62,7 +62,7 @@ def dispatch_query(update, context):
     edit = True
     call = None
 
-    if data == 'my_nodes_menu':
+    if data.startswith('my_nodes_menu'):
         call = on_my_nodes_clicked
     elif data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
@@ -153,11 +153,21 @@ def on_my_nodes_clicked(update, context):
                              callback_data='show_nodes_other'),
     ], ]
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text="*What type of nodes do you want to see?*\n"
-                     "Note that the nodes of other chains can be added only by the bot maintainer on startup.",
-                reply_markup=InlineKeyboardMarkup(keyboard))
+    was_back_button_clicked = hasattr(update.callback_query, 'data') and (
+            update.callback_query.data.split("-")[-1] == "edit")
+
+    text = "*What type of nodes do you want to see?*\n"
+    "Note that the nodes of other chains can be added only by the bot maintainer on startup."
+
+    if was_back_button_clicked:
+        update.callback_query.edit_message_text(text=text,
+                                                parse_mode='markdown',
+                                                reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        try_message(context=context,
+                    chat_id=update.effective_message.chat_id,
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    text=text)
 
 
 def error_handler(update, context):

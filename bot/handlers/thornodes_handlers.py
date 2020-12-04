@@ -267,10 +267,10 @@ def show_my_thorchain_nodes_menu(update, context):
     else:
         text = 'You do not monitor any THORNodes yet.\nAdd a Node!'
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.edit_message_text(context=context,
+                                            text=text,
+                                            parse_mode='markdown',
+                                            reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def get_thornode_menu_buttons(user_data):
@@ -294,7 +294,7 @@ def get_thornode_menu_buttons(user_data):
         InlineKeyboardButton('➖ REMOVE ALL',
                              callback_data='confirm_delete_all_thornodes')
     ], [
-        InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu'),
+        InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu-edit'),
     ]]
     keyboard.extend(buttons)
 
