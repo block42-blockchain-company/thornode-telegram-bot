@@ -10,11 +10,11 @@ def check_thornodes(context):
     """
 
     chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    chat_data = context.job.context['chat_data']
 
     inactive_nodes = []
 
-    for node_address, node_data in user_data.get('nodes', {}).items():
+    for node_address, node_data in chat_data.get('nodes', {}).items():
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
@@ -22,10 +22,10 @@ def check_thornodes(context):
             logger.exception(e)
             continue
 
-        local_node = user_data['nodes'][node_address]
+        local_node = chat_data['nodes'][node_address]
 
         if remote_node is None:
-            text = 'THORNode ' + user_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
+            text = 'THORNode ' + chat_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
                    'Address: ' + node_address + '\n\n' + \
                    'Please enter another THORNode address.'
 
@@ -54,7 +54,7 @@ def check_thornodes(context):
 
             # Check if there are any changes
             if len(changed_fields) > 0:
-                text = 'THORNode: ' + user_data['nodes'][node_address]['alias'] + '\n' + \
+                text = 'THORNode: ' + chat_data['nodes'][node_address]['alias'] + '\n' + \
                        'Address: ' + node_address + '\n' + \
                        'Status: ' + local_node['status'].capitalize()
                 if 'status' in changed_fields:
@@ -93,11 +93,11 @@ def check_thornodes(context):
             check_thorchain_midgard_api(context, node_address=node_address)
 
     for node_address in inactive_nodes:
-        del user_data['nodes'][node_address]
+        del chat_data['nodes'][node_address]
 
 
 def check_versions_status(context):
-    user_data = context.job.context['user_data']
+    chat_data = context.job.context['chat_data']
 
     try:
         node_accounts = get_node_accounts()
@@ -108,12 +108,12 @@ def check_versions_status(context):
 
     highest_version = max(map(lambda n: n['version'], node_accounts),
                           key=lambda v: version.parse(v))
-    last_newest_version = user_data.get('newest_software_version', None)
+    last_newest_version = chat_data.get('newest_software_version', None)
 
     if last_newest_version is None or version.parse(
             highest_version) > version.parse(last_newest_version):
-        user_data['newest_software_version'] = highest_version
-        for node in user_data.get('nodes', {}).values():
+        chat_data['newest_software_version'] = highest_version
+        for node in chat_data.get('nodes', {}).values():
             if version.parse(node['version']) < version.parse(highest_version):
                 message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
                           f"Your software version is *{node['version']}* " \
@@ -252,8 +252,11 @@ def check_solvency(context):
     try:
         asgard_solvency = asgard_solvency_check()
         yggdrasil_solvency = yggdrasil_check()
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error while querying Asgard and Yggdrasil.")
+        return
     except Exception as e:
-        # logger.exception(e) # todo: removeme
+        logger.exception(e)
         return
 
     is_solvent = asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent']

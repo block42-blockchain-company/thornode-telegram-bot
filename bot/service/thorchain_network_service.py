@@ -3,6 +3,7 @@ from time import sleep
 
 import aiohttp
 import requests
+from requests.exceptions import Timeout, ConnectionError
 
 from constants.mock_values import thorchain_last_block_mock
 from service.general_network_service import get_request_json, get_request_json_with_retries
@@ -35,8 +36,14 @@ def is_thorchain_catching_up(node_ip=None) -> bool:
 def is_midgard_api_healthy(node_ip) -> bool:
     try:
         get_request_json_thorchain(url_path=":8080/v1/health", node_ip=node_ip)
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error with {node_ip}")
+        return False
     except Exception as e:
-        logger.exception(e)
+        if len(e.args) > 0 and "status_code" in e.args[0] and e.args[0].status_code == 502:
+            logger.info(f"Bad Status Request (status code 502) in 'is_midgard_api_healthy(node_ip)' with {node_ip}")
+        else:
+            logger.exception(e)
         return False
 
     return True
