@@ -34,14 +34,11 @@ def show_other_nodes_details(update, context):
 
     text = f"Details of node: *{node.network_name}* (*{node.node_ip}*)\n\n "
 
-    is_synced = context.bot_data.get(node.node_id, {}).get('syncing', None)
-
-    if is_synced is None:
-        try:
-            is_synced = node.is_fully_synced()
-        except Exception as e:
-            logger.debug(e, exc_info=True)
-            is_synced = 'currently unavailable'
+    try:
+        is_synced = node.is_fully_synced()
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        is_synced = 'currently unavailable'
 
     text += f"Is fully synced: *{is_synced}*\n"
 
@@ -54,7 +51,7 @@ def show_other_nodes_details(update, context):
         logger.debug(e, exc_info=True)
 
     try:
-        network_block_height = node.get_real_block_count()
+        network_block_height = node.get_network_block_count()
     except Exception as e:
         logger.debug(e, exc_info=True)
 

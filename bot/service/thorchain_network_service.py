@@ -102,6 +102,39 @@ def get_binance_balance(address: str) -> dict:
     return get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
 
 
+def get_binance_block_count() -> dict:
+    res = get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/node-info")
+
+    return res['sync_info']['latest_block_height']
+
+
+# TODO: test me on real node
+def is_binance_node_syncing(binance_node_ip) -> bool:
+    syncing_path = {
+        "TESTNET": ":26657/syncing",
+        "CHAOSNET": ":27147/syncing"
+    }[NETWORK_TYPE]
+
+    res = get_request_json(url=f"http://{binance_node_ip}{syncing_path}")
+
+    if res:
+        return True
+    else:
+        return False
+
+
+# TODO: test me on real node
+def get_binance_node_block_height(binance_node_ip):
+    block_height_path = {
+        "TESTNET": ":26657/blocks/latest",
+        "CHAOSNET": ":27147/blocks/latest"
+    }[NETWORK_TYPE]
+
+    res = get_request_json(url=f"http://{binance_node_ip}{block_height_path}")
+
+    return res['block_meta']['header']['height']
+
+
 async def get_pool_addresses(node_ip: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(
