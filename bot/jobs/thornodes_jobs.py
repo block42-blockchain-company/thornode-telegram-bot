@@ -213,12 +213,12 @@ def check_thorchain_block_height(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     try:
         block_height = get_latest_block_height(node_data['ip_address'])
-    except Exception as e:
-        logger.exception(e)
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
         return
 
     is_stuck = block_height <= node_data.setdefault('block_height', 0)
@@ -283,7 +283,7 @@ def check_thorchain_catch_up_status(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     if 'is_catching_up' not in node_data:
         node_data['is_catching_up'] = False
@@ -291,15 +291,15 @@ def check_thorchain_catch_up_status(context, node_address):
     try:
         is_currently_catching_up = is_thorchain_catching_up(
             node_data['ip_address'])
-    except Exception as e:
-        logger.exception(e)
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
         return
 
     if node_data['is_catching_up'] != is_currently_catching_up:
         try:
             block_height = get_latest_block_height(node_data['ip_address'])
-        except Exception as e:
-            logger.exception(e)
+        except (Timeout, ConnectionError):
+            logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
             block_height = "currently unavailable"
 
         if is_currently_catching_up:
@@ -326,7 +326,7 @@ def check_thorchain_midgard_api(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
     was_healthy = node_data.setdefault('is_midgard_healthy', True)
 
     is_midgard_healthy = is_midgard_api_healthy(node_data['ip_address'])

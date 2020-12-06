@@ -18,7 +18,7 @@ def on_start_command(update, context):
         return
 
     # Start job for user
-    if 'job_started' not in context.user_data:
+    if 'job_started' not in context.chat_data:
         start_user_job(context, update.message.chat.id)
 
     text = 'Heil ok sæll! I am your THORNode Bot runaning on ' + NETWORK_TYPE + '. 🤖\n\n'
@@ -58,7 +58,7 @@ def dispatch_query(update, context):
     if not is_admin(update, context):
         return
 
-    context.user_data['expected'] = None
+    context.chat_data['expected'] = None
     edit = True
     call = None
 
@@ -128,8 +128,8 @@ def dispatch_plain_input_query(update, context):
         return
 
     message = update.message.text
-    expected = context.user_data[
-        'expected'] if 'expected' in context.user_data else None
+    expected = context.chat_data[
+        'expected'] if 'expected' in context.chat_data else None
     if message == '📡 MY NODES':
         return on_my_nodes_clicked(update, context)
     elif message == '🌎 NETWORK':
@@ -137,10 +137,10 @@ def dispatch_plain_input_query(update, context):
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
     elif expected == 'add_node':
-        context.user_data['expected'] = None
+        context.chat_data['expected'] = None
         return handle_add_node(update, context)
     elif expected == 'change_alias':
-        context.user_data['expected'] = None
+        context.chat_data['expected'] = None
         return handle_change_alias(update, context)
 
 

@@ -208,12 +208,12 @@ def tor_to_rune(tor):
         return '{:.4f} RUNE'.format(tor / 100000000)
 
 
-def add_thornode_to_user_data(user_data, address, node):
+def add_thornode_to_chat_data(chat_data, address, node):
     """
     Add a node in the user specific dictionary
     """
 
-    nodes = user_data.setdefault('nodes', {})
+    nodes = chat_data.setdefault('nodes', {})
     # Find an alias that does not exist yet
     i = 0
     while True:

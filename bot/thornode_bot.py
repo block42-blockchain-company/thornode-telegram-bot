@@ -1,8 +1,9 @@
 from telegram.error import InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
-                          CallbackQueryHandler, MessageHandler, Filters)
-
+                          CallbackQueryHandler, MessageHandler, Filters, messagequeue)
+from telegram.utils.request import Request
 from handlers.handlers import *
+from message_queue import MQBot
 from service.setup import *
 
 

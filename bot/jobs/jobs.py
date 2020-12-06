@@ -20,10 +20,10 @@ def start_user_job(context, chat_id):
                                     interval=JOB_INTERVAL_IN_SECONDS,
                                     context={
                                         'chat_id': chat_id,
-                                        'user_data': context.user_data
+                                        'chat_data': context.chat_data
                                     })
 
-    context.user_data['job_started'] = True
+    context.chat_data['job_started'] = True
 
 
 def user_specific_checks(context):
