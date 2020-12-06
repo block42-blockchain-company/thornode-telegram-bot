@@ -277,9 +277,10 @@ def get_thornode_menu_buttons(user_data):
     buttons = []
     for address in user_data.get('nodes', {}).keys():
         node = user_data['nodes'][address]
-        is_healthy = node.get('is_midgard_healthy', None)
         status_emoji = STATUS_EMOJIS.get(node['status'], STATUS_EMOJIS["unknown"])
         truncated_address = f"...{address[-3:]}"
+        is_catching_up = node.get('is_catching_up', None)
+        is_healthy = None if is_catching_up is None else not is_catching_up
         is_healthy_emoji = HEALTH_EMOJIS[is_healthy]
 
         button_text = f"{status_emoji} {node['alias']} ({truncated_address}) [{is_healthy_emoji}]"
