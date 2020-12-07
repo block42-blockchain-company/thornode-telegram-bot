@@ -30,8 +30,9 @@ def set_threshold_menu(update, context):
 
     keyboard = [[InlineKeyboardButton(f'⬅️ BACK', callback_data='show_settings-edit')]]
 
-    text = f"*Slash points notification threshold* is a minimal change of slash points in a node " \
-           f"that should trigger a notification. For example, when you set it to 1 you will get the notification " \
+    text = f"If the slash points of a monitored node change, you'll get notified only when the change is greater " \
+           f"than the *slash points notification threshold*." \
+           f" For example, when you set it to 1 you will get the notification " \
            f"when the change of points is 2 or more.\n\n" \
            f"Slash points notification threshold: *{current_threshold}*\n" \
            f"Default: *{SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT}* \n" \

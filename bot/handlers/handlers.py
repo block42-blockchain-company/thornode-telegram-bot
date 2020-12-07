@@ -67,6 +67,8 @@ def dispatch_query(update, context):
         call = show_all_thorchain_nodes
     elif data == 'show_network_stats':
         call = show_network_stats
+    elif data.startswith('show_settings'):
+        call = show_settings
     elif data == 'solvency':
         call = solvency_stats
     elif data == 'vault_key_addresses':
