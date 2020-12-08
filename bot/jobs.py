@@ -450,10 +450,10 @@ def check_churning(context):
             text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n\n" \
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(int(get_network_security(network) * 100)) + " %*\n\n" \
-                                                                                                              "↩️ Bond ROI: *" + '{:.2f}'.format(
-                float(network['bondingROI']) * 100) + " %* APY\n\n" \
-                                                      "↩️ Stake ROI: *" + '{:.2f}'.format(
-                float(network['stakingROI']) * 100) + " %* APY"
+                                                                                                              "↩️ Bonding ROI: *" + '{:.2f}'.format(
+                float(network['bondingAPY']) * 100) + " %* APY\n\n" \
+                                                      "↩️ Liquidity ROI: *" + '{:.2f}'.format(
+                float(network['liquidityAPY']) * 100) + " %* APY"
         except Exception as e:
             logger.exception(e)
 
@@ -464,30 +464,37 @@ def check_churning(context):
             validator['node_address']] = validator['status']
 
 
-def check_solvency(context):
+def check_solvency_job(context):
+    message = check_solvency(context)
+    if message:
+        try_message_to_all_users(context, text=message)
+
+
+def check_solvency(context) -> [str, None]:
     try:
         asgard_solvency = asgard_solvency_check()
-        yggdrasil_solvency = yggdrasil_check()
+        yggdrasil_solvency = yggdrasil_solvency_check()
     except (Timeout, ConnectionError):
         logger.warning(f"Timeout or Connection error while querying Asgard and Yggdrasil.")
-        return
+        return None
     except Exception as e:
         logger.exception(e)
-        return
+        return None
 
     is_solvent = asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent']
     insolvency_count = context.bot_data.setdefault("insolvency_count", 0)
 
+    message = None
     if not is_solvent:
         insolvency_count += 1
         if insolvency_count == MISSING_FUNDS_THRESHOLD:
-            text = 'THORChain is *missing funds*! 💀\n\n'
-            text += get_solvency_message(asgard_solvency, yggdrasil_solvency)
-            try_message_to_all_users(context, text=text)
+            message = 'THORChain is *missing funds*! 💀\n\n'
+            message += get_insolvent_balances_message(asgard_solvency, yggdrasil_solvency)
     else:
         if insolvency_count >= MISSING_FUNDS_THRESHOLD:
-            text = 'THORChain is *100% solvent* again! 👌\n'
-            try_message_to_all_users(context, text=text)
+            message = 'THORChain is *100% solvent* again! 👌\n'
         insolvency_count = 0
 
     context.bot_data["insolvency_count"] = insolvency_count
+
+    return message
