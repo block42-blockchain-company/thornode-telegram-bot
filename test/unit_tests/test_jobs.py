@@ -107,7 +107,8 @@ class JobTests(unittest.TestCase):
                                                                    {'expected': '1175126895',
                                                                     'actual': '11.75096895'}}}}
         for i in range(0, MISSING_FUNDS_THRESHOLD - 1):
-            check_solvency(self.context)
+            message = check_solvency(self.context)
+            self.assertIs(message, None, "Solvency message should be None but is not!")
 
         message = check_solvency(self.context)
         self.assertIn("THORChain is *missing funds*! 💀", message,
