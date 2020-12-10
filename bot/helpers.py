@@ -377,7 +377,7 @@ def asgard_solvency_check() -> dict:
     return solvency_report
 
 
-def yggdrasil_check() -> dict:
+def yggdrasil_solvency_check() -> dict:
     solvency_report = {'is_solvent': True}
     yggdrasil_actual = {}
 
@@ -430,6 +430,7 @@ def yggdrasil_check() -> dict:
 
     return solvency_report
 
+
 def get_solvency_message(asgard_solvency, yggdrasil_solvency) -> str:
     message = "Tracked Balances of *Asgard*:\n"
     if 'insolvent_coins' in asgard_solvency:
@@ -454,6 +455,27 @@ def get_solvency_message(asgard_solvency, yggdrasil_solvency) -> str:
     if 'solvent_coins' in yggdrasil_solvency:
         for coin_key, coin_value in yggdrasil_solvency['solvent_coins'].items():
             message += f"*{coin_key}*: {coin_value}\n"
+
+    return message
+
+
+def get_insolvent_balances_message(asgard_solvency, yggdrasil_solvency) -> str:
+    message = ""
+    if 'insolvent_coins' in asgard_solvency:
+        message += "Insolvent Balances of *Asgard*:\n"
+        for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
+            message += f"*{coin_key}*:\n" \
+                       f"  Expected: {coin_value['expected']}\n" \
+                       f"  Actual:   {coin_value['actual']}\n"
+
+    if 'insolvent_coins' in yggdrasil_solvency:
+        message += "\nInsolvent Balances of *Yggdrasil*:\n"
+        for pub_key, coins in yggdrasil_solvency['insolvent_coins'].items():
+            for coin_key, coin_value in coins.items():
+                message += f"*{pub_key}*:\n" \
+                           f"*{coin_key}*:\n" \
+                           f"  Expected: {coin_value['expected']}\n" \
+                           f"  Actual:   {coin_value['actual']}\n"
 
     return message
 
