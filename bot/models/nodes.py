@@ -1,7 +1,7 @@
 import abc
 
+from service.binance_network_service import *
 from service.general_network_service import *
-from service.thorchain_network_service import *
 
 
 class Node(abc.ABC):
@@ -48,7 +48,6 @@ class BitcoinNode(Node):
         self.ip_with_credentials = address
         ip = address.split("@")[-1].split(":")[0]
         super().__init__(ip, self.network_name, "BTC")
-        self.address = address
 
     def is_fully_synced(self) -> bool:
         info = btc_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo').json()['result']
@@ -137,7 +136,7 @@ class BinanceNode(Node):
         return list(map(lambda n: BinanceNode(n), ips))
 
     def get_network_block_count(self):
-        return get_binance_block_count()
+        return get_binance_network_block_count()
 
 
 class UnauthorizedException(Exception):

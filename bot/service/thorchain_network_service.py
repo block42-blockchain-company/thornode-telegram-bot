@@ -61,21 +61,6 @@ def get_network_data(node_ip=None):
     return get_request_json_thorchain(url_path=f":8080/v1/network", node_ip=node_ip)
 
 
-def is_binance_node_healthy(binance_node_ip) -> bool:
-    health_path = {
-        "TESTNET": ":26657/health",
-        "CHAOSNET": ":27147/health"
-    }[NETWORK_TYPE]
-
-    try:
-        get_request_json(url=f"http://{binance_node_ip}{health_path}")
-    except Exception as e:
-        logger.exception(e)
-        return False
-
-    return True
-
-
 def get_thorchain_blocks_per_year(node_ip=None):
     constants = get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants", node_ip=node_ip)
     return constants['int_64_values']['BlocksPerYear']
@@ -103,43 +88,6 @@ def get_asgard_json() -> dict:
 def get_yggdrasil_json() -> dict:
     path = ":8080/yggdrasil.json" if DEBUG else ":1317/thorchain/vaults/yggdrasil"
     return get_request_json_thorchain(url_path=path)
-
-
-def get_binance_balance(address: str) -> dict:
-    return get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
-
-
-def get_binance_block_count() -> dict:
-    res = get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/node-info")
-
-    return res['sync_info']['latest_block_height']
-
-
-# TODO: test me on real node
-def is_binance_node_syncing(binance_node_ip) -> bool:
-    syncing_path = {
-        "TESTNET": ":26657/syncing",
-        "CHAOSNET": ":27147/syncing"
-    }[NETWORK_TYPE]
-
-    res = get_request_json(url=f"http://{binance_node_ip}{syncing_path}")
-
-    if res:
-        return True
-    else:
-        return False
-
-
-# TODO: test me on real node
-def get_binance_node_block_height(binance_node_ip):
-    block_height_path = {
-        "TESTNET": ":26657/blocks/latest",
-        "CHAOSNET": ":27147/blocks/latest"
-    }[NETWORK_TYPE]
-
-    res = get_request_json(url=f"http://{binance_node_ip}{block_height_path}")
-
-    return res['block_meta']['header']['height']
 
 
 async def get_pool_addresses(node_ip: str):

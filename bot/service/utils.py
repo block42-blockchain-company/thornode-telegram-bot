@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Callable, Awaitable
 
+from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
 
 

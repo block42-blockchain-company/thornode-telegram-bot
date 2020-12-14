@@ -51,7 +51,7 @@ def btc_rpc_request(address: str, method: str, params=None):
 
 
 def eth_rpc_request(ip: str, method: str, params=None):
-    return rpc_request(url=f'http://{ip}:8545/', jsonrpc_version="2.0", method=method,
+    return rpc_request(url=f'http://{ip}', jsonrpc_version="2.0", method=method,
                        params=params)
 
 
