@@ -6,7 +6,7 @@ thorchain_last_block_mock = {
     "chain": "BNB",
     "lastobservedin": "129145816",
     "lastsignedout": "1520564",
-    "thorchain": "1520569"
+    "thorchain": "1520569(MOCKED)"
 }
 
 # BINANCE
