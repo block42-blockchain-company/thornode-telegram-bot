@@ -84,8 +84,8 @@ class JobTests(unittest.TestCase):
         message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
-    @patch('jobs.jobs.yggdrasil_solvency_check')
-    @patch('jobs.jobs.asgard_solvency_check')
+    @patch('jobs.thornodes_jobs.yggdrasil_solvency_check')
+    @patch('jobs.thornodes_jobs.asgard_solvency_check')
     def test_solvency_check_success(self, mock_asgard_solvency_check, mock_yggdrasil_solvency_check):
         mock_asgard_solvency_check.return_value = {"is_solvent": True,
                                                    "solvent_coins": {'BNB.RUNE-67C': '461534.11554061',
