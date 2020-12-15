@@ -73,7 +73,7 @@ async def show_network_stats(update, context):
         text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n"
 
         text += "\n↩️ Node ROI: *" + \
-                '{:.2f}'.format(float(network['bondingROI']) * 100) \
+                '{:.2f}'.format(float(network['bondingAPY']) * 100) \
                 + " %* APY\n"
 
         text += "\n📀 Versions:\n"
@@ -100,7 +100,7 @@ def solvency_stats(update, context):
     logger.info("I'm getting the Solvency Stats...")
     try:
         asgard_solvency = asgard_solvency_check()
-        yggdrasil_solvency = yggdrasil_check()
+        yggdrasil_solvency = yggdrasil_solvency_check()
     except Exception as e:
         logger.exception(e)
         try_message_with_home_menu(context, update.effective_chat.id, NETWORK_ERROR_MSG)
