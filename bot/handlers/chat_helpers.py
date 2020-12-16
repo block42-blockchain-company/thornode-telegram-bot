@@ -106,7 +106,7 @@ def build_2_columns_keyboard(buttons):
 def is_admin(update, context):
     if ALLOWED_USER_IDS == 'ALL':
         return True
-    elif update.effective_chat.id not in ALLOWED_USER_IDS:
+    elif update.effective_user.id not in ALLOWED_USER_IDS:
         try_message(context, update.effective_chat.id, f"❌ You are not an Admin! ❌\n"
                                                        f"I'm *THORNode Bot*, I'm a loyal bot.")
         return False
