@@ -19,7 +19,7 @@ def on_start_command(update, context):
         return
 
     # Start job for user
-    if 'job_started' not in context.user_data:
+    if 'job_started' not in context.chat_data:
         start_user_job(context, update.message.chat.id)
 
     text = 'Heil ok sæll! I am your THORNode Bot runaning on ' + NETWORK_TYPE + '. 🤖\n\n'
@@ -59,11 +59,13 @@ def dispatch_query(update, context):
     if not is_admin(update, context):
         return
 
-    context.user_data['expected'] = None
+    context.chat_data['expected'] = None
     edit = True
     call = None
 
-    if data == 'show_all_thorchain_nodes':
+    if data.startswith('my_nodes_menu'):
+        call = on_my_nodes_clicked
+    elif data == 'show_all_thorchain_nodes':
         call = show_all_thorchain_nodes
     elif data == 'show_network_stats':
         call = show_network_stats
@@ -95,7 +97,7 @@ def dispatch_query(update, context):
         call = show_my_thorchain_nodes_menu
     elif data == 'show_nodes_other':
         call = show_other_nodes_menu
-    elif data.startswith("other_node_details"):
+    elif data.startswith("other_node"):
         call = show_other_nodes_details
     elif data == 'set_threshold':
         call = set_threshold_menu
@@ -131,7 +133,7 @@ def dispatch_plain_input_query(update, context):
         return
 
     message = update.message.text
-    expected = context.user_data.pop('expected', None)
+    expected = context.chat_data.pop('expected', None)
 
     if message == '📡 MY NODES':
         return on_my_nodes_clicked(update, context)
@@ -152,15 +154,27 @@ def dispatch_plain_input_query(update, context):
 @run_async
 def on_my_nodes_clicked(update, context):
     keyboard = [[
-        InlineKeyboardButton('📡 THORCHAIN NODES', callback_data='show_nodes_thor')], [
-        InlineKeyboardButton('📡 OTHER CHAIN NODES', callback_data='show_nodes_other'),
-    ]]
+        InlineKeyboardButton('🦸 THORCHAIN NODES',
+                             callback_data='show_nodes_thor')], [
+        InlineKeyboardButton('👽 👺 👻 NODES OF OTHER CHAINS',
+                             callback_data='show_nodes_other'),
+    ], ]
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text="*What type of nodes do you want to see?*\n"
-                     "Note that Bitcoin and Ethereum nodes need to be added manually.",
-                reply_markup=InlineKeyboardMarkup(keyboard))
+    was_back_button_clicked = hasattr(update.callback_query, 'data') and (
+            update.callback_query.data.split("-")[-1] == "edit")
+
+    text = "*What type of nodes do you want to see?*\n"
+    "Note that the nodes of other chains can be added only by the bot maintainer on startup."
+
+    if was_back_button_clicked:
+        update.callback_query.edit_message_text(text=text,
+                                                parse_mode='markdown',
+                                                reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        try_message(context=context,
+                    chat_id=update.effective_message.chat_id,
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    text=text)
 
 
 def error_handler(update, context):

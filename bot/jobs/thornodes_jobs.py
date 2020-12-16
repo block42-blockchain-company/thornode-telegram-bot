@@ -10,10 +10,11 @@ def check_thornodes(context):
     """
 
     chat_id = context.job.context['chat_id']
-    user_data = context.job.context['user_data']
+    chat_data = context.job.context['chat_data']
+
     inactive_nodes = []
 
-    for node_address, local_node in user_data.get('nodes', {}).items():
+    for node_address, local_node in chat_data.get('nodes', {}).items():
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
@@ -66,7 +67,7 @@ def check_thornodes(context):
             check_thorchain_midgard_api(context, node_address=node_address)
 
     for node_address in inactive_nodes:
-        del user_data['nodes'][node_address]
+        del chat_data['nodes'][node_address]
 
 
 def build_notification_message_for_active_node(local_node, remote_node, context) -> [str, None]:
@@ -102,7 +103,7 @@ def build_notification_message_for_active_node(local_node, remote_node, context)
 
 
 def check_versions_status(context):
-    user_data = context.job.context['user_data']
+    chat_data = context.job.context['chat_data']
 
     try:
         node_accounts = get_node_accounts()
@@ -113,12 +114,12 @@ def check_versions_status(context):
 
     highest_version = max(map(lambda n: n['version'], node_accounts),
                           key=lambda v: version.parse(v))
-    last_newest_version = user_data.get('newest_software_version', None)
+    last_newest_version = chat_data.get('newest_software_version', None)
 
     if last_newest_version is None or version.parse(
             highest_version) > version.parse(last_newest_version):
-        user_data['newest_software_version'] = highest_version
-        for node in user_data.get('nodes', {}).values():
+        chat_data['newest_software_version'] = highest_version
+        for node in chat_data.get('nodes', {}).values():
             if version.parse(node['version']) < version.parse(highest_version):
                 message = f"Consider updating the software on your node: *{node['alias']}*   ‼️\n" \
                           f"Your software version is *{node['version']}* " \
@@ -187,10 +188,10 @@ def check_churning(context):
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(
                 int(get_network_security_ratio(network) * 100)) + " %*\n\n" \
-                                                                  "↩️ Bond ROI: *" + '{:.2f}'.format(
-                float(network['bondingROI']) * 100) + " %* APY\n\n" \
-                                                      "↩️ Stake ROI: *" + '{:.2f}'.format(
-                float(network['stakingROI']) * 100) + " %* APY"
+                                                                  "↩️ Bonding ROI: *" + '{:.2f}'.format(
+                float(network['bondingAPY']) * 100) + " %* APY\n\n" \
+                                                      "↩️ Liquidity ROI: *" + '{:.2f}'.format(
+                float(network['liquidityAPY']) * 100) + " %* APY"
         except Exception as e:
             logger.exception(e)
 
@@ -218,12 +219,12 @@ def check_thorchain_block_height(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     try:
         block_height = get_latest_block_height(node_data['ip_address'])
-    except Exception as e:
-        logger.exception(e)
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
         return
 
     is_stuck = block_height <= node_data.setdefault('block_height', 0)
@@ -232,12 +233,12 @@ def check_thorchain_block_height(context, node_address):
     if is_stuck:
         block_height_stuck_count += 1
         if block_height_stuck_count == 1:
-            text = f'Block height is not increasing anymore! 💀\n' + \
-                   f"IP: {node_data['ip_address']}\n" + \
-                   f"THORNode: {node_data['alias']}\n" + \
-                   f'Node address: {node_address}\n' + \
-                   f'Block height stuck at: {block_height}\n\n' + \
-                   f'Please check your Thornode immediately!'
+            text = 'Block height is not increasing anymore! 💀' + '\n' + \
+                   'IP: ' + node_data['ip_address'] + '\n' + \
+                   'THORNode: ' + node_data['alias'] + '\n' + \
+                   'Node address: ' + node_address + '\n' + \
+                   'Block height stuck at: ' + block_height + '\n\n' + \
+                   'Please check your Thornode immediately!'
             try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
     else:
         if block_height_stuck_count >= 1:
@@ -253,30 +254,40 @@ def check_thorchain_block_height(context, node_address):
     node_data["block_height_stuck_count"] = block_height_stuck_count
 
 
-def check_solvency(context):
+def check_solvency_job(context):
+    message = check_solvency(context)
+    if message:
+        try_message_to_all_users(context, text=message)
+
+
+def check_solvency(context) -> [str, None]:
     try:
         asgard_solvency = asgard_solvency_check()
-        yggdrasil_solvency = yggdrasil_check()
+        yggdrasil_solvency = yggdrasil_solvency_check()
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error while querying Asgard and Yggdrasil.")
+        return None
     except Exception as e:
-        # logger.exception(e) # todo: removeme
-        return
+        logger.exception(e)
+        return None
 
     is_solvent = asgard_solvency['is_solvent'] and yggdrasil_solvency['is_solvent']
     insolvency_count = context.bot_data.setdefault("insolvency_count", 0)
 
+    message = None
     if not is_solvent:
         insolvency_count += 1
         if insolvency_count == MISSING_FUNDS_THRESHOLD:
-            text = 'THORChain is *missing funds*! 💀\n\n'
-            text += get_solvency_message(asgard_solvency, yggdrasil_solvency)
-            try_message_to_all_users(context, text=text)
+            message = 'THORChain is *missing funds*! 💀\n\n'
+            message += get_insolvent_balances_message(asgard_solvency, yggdrasil_solvency)
     else:
         if insolvency_count >= MISSING_FUNDS_THRESHOLD:
-            text = 'THORChain is *100% solvent* again! 👌\n'
-            try_message_to_all_users(context, text=text)
+            message = 'THORChain is *100% solvent* again! 👌\n'
         insolvency_count = 0
 
     context.bot_data["insolvency_count"] = insolvency_count
+
+    return message
 
 
 def check_thorchain_catch_up_status(context, node_address):
@@ -285,7 +296,7 @@ def check_thorchain_catch_up_status(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
     if 'is_catching_up' not in node_data:
         node_data['is_catching_up'] = False
@@ -293,15 +304,15 @@ def check_thorchain_catch_up_status(context, node_address):
     try:
         is_currently_catching_up = is_thorchain_catching_up(
             node_data['ip_address'])
-    except Exception as e:
-        logger.exception(e)
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
         return
 
     if node_data['is_catching_up'] != is_currently_catching_up:
         try:
             block_height = get_latest_block_height(node_data['ip_address'])
-        except Exception as e:
-            logger.exception(e)
+        except (Timeout, ConnectionError):
+            logger.warning(f"Timeout or Connection error with {node_data['ip_address']}")
             block_height = "currently unavailable"
 
         if is_currently_catching_up:
@@ -328,7 +339,7 @@ def check_thorchain_midgard_api(context, node_address):
     """
 
     chat_id = context.job.context['chat_id']
-    node_data = context.job.context['user_data']['nodes'][node_address]
+    node_data = context.job.context['chat_data']['nodes'][node_address]
     was_healthy = node_data.setdefault('is_midgard_healthy', True)
 
     is_midgard_healthy = is_midgard_api_healthy(node_data['ip_address'])

@@ -43,7 +43,7 @@ def add_thornode(update, context):
     Initiate a conversation and prompt for user input (thornode address).
     """
 
-    context.user_data['expected'] = 'add_node'
+    context.chat_data['expected'] = 'add_node'
 
     text = 'What\'s the address of your THORNode?'
     return show_text_input_message(update, text)
@@ -55,7 +55,7 @@ def change_alias(update, context):
     Initiate a conversation and prompt for user input (new alias).
     """
 
-    context.user_data['expected'] = 'change_alias'
+    context.chat_data['expected'] = 'change_alias'
 
     text = 'How would you like to name your THORNode?'
     return show_text_input_message(update, text)
@@ -75,10 +75,10 @@ def handle_add_node(update, context):
         update.message.reply_text(
             '⛔️ I have not found a THORNode with this address! Please try another one.'
         )
-        context.user_data['expected'] = 'add_node'
+        context.chat_data['expected'] = 'add_node'
         return
 
-    add_thornode_to_user_data(context.user_data, address, node)
+    add_thornode_to_chat_data(context.chat_data, address, node)
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -97,10 +97,11 @@ def handle_change_alias(update, context):
         update.message.reply_text(
             '⛔️ Alias cannot have more than 16 characters! Please try another one.'
         )
-        context.user_data['expected'] = 'change_alias'
+        context.chat_data['expected'] = 'change_alias'
         return
 
-    context.user_data.setdefault('nodes', {})[context.user_data['selected_node_address']]['alias'] = alias
+    context.chat_data.setdefault('nodes', {})[
+        context.chat_data['selected_node_address']]['alias'] = alias
 
     # Send message
     update.message.reply_text('Got it! 👌')
@@ -112,7 +113,7 @@ def confirm_thornode_deletion(update, context):
     Initiate process of thornode address removal
     """
 
-    address = context.user_data['selected_node_address']
+    address = context.chat_data['selected_node_address']
 
     keyboard = [[
         InlineKeyboardButton('YES ✅', callback_data='delete_thornode'),
@@ -120,7 +121,7 @@ def confirm_thornode_deletion(update, context):
                              callback_data='thornode_details-' + address)
     ]]
     text = '⚠️ Do you really want to remove this node from your monitoring list? ⚠\n️' + \
-           "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
+           "*" + context.chat_data['nodes'][address]['alias'] + "*\n" + \
            "*" + address + "*"
 
     return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
@@ -132,13 +133,13 @@ def delete_thornode(update, context):
     """
 
     query = update.callback_query
-    address = context.user_data['selected_node_address']
+    address = context.chat_data['selected_node_address']
 
     text = "❌ Thornode got deleted! ❌\n" + \
-           "*" + context.user_data['nodes'][address]['alias'] + "*\n" + \
+           "*" + context.chat_data['nodes'][address]['alias'] + "*\n" + \
            "*" + address + "*"
 
-    del context.user_data['nodes'][address]
+    del context.chat_data['nodes'][address]
 
     query.edit_message_text(text, parse_mode='markdown')
     show_my_thorchain_nodes_menu(update, context)
@@ -152,7 +153,7 @@ def thornode_details(update, context):
     query = update.callback_query
 
     address = query.data.split("-")[1]
-    context.user_data['selected_node_address'] = address
+    context.chat_data['selected_node_address'] = address
 
     return show_detail_menu(update=update, context=context)
 
@@ -168,8 +169,8 @@ def add_all_thornodes(update, context):
 
     for node in nodes:
         address = node['node_address']
-        if address not in context.user_data.get('nodes', {}):
-            add_thornode_to_user_data(context.user_data, address, node)
+        if address not in context.chat_data.get('nodes', {}):
+            add_thornode_to_chat_data(context.chat_data, address, node)
 
     # Send message
     query.edit_message_text('Added all THORNodes! 👌')
@@ -183,7 +184,7 @@ def delete_all_thornodes(update, context):
 
     query = update.callback_query
 
-    context.user_data.clear()
+    context.chat_data.clear()
 
     text = '❌ Deleted all THORNodes! ❌'
     # Send message
@@ -215,11 +216,11 @@ def show_all_thorchain_nodes(update, context):
             monitored_address = next(
                 filter(
                     lambda a: a == node[
-                        'node_address'], context.user_data.get('nodes', {})), None)
+                        'node_address'], context.chat_data.get('nodes', {})), None)
             text += 'THORNode: *'
 
             if monitored_address:
-                text += context.user_data['nodes'][monitored_address]['alias']
+                text += context.chat_data['nodes'][monitored_address]['alias']
             else:
                 text += "not monitored"
             text += "*\n"
@@ -251,10 +252,10 @@ def show_all_thorchain_nodes(update, context):
 
 
 def show_my_thorchain_nodes_menu(update, context):
-    user_data = context.user_data if context.user_data else context.job.context[
-        'user_data']
+    chat_data = context.chat_data if context.chat_data else context.job.context[
+        'chat_data']
 
-    keyboard = get_thornode_menu_buttons(user_data=user_data)
+    keyboard = get_thornode_menu_buttons(chat_data=chat_data)
 
     if len(keyboard) > 2:
         text = '*Node statuses*:\n'
@@ -266,19 +267,20 @@ def show_my_thorchain_nodes_menu(update, context):
     else:
         text = 'You do not monitor any THORNodes yet.\nAdd a Node!'
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.edit_message_text(context=context,
+                                            text=text,
+                                            parse_mode='markdown',
+                                            reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-def get_thornode_menu_buttons(user_data):
+def get_thornode_menu_buttons(chat_data):
     buttons = []
-    for address in user_data.get('nodes', {}).keys():
-        node = user_data['nodes'][address]
-        is_healthy = node.get('is_midgard_healthy', None)
+    for address in chat_data.get('nodes', {}).keys():
+        node = chat_data['nodes'][address]
         status_emoji = STATUS_EMOJIS.get(node['status'], STATUS_EMOJIS["unknown"])
         truncated_address = f"...{address[-3:]}"
+        is_catching_up = node.get('is_catching_up', None)
+        is_healthy = None if is_catching_up is None else not is_catching_up
         is_healthy_emoji = HEALTH_EMOJIS[is_healthy]
 
         button_text = f"{status_emoji} {node['alias']} ({truncated_address}) [{is_healthy_emoji}]"
@@ -286,15 +288,16 @@ def get_thornode_menu_buttons(user_data):
         buttons.append(InlineKeyboardButton(button_text, callback_data='thornode_details-' + address))
 
     keyboard = build_2_columns_keyboard(buttons)
-
-    keyboard.append(
-        [InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')])
-    keyboard.append([
+    buttons = [[
+        InlineKeyboardButton('1️⃣ ADD NODE', callback_data='add_thornode')], [
         InlineKeyboardButton('➕ ADD ALL',
                              callback_data='confirm_add_all_thornodes'),
         InlineKeyboardButton('➖ REMOVE ALL',
                              callback_data='confirm_delete_all_thornodes')
-    ])
+    ], [
+        InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu-edit'),
+    ]]
+    keyboard.extend(buttons)
 
     return keyboard
 
@@ -305,7 +308,7 @@ def show_detail_menu(update, context):
     """
 
     query = update.callback_query
-    address = context.user_data['selected_node_address']
+    address = context.chat_data['selected_node_address']
 
     try:
         node = get_thornode_object_or_none(address=address)
@@ -321,7 +324,7 @@ def show_detail_menu(update, context):
         show_my_thorchain_nodes_menu(update, context)
         return
 
-    text = 'THORNode: *' + context.user_data['nodes'][address]['alias'] + '*\n' + \
+    text = 'THORNode: *' + context.chat_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \

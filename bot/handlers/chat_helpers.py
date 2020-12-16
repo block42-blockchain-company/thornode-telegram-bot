@@ -13,7 +13,7 @@ def try_message_with_home_menu(context, chat_id, text):
 
 
 def try_message_to_all_users(context, text):
-    for chat_id in context.dispatcher.user_data.keys():
+    for chat_id in context.dispatcher.chat_data.keys():
         try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
 
@@ -22,8 +22,8 @@ def get_home_menu_buttons():
     Return keyboard buttons for the home menu
     """
 
-    keyboard = [[KeyboardButton('📡 MY NODES'), KeyboardButton('👀 SHOW ALL')],
-                [KeyboardButton('⚙️ SETTINGS'), KeyboardButton('🌎 NETWORK')]]
+    keyboard = [[KeyboardButton('📡 MY NODES')],
+                [KeyboardButton('👀 SHOW ALL'), KeyboardButton('🌎 NETWORK')]]
 
     return keyboard
 
@@ -52,19 +52,20 @@ def try_message(context, chat_id, text, reply_markup=None):
         context.bot.send_message(chat_id,
                                  text,
                                  parse_mode='markdown',
-                                 reply_markup=reply_markup)
+                                 reply_markup=reply_markup,
+                                 isgroup=is_group_chat(chat_id))
     except TelegramError as e:
         if 'bot was blocked by the user' in e.message:
             print("Telegram user " + str(chat_id) +
                   " blocked me; removing him from the user list")
-            del context.dispatcher.user_data[chat_id]
             del context.dispatcher.chat_data[chat_id]
-            del context.dispatcher.persistence.user_data[chat_id]
+            del context.dispatcher.chat_data[chat_id]
+            del context.dispatcher.persistence.chat_data[chat_id]
             del context.dispatcher.persistence.chat_data[chat_id]
 
             # Somehow session.data does not get updated if all users block the bot.
             # That makes problems on bot restart. That's why we delete the file ourselves.
-            if len(context.dispatcher.persistence.user_data) == 0:
+            if len(context.dispatcher.persistence.chat_data) == 0:
                 if os.path.exists(session_data_path):
                     os.remove(session_data_path)
             context.job.enabled = False
@@ -106,7 +107,11 @@ def is_admin(update, context):
     if ALLOWED_USER_IDS == 'ALL':
         return True
     elif update.effective_user.id not in ALLOWED_USER_IDS:
-        try_message(context, update.effective_user.id, f"❌ You are not an Admin! ❌\n"
+        try_message(context, update.effective_chat.id, f"❌ You are not an Admin! ❌\n"
                                                        f"I'm *THORNode Bot*, I'm a loyal bot.")
         return False
     return True
+
+
+def is_group_chat(chat_id: int):
+    return chat_id < 0

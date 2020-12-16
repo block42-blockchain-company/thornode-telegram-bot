@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Callable, Awaitable
 
+from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
 
 
@@ -81,7 +82,7 @@ def asgard_solvency_check() -> dict:
     return solvency_report
 
 
-def yggdrasil_check() -> dict:
+def yggdrasil_solvency_check() -> dict:
     solvency_report = {'is_solvent': True}
     yggdrasil_actual = {}
 
@@ -163,6 +164,27 @@ def get_solvency_message(asgard_solvency, yggdrasil_solvency) -> str:
     return message
 
 
+def get_insolvent_balances_message(asgard_solvency, yggdrasil_solvency) -> str:
+    message = ""
+    if 'insolvent_coins' in asgard_solvency:
+        message += "Insolvent Balances of *Asgard*:\n"
+        for coin_key, coin_value in asgard_solvency['insolvent_coins'].items():
+            message += f"*{coin_key}*:\n" \
+                       f"  Expected: {coin_value['expected']}\n" \
+                       f"  Actual:   {coin_value['actual']}\n"
+
+    if 'insolvent_coins' in yggdrasil_solvency:
+        message += "\nInsolvent Balances of *Yggdrasil*:\n"
+        for pub_key, coins in yggdrasil_solvency['insolvent_coins'].items():
+            for coin_key, coin_value in coins.items():
+                message += f"*{pub_key}*:\n" \
+                           f"*{coin_key}*:\n" \
+                           f"  Expected: {coin_value['expected']}\n" \
+                           f"  Actual:   {coin_value['actual']}\n"
+
+    return message
+
+
 def network_security_ratio_to_string(network_security_ratio):
     """
     Converts the network security ratio to an understandable english string
@@ -208,12 +230,12 @@ def tor_to_rune(tor):
         return '{:.4f} RUNE'.format(tor / 100000000)
 
 
-def add_thornode_to_user_data(user_data, address, node):
+def add_thornode_to_chat_data(chat_data, address, node):
     """
     Add a node in the user specific dictionary
     """
 
-    nodes = user_data.setdefault('nodes', {})
+    nodes = chat_data.setdefault('nodes', {})
     # Find an alias that does not exist yet
     i = 0
     while True:

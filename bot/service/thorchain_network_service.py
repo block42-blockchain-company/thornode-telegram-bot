@@ -3,9 +3,10 @@ from time import sleep
 
 import aiohttp
 import requests
+from requests.exceptions import Timeout, ConnectionError
 
 from constants.mock_values import thorchain_last_block_mock
-from service.general_network_service import get_request_json, get_request_json_with_retries
+from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
 
@@ -35,8 +36,14 @@ def is_thorchain_catching_up(node_ip=None) -> bool:
 def is_midgard_api_healthy(node_ip) -> bool:
     try:
         get_request_json_thorchain(url_path=":8080/v1/health", node_ip=node_ip)
+    except (Timeout, ConnectionError):
+        logger.warning(f"Timeout or Connection error with {node_ip}")
+        return False
     except Exception as e:
-        logger.exception(e)
+        if len(e.args) > 0 and "status_code" in e.args[0] and e.args[0].status_code == 502:
+            logger.info(f"Bad Status Request (status code 502) in 'is_midgard_api_healthy(node_ip)' with {node_ip}")
+        else:
+            logger.exception(e)
         return False
 
     return True
@@ -52,21 +59,6 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
 
 def get_network_data(node_ip=None):
     return get_request_json_thorchain(url_path=f":8080/v1/network", node_ip=node_ip)
-
-
-def is_binance_node_healthy(binance_node_ip) -> bool:
-    health_path = {
-        "TESTNET": ":26657/health",
-        "CHAOSNET": ":27147/health"
-    }[NETWORK_TYPE]
-
-    try:
-        get_request_json(url=f"http://{binance_node_ip}{health_path}")
-    except Exception as e:
-        logger.exception(e)
-        return False
-
-    return True
 
 
 def get_thorchain_blocks_per_year(node_ip=None):
@@ -96,10 +88,6 @@ def get_asgard_json() -> dict:
 def get_yggdrasil_json() -> dict:
     path = ":8080/yggdrasil.json" if DEBUG else ":1317/thorchain/vaults/yggdrasil"
     return get_request_json_thorchain(url_path=path)
-
-
-def get_binance_balance(address: str) -> dict:
-    return get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
 
 
 async def get_pool_addresses(node_ip: str):

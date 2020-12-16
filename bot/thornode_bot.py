@@ -1,8 +1,9 @@
 from telegram.error import InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
-                          CallbackQueryHandler, MessageHandler, Filters)
-
+                          CallbackQueryHandler, MessageHandler, Filters, messagequeue)
+from telegram.utils.request import Request
 from handlers.handlers import *
+from message_queue import MQBot
 from service.setup import *
 
 
@@ -13,14 +14,27 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
+    # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
+    # We cannot set burst_limit to 1, because of some off-by-one if check in the library
+    m_queue = messagequeue.MessageQueue(all_burst_limit=20, all_time_limit_ms=1000,
+                                        group_burst_limit=2, group_time_limit_ms=7000)
+    # set connection pool size for bot because
+    # it only happens automatically when creating Updater() with the telegram token.
+    # But we use the mq_bot to create the Updater() instance.
+    # Increased 'read_timeout' from default 5 seconds to 20 seconds to mitigate Timeouts due
+    # to the MessageQueue delay for group chats.
+    request = Request(con_pool_size=8, read_timeout=20)
+
     try:
-        bot = Updater(TELEGRAM_BOT_TOKEN,
-                      persistence=PicklePersistence(filename=session_data_path),
-                      use_context=True)
+        mq_bot = MQBot(TELEGRAM_BOT_TOKEN, request=request, mqueue=m_queue)
     except InvalidToken:
         logger.error("Invalid telegram token. Please make sure to set TELEGRAM_BOT_TOKEN environmental variable with"
                      " correct Telegram bot token. Check project docs for more details.", exc_info=True)
         raise
+
+    bot = Updater(bot=mq_bot,
+                  persistence=PicklePersistence(filename=session_data_path),
+                  use_context=True)
 
     dispatcher = bot.dispatcher
 

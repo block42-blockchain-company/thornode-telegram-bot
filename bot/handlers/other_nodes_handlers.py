@@ -1,53 +1,44 @@
-import itertools
-
 from telegram import InlineKeyboardButton
 
 from constants.messages import HEALTH_LEGEND
-from constants.node_ips import *
+from data.other_nodes_dao import OtherNodesDao
 from handlers.chat_helpers import *
-from models.nodes import *
 
 
 def show_other_nodes_menu(update, context):
-    all_nodes = itertools.chain(EthereumNode.from_ips(ETHEREUM_NODE_IPS),
-                                BitcoinNode.from_ips(BITCOIN_NODE_IPS),
-                                BinanceNode.from_ips(BINANCE_NODE_IPS))
-    all_nodes = list(all_nodes)
-
+    dao = OtherNodesDao()
     text = HEALTH_LEGEND
     text += '\nClick an address from the list below or add a node:'
 
     buttons = []
-    for node in all_nodes:
+    for node in dao.get_all_nodes():
         is_healthy = context.bot_data.get(node.node_id, {}).get('health', None)
         emoji = HEALTH_EMOJIS[is_healthy]
 
         buttons.append(InlineKeyboardButton(f'{emoji} {node.network_short_name} {node.node_ip}',
-                                            callback_data='other_node_details-' + node.node_id))
+                                            callback_data=f'other_node-{hash(node)}'))
 
     keyboard = build_2_columns_keyboard(buttons)
+    keyboard.append([InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu-edit')])
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.edit_message_text(context=context,
+                                            text=text,
+                                            parse_mode='markdown',
+                                            reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_other_nodes_details(update, context):
     query = update.callback_query
-    node_id = query.data.split('other_node_details-')[-1]
-    node = Node.from_id(node_id)
+    node_hash = query.data.split('other_node-')[-1]
+    node = OtherNodesDao().get_node_by_hash(node_hash)
 
     text = f"Details of node: *{node.network_name}* (*{node.node_ip}*)\n\n "
 
-    is_synced = context.bot_data.get(node.node_id, {}).get('syncing', None)
-
-    if is_synced is None:
-        try:
-            is_synced = node.is_fully_synced()
-        except Exception as e:
-            logger.debug(e, exc_info=True)
-            is_synced = 'currently unavailable'
+    try:
+        is_synced = node.is_fully_synced()
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        is_synced = 'currently unavailable'
 
     text += f"Is fully synced: *{is_synced}*\n"
 
@@ -60,7 +51,7 @@ def show_other_nodes_details(update, context):
         logger.debug(e, exc_info=True)
 
     try:
-        network_block_height = node.get_real_block_count()
+        network_block_height = node.get_network_block_count()
     except Exception as e:
         logger.debug(e, exc_info=True)
 
@@ -75,8 +66,8 @@ def show_other_nodes_details(update, context):
     else:
         text += f"*currently unavailable*"
 
-    try_message(context=context,
-                chat_id=update.effective_message.chat_id,
-                text=text,
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton('⬅️ BACK', callback_data='show_nodes_other')]]))
+    query.edit_message_text(context=context,
+                            text=text,
+                            parse_mode='markdown',
+                            reply_markup=InlineKeyboardMarkup(
+                                [[InlineKeyboardButton('⬅️ BACK', callback_data='show_nodes_other')]]))

@@ -1,15 +1,10 @@
-from constants.node_ips import *
+from data.other_nodes_dao import OtherNodesDao
 from handlers.chat_helpers import *
 from models.nodes import *
 
 
 def check_other_nodes_health(context):
-    nodes = []
-    nodes.extend(BinanceNode.from_ips(BINANCE_NODE_IPS))
-    nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
-    nodes.extend(BitcoinNode.from_ips(BITCOIN_NODE_IPS))
-
-    for node in nodes:
+    for node in OtherNodesDao().get_all_nodes():
         message = check_health(node, context)
         if message:
             try_message_to_all_users(context, text=message)
@@ -25,7 +20,7 @@ def check_health(node: Node, context) -> [str, None]:
         logger.error(e)
         return None
 
-    was_node_healthy = context.bot_data.setdefault(node.node_id, {}).get('health', True)
+    was_node_healthy = context.bot_data.setdefault(node.node_id, {}).setdefault('health', True)
 
     if was_node_healthy != is_node_currently_healthy:
         context.bot_data[node.node_id]['health'] = is_node_currently_healthy
@@ -42,14 +37,18 @@ def check_health(node: Node, context) -> [str, None]:
 
 
 def check_bitcoin_height_increase_job(context):
-    for node in BitcoinNode.from_ips(BITCOIN_NODE_IPS):
+    nodes = OtherNodesDao().get_nodes_by_network_names([BitcoinNode.network_name])
+
+    for node in nodes:
         message = check_block_height_increase(context, node)
         if message:
             try_message_to_all_users(context, message)
 
 
 def check_ethereum_height_increase_job(context):
-    for node in EthereumNode.from_ips(ETHEREUM_NODE_IPS):
+    nodes = OtherNodesDao().get_nodes_by_network_names([EthereumNode.network_name])
+
+    for node in nodes:
         message = check_block_height_increase(context, node)
         if message:
             try_message_to_all_users(context, message)
@@ -96,9 +95,7 @@ def check_other_nodes_syncing_job(context):
     Check if node is syncing or not and send appropriate notification
     """
 
-    nodes = []
-    nodes.extend(EthereumNode.from_ips(ETHEREUM_NODE_IPS))
-    nodes.extend(BitcoinNode.from_ips(BITCOIN_NODE_IPS))
+    nodes = OtherNodesDao().get_nodes_by_network_names([EthereumNode.network_name, BitcoinNode.network_name])
 
     for node in nodes:
         message = check_other_nodes_syncing(node, context)

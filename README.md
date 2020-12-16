@@ -20,9 +20,9 @@ For *docker-compose* open `variables-chaosnet.env` and/or
  
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
-- `BINANCE_NODE_IPS` to a list of Binance Node IPs you want to monitor (or `localhost`).
+- `BINANCE_NODE_IPS` to a list of Binance Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Binance Node.
-- `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs you want to monitor (or `localhost`).
+- `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Ethereum Node.
 - `ALLOWED_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
 Bot. Set it to `ALL` to make it available to everybody.
@@ -117,11 +117,11 @@ If you enter multiple node IPs for one network make sure to separate the IDs wit
 Set it to `localhost` if the Node runs on the same machine as the Telegram Bot.
 ##### Binance
 ```
-export BINANCE_NODE_IPS=3.228.22.197,localhost
+export BINANCE_NODE_IPS=3.228.22.197:5555,localhost
 ```
 ##### Ethereum
 ```
-export ETHEREUM_NODE_IPS=3.228.22.197,localhost
+export ETHEREUM_NODE_IPS=3.228.22.197:5555,localhost
 ```
 ##### Bitcoin
 For each node ip you need to also set the corresponding usernames and passwords to your node's
@@ -320,7 +320,8 @@ Set the `--env TELEGRAM_BOT_TOKEN` flag to your telegram bot token.
 Set the `--env NETWORK_TYPE` flag to the network you want to monitor (`TESTNET` or `CHAOSNET` while 
 the former is the default).
 
-If you have a node that you want to monitor, set additional node variables (see [Set environment variables](#set-environment-variables) section). 
+If you have a node that you want to monitor, set additional node variables 
+(see [Set environment variables](#set-environment-variables) section). 
 Set it as `BINANCE_NODE_IPS` in above example.
 
 Finally, the `--mount` flag tells docker to mount our previously created volume in the directory `storage`. 

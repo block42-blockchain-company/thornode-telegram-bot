@@ -1,8 +1,8 @@
 import abc
 
-from constants.node_ips import BITCOIN_NODE_IPS
+from service.binance_network_service import *
+from service.ethereum_network_service import *
 from service.general_network_service import *
-from service.thorchain_network_service import is_binance_node_healthy
 
 
 class Node(abc.ABC):
@@ -30,30 +30,14 @@ class Node(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_real_block_count(self):
+    def get_network_block_count(self):
         pass
+
+    def __hash__(self):
+        return hash(self.node_id)
 
     def to_string(self):
         return f"{self.network_name} node ({self.node_ip})"
-
-    @staticmethod
-    def from_id(node_id):
-        split = node_id.split('-')
-        network_name = split[0]
-        split.pop(0)
-        network_ip = '-'.join(split)
-
-        if network_name == BitcoinNode.network_name:
-            ip_with_credentials = next(filter(lambda ip_with_creds: network_ip in ip_with_creds, BITCOIN_NODE_IPS),
-                                       None)
-
-            return BitcoinNode(ip_with_credentials)
-        elif network_name == EthereumNode.network_name:
-            return EthereumNode(network_ip)
-        elif network_name == BinanceNode.network_name:
-            return BinanceNode(network_ip)
-        else:
-            raise Exception("No matching node type for node " + node_id)
 
 
 class BitcoinNode(Node):
@@ -65,16 +49,11 @@ class BitcoinNode(Node):
         self.ip_with_credentials = address
         ip = address.split("@")[-1].split(":")[0]
         super().__init__(ip, self.network_name, "BTC")
-        self.address = address
 
     def is_fully_synced(self) -> bool:
-        node_block_count = self.get_block_height()
-        public_block_count = requests.get(
-            "https://blockchain.info/q/getblockcount").json()
+        info = btc_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo').json()['result']
 
-        difference = abs(public_block_count - node_block_count)
-
-        return difference <= 1  # For difference 1 and 0 we assume that it is synced
+        return info['blocks'] == info['headers']
 
     def get_block_height(self):
         block_count_res = btc_rpc_request(address=self.ip_with_credentials, method='getblockcount')
@@ -91,6 +70,12 @@ class BitcoinNode(Node):
 
         return res.ok
 
+    def get_network_block_count(self):
+        info = btc_rpc_request(address=self.ip_with_credentials,
+                               method='getblockchaininfo').json()
+
+        return info['result']['headers']
+
     @staticmethod
     def from_ips(ips) -> list:
         btc_nodes = []
@@ -99,14 +84,6 @@ class BitcoinNode(Node):
             btc_nodes.append(BitcoinNode(btc_address))
 
         return btc_nodes
-
-    def get_real_block_count(self):
-        res = btc_rpc_request(address=self.ip_with_credentials,
-                              method='getblockcount')
-        if res.status_code == 401:
-            raise UnauthorizedException()
-
-        return res.json()['result']
 
 
 class EthereumNode(Node):
@@ -117,22 +94,20 @@ class EthereumNode(Node):
         super().__init__(node_ip, self.network_name, "ETH")
 
     def is_fully_synced(self) -> bool:
-        is_syncing = eth_rpc_request(self.node_ip, method="eth_syncing").json()['result']
-
-        return not is_syncing
+        return is_eth_node_fully_synced(self.node_ip)
 
     def get_block_height(self):
-        return int(eth_rpc_request(self.node_ip, method="eth_blockNumber").json()['result'], 16)
+        return get_eth_node_block_height(self.node_ip)
 
     def is_healthy(self) -> bool:
-        return eth_rpc_request(ip=self.node_ip, method="eth_protocolVersion").ok
+        return is_eth_node_healthy(self.node_ip)
+
+    def get_network_block_count(self):
+        return get_eth_network_block_count(self.node_ip)
 
     @staticmethod
     def from_ips(ips) -> list:
         return list(map(lambda n: EthereumNode(n), ips))
-
-    def get_real_block_count(self):
-        return int(eth_rpc_request(self.node_ip, method="eth_blockNumber", params=[]).json()['result'], 16)
 
 
 class BinanceNode(Node):
@@ -142,12 +117,10 @@ class BinanceNode(Node):
         super().__init__(node_ip, self.network_name, "BNB")
 
     def is_fully_synced(self) -> bool:
-        # We didn't implement it for Binance yet
-        return True
+        return not is_binance_node_syncing(self.node_ip)
 
     def get_block_height(self):
-        # We didn't implement it for Binance yet
-        raise NotImplementedError()
+        return get_binance_node_block_height(self.node_ip)
 
     def is_healthy(self) -> bool:
         return is_binance_node_healthy(self.node_ip)
@@ -156,8 +129,8 @@ class BinanceNode(Node):
     def from_ips(ips) -> list:
         return list(map(lambda n: BinanceNode(n), ips))
 
-    def get_real_block_count(self):
-        return requests.get('https://api.blockcypher.com/v1/eth/main').json()['height']
+    def get_network_block_count(self):
+        return get_binance_network_block_count()
 
 
 class UnauthorizedException(Exception):
