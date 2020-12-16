@@ -14,7 +14,7 @@ def check_thornodes(context):
 
     inactive_nodes = []
 
-    for node_address, node_data in chat_data.get('nodes', {}).items():
+    for node_address, local_node in chat_data.get('nodes', {}).items():
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
@@ -22,10 +22,8 @@ def check_thornodes(context):
             logger.exception(e)
             continue
 
-        local_node = chat_data['nodes'][node_address]
-
         if remote_node is None:
-            text = 'THORNode ' + chat_data['nodes'][node_address]['alias'] + ' is not active anymore! 💀' + '\n' + \
+            text = 'THORNode ' + local_node['alias'] + ' is not active anymore! 💀' + '\n' + \
                    'Address: ' + node_address + '\n\n' + \
                    'Please enter another THORNode address.'
 
@@ -36,38 +34,14 @@ def check_thornodes(context):
                                        text=text)
             continue
 
-        # isNotBlocked = lastTimestamp < currentTimestamp - timeout
-        if float(local_node['last_notification_timestamp']) < \
-                float(datetime.timestamp(
-                    datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))):
+        is_not_blocked = float(local_node['last_notification_timestamp']) < \
+                         datetime.timestamp(
+                             datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))
+        if is_not_blocked:
 
-            # Check which node fields have changed
-            changed_fields = [
-                field for field in ['status', 'bond', 'slash_points']
-                if local_node[field] != remote_node[field]
-            ]
+            message = build_notification_message_for_active_node(local_node, remote_node, context)
 
-            # If just slash_points changed, only send message if difference is min. 3 slash points
-            if len(changed_fields) == 1 and 'slash_points' in changed_fields and \
-                    abs(int(local_node['slash_points']) - int(remote_node['slash_points'])) < 5:
-                continue
-
-            # Check if there are any changes
-            if len(changed_fields) > 0:
-                text = 'THORNode: ' + chat_data['nodes'][node_address]['alias'] + '\n' + \
-                       'Address: ' + node_address + '\n' + \
-                       'Status: ' + local_node['status'].capitalize()
-                if 'status' in changed_fields:
-                    text += ' ➡️ ' + remote_node['status'].capitalize()
-                text += '\nBond: ' + tor_to_rune(int(local_node['bond']))
-                if 'bond' in changed_fields:
-                    text += ' ➡️ ' + tor_to_rune(int(remote_node['bond']))
-                text += '\nSlash Points: ' + '{:,}'.format(
-                    int(local_node['slash_points']))
-                if 'slash_points' in changed_fields:
-                    text += ' ➡️ ' + '{:,}'.format(
-                        int(remote_node['slash_points']))
-
+            if message:
                 # Update data
                 local_node['status'] = remote_node['status']
                 local_node['bond'] = remote_node['bond']
@@ -80,10 +54,10 @@ def check_thornodes(context):
 
                 try_message_with_home_menu(context=context,
                                            chat_id=chat_id,
-                                           text=text)
+                                           text=message)
+
             else:
-                local_node[
-                    'notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
+                local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
         if local_node['status'] in MONITORED_STATUSES:
             check_thorchain_block_height(context, node_address=node_address)
@@ -94,6 +68,38 @@ def check_thornodes(context):
 
     for node_address in inactive_nodes:
         del chat_data['nodes'][node_address]
+
+
+def build_notification_message_for_active_node(local_node, remote_node, context) -> [str, None]:
+    changed_fields = [
+        field for field in ['status', 'bond', 'slash_points']
+        if local_node[field] != remote_node[field]
+    ]
+    threshold = get_slash_points_threshold(context)
+
+    slash_point_change = abs(int(local_node['slash_points']) - int(remote_node['slash_points']))
+    if (len(changed_fields) <= 1) and ('slash_points' in changed_fields) and (slash_point_change <= threshold):
+        return None
+
+    if len(changed_fields) > 0:
+        text = f"THORNode: {local_node['alias']}\n" \
+               f"Address: {local_node['node_address']}\n" \
+               f"Status: {local_node['status'].capitalize()}"
+
+        if 'status' in changed_fields:
+            text += f' ➡️ {remote_node["status"].capitalize()}'
+
+        text += f"\nBond: {tor_to_rune(int(local_node['bond']))}"
+        if 'bond' in changed_fields:
+            text += f" ➡️ {tor_to_rune(int(remote_node['bond']))}"
+
+        text += '\nSlash Points: ' + '{:,}'.format(int(local_node['slash_points']))
+        if 'slash_points' in changed_fields:
+            text += ' ➡️ ' + '{:,}'.format(int(remote_node['slash_points']))
+
+        return text
+    else:
+        return None
 
 
 def check_versions_status(context):

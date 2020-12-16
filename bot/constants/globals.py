@@ -56,3 +56,6 @@ REQUEST_POSTFIX = '?height=0'  # currently needed to get correct results due to 
 MONITORED_STATUSES = ["standby", "ready", "active"]
 
 JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
+
+# SETTINGS
+SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3

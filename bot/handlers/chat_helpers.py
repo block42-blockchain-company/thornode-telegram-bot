@@ -22,8 +22,8 @@ def get_home_menu_buttons():
     Return keyboard buttons for the home menu
     """
 
-    keyboard = [[KeyboardButton('📡 MY NODES')],
-                [KeyboardButton('👀 SHOW ALL'), KeyboardButton('🌎 NETWORK')]]
+    keyboard = [[KeyboardButton('📡 MY NODES'), KeyboardButton('👀 SHOW ALL')],
+                [KeyboardButton('⚙️ SETTINGS'), KeyboardButton('🌎 NETWORK')]]
 
     return keyboard
 

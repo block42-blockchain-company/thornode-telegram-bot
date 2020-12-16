@@ -4,6 +4,7 @@ from telegram.error import BadRequest
 
 from handlers.network_info_handlers import *
 from handlers.other_nodes_handlers import *
+from handlers.settings_handlers import show_settings, set_threshold_menu, handle_change_threshold
 from handlers.thornodes_handlers import *
 from jobs.jobs import start_user_job
 
@@ -68,6 +69,8 @@ def dispatch_query(update, context):
         call = show_all_thorchain_nodes
     elif data == 'show_network_stats':
         call = show_network_stats
+    elif data.startswith('show_settings'):
+        call = show_settings
     elif data == 'solvency':
         call = solvency_stats
     elif data == 'vault_key_addresses':
@@ -96,6 +99,8 @@ def dispatch_query(update, context):
         call = show_other_nodes_menu
     elif data.startswith("other_node"):
         call = show_other_nodes_details
+    elif data == 'set_threshold':
+        call = set_threshold_menu
     else:
         edit = False
 
@@ -128,20 +133,22 @@ def dispatch_plain_input_query(update, context):
         return
 
     message = update.message.text
-    expected = context.chat_data[
-        'expected'] if 'expected' in context.chat_data else None
+    expected = context.chat_data.pop('expected', None)
+
     if message == '📡 MY NODES':
         return on_my_nodes_clicked(update, context)
     elif message == '🌎 NETWORK':
         return show_network_menu(update, context)
     elif message == '👀 SHOW ALL':
         return show_all_thorchain_nodes(update, context)
+    elif message == '⚙️ SETTINGS':
+        return show_settings(update, context)
     elif expected == 'add_node':
-        context.chat_data['expected'] = None
         return handle_add_node(update, context)
     elif expected == 'change_alias':
-        context.chat_data['expected'] = None
         return handle_change_alias(update, context)
+    elif expected == 'change_threshold':
+        return handle_change_threshold(update, context)
 
 
 @run_async
