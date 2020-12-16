@@ -1,5 +1,5 @@
 from constants.globals import logger, DEBUG
-from constants.mock_values import binance_is_syncing_mock, binance_node_healthy_mock
+from constants.mock_values import *
 from constants.node_ips import BINANCE_DEX_ENDPOINT
 from service.general_network_service import get_request_json, get_request_json_with_retries
 

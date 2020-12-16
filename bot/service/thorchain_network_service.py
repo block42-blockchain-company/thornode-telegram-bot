@@ -6,7 +6,7 @@ import requests
 from requests.exceptions import Timeout, ConnectionError
 
 from constants.mock_values import thorchain_last_block_mock
-from service.general_network_service import get_request_json, get_request_json_with_retries
+from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
 

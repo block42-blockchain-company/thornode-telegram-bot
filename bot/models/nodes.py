@@ -1,6 +1,7 @@
 import abc
 
 from service.binance_network_service import *
+from service.ethereum_network_service import *
 from service.general_network_service import *
 
 
@@ -93,27 +94,20 @@ class EthereumNode(Node):
         super().__init__(node_ip, self.network_name, "ETH")
 
     def is_fully_synced(self) -> bool:
-        is_syncing = eth_rpc_request(self.node_ip, method="eth_syncing").json()['result']
-
-        return not is_syncing
+        return is_eth_node_fully_synced(self.node_ip)
 
     def get_block_height(self):
-        return int(eth_rpc_request(self.node_ip, method="eth_blockNumber").json()['result'], 16)
+        return get_eth_node_block_height(self.node_ip)
 
     def is_healthy(self) -> bool:
-        return eth_rpc_request(ip=self.node_ip, method="eth_protocolVersion").ok
+        return is_eth_node_healthy(self.node_ip)
+
+    def get_network_block_count(self):
+        return get_eth_network_block_count(self.node_ip)
 
     @staticmethod
     def from_ips(ips) -> list:
         return list(map(lambda n: EthereumNode(n), ips))
-
-    def get_network_block_count(self):
-        syncing = eth_rpc_request(ip=self.node_ip, method="eth_syncing").json()['result']
-
-        if not syncing:
-            return self.get_block_height()
-        else:
-            return int(syncing['highestBlock'], 16)
 
 
 class BinanceNode(Node):
