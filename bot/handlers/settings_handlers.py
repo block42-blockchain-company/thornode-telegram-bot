@@ -38,7 +38,7 @@ def set_threshold_menu(update, context):
            f"Default: *{SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT}* \n" \
            f"(0 = always notify)\n\n" \
            f"*Insert threshold for slash points notification*"
-    context.user_data['expected'] = 'change_threshold'
+    context.chat_data['expected'] = 'change_threshold'
 
     query.edit_message_text(
         text=text,
@@ -59,7 +59,7 @@ def handle_change_threshold(update, context):
             '⛔️ This is not a correct input! Must be an integer *>= 0* ⛔️\n\n'
             'Try again.',
             parse_mode='markdown')
-        context.user_data['expected'] = 'change_threshold'
+        context.chat_data['expected'] = 'change_threshold'
         return
 
     set_slash_points_threshold(new_threshold, context)
