@@ -29,11 +29,7 @@ spec:
             - name: ETHEREUM_NODE_IPS
               value: ""                     # Node IPs of your Ethereum nodes, "localhost" or leave it empty to not monitor Ethereum node
             - name: BITCOIN_NODE_IPS
-              value: ""                     # Node IPs of your Bitcoin nodes, "localhost" or leave it empty to not monitor Bitcoin node
-            - name: BITCOIN_NODE_USERNAMES
-              value: ""                     # Comma separated usernames for your bitcoin nodes (for each Bitcoin node ip exactly one username)
-            - name: BITCOIN_NODE_PASSWORDS
-              value: ""                     # Comma separated passwords for your bitcoin nodes (for each Bitcoin node ip exactly one password)
+              value: ""                     # Addresses of your Bitcoin nodes, use format `username:password@ip:port'
       volumes:
         - name: thornode-bot-testnet-volume
           persistentVolumeClaim:

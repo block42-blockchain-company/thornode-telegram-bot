@@ -1,11 +1,14 @@
 import random
+from time import sleep
 
 import aiohttp
 import requests
 from requests.exceptions import Timeout, ConnectionError
 
-from constants import *
-from service.general_network_service import get_request_json, get_request_json_with_retries
+from constants.mock_values import thorchain_last_block_mock
+from service.general_network_service import get_request_json
+from constants.globals import *
+from constants.node_ips import *
 
 
 def get_node_accounts():
@@ -58,24 +61,23 @@ def get_network_data(node_ip=None):
     return get_request_json_thorchain(url_path=f":8080/v1/network", node_ip=node_ip)
 
 
-def is_binance_node_healthy(binance_node_ip) -> bool:
-    health_path = {
-        "TESTNET": ":26657/health",
-        "CHAOSNET": ":27147/health"
-    }[NETWORK_TYPE]
-
-    try:
-        get_request_json(url=f"http://{binance_node_ip}{health_path}")
-    except Exception as e:
-        logger.exception(e)
-        return False
-
-    return True
-
-
 def get_thorchain_blocks_per_year(node_ip=None):
     constants = get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants", node_ip=node_ip)
     return constants['int_64_values']['BlocksPerYear']
+
+
+def get_thorchain_blocks_per_second():
+    return get_thorchain_blocks_per_year() / (365 * 24 * 60 * 60)
+
+
+def get_thorchain_last_block(node_ip=None):
+    if DEBUG:
+        sleep(0.5)
+        last_block = thorchain_last_block_mock
+    else:
+        last_block = get_request_json_thorchain(url_path=f":8080/v1/thorchain/lastblock", node_ip=node_ip)
+
+    return last_block['thorchain']
 
 
 def get_asgard_json() -> dict:
@@ -86,10 +88,6 @@ def get_asgard_json() -> dict:
 def get_yggdrasil_json() -> dict:
     path = ":8080/yggdrasil.json" if DEBUG else ":1317/thorchain/vaults/yggdrasil"
     return get_request_json_thorchain(url_path=path)
-
-
-def get_binance_balance(address: str) -> dict:
-    return get_request_json_with_retries(url=f"{BINANCE_DEX_ENDPOINT}/api/v1/account/{address}")['balances']
 
 
 async def get_pool_addresses(node_ip: str):
@@ -106,7 +104,7 @@ async def get_pool_addresses(node_ip: str):
             return await response.json()
 
 
-def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
+def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
     if DEBUG:
         node_ip = 'localhost'
 
@@ -128,4 +126,9 @@ def get_request_json_thorchain(url_path: str, node_ip: str=None) -> dict:
     raise Exception("No seed node returned a valid response!")
 
 
+def get_thornode_object_or_none(address):
+    nodes = get_node_accounts()
 
+    node = next(filter(lambda n: n['node_address'] == address, nodes), None)
+
+    return node

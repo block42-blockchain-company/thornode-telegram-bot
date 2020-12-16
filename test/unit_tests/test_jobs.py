@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import Mock, patch
 
-import helpers
-from jobs import check_block_height_increase, check_health, check_syncing, check_solvency
+from jobs.other_nodes_jobs import *
+from jobs.other_nodes_jobs import check_health
+from jobs.thornodes_jobs import check_solvency
 from models.nodes import Node, UnauthorizedException
-from constants import MISSING_FUNDS_THRESHOLD
 
 
 class ContextMock:
@@ -21,7 +21,6 @@ class JobTests(unittest.TestCase):
         self.node_mock.node_id = ":)"
         self.node_mock.node_ip = "123"
         self.node_mock.network_name = "MoshbitChain"
-
 
     def test_block_height_increase_check(self):
         message = check_block_height_increase(self.context, self.node_mock)
@@ -68,27 +67,27 @@ class JobTests(unittest.TestCase):
 
     def test_syncing_check(self):
         self.node_mock.is_fully_synced.return_value = True
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
         self.node_mock.is_fully_synced.return_value = False
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIn(f"is syncing with the network".lower(), message.lower())
 
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
         self.node_mock.is_fully_synced.return_value = True
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIn(f"is fully synced again".lower(), message.lower())
 
-        message = check_syncing(self.node_mock, self.context)
+        message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
-    @patch('jobs.yggdrasil_solvency_check')
-    @patch('jobs.asgard_solvency_check')
+    @patch('jobs.thornodes_jobs.yggdrasil_solvency_check')
+    @patch('jobs.thornodes_jobs.asgard_solvency_check')
     def test_solvency_check_success(self, mock_asgard_solvency_check, mock_yggdrasil_solvency_check):
-        mock_asgard_solvency_check.return_value = {"is_solvent" : True,
+        mock_asgard_solvency_check.return_value = {"is_solvent": True,
                                                    "solvent_coins": {'BNB.RUNE-67C': '461534.11554061',
                                                                      'BNB.MATIC-416': '3042.60609950'}}
         mock_yggdrasil_solvency_check.return_value = {"is_solvent": True,

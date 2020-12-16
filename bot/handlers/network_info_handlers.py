@@ -1,15 +1,16 @@
-from collections import defaultdict, Counter
+from telegram import InlineKeyboardButton
+from collections import Counter
 
-from helpers import *
-from messages import *
+from constants.messages import *
+from handlers.chat_helpers import *
+from service.utils import *
 
 
 def show_network_menu(update, context):
     keyboard = [[
         InlineKeyboardButton('📊 NETWORK STATS',
                              callback_data='show_network_stats'),
-    ],
-    [
+    ], [
         InlineKeyboardButton('💰 SOLVENCY',
                              callback_data='solvency'),
         InlineKeyboardButton('🔒 VAULT ADDRESSES',
@@ -69,7 +70,7 @@ async def show_network_stats(update, context):
                 '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
                     network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
-        text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security(network))}*\n"
+        text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n"
 
         text += "\n↩️ Node ROI: *" + \
                 '{:.2f}'.format(float(network['bondingAPY']) * 100) \
