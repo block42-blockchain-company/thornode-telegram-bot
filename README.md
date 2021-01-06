@@ -94,7 +94,12 @@ Install all required dependencies via: `pip install -r requirements.txt`
 ## [Create Telegram bot token via BotFather](#create-telegram-bot-token-via-botfather)
 Start a Telegram chat with [BotFather](https://t.me/BotFather) and click `start`.
 
-Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. Save this token, you will need it in a second.
+Then send `/newbot` in the chat, and follow the given steps to create a new telegram token. 
+Save this token, you will need it in a second.
+
+Please note that you can specify various Bot Settings for your Bot.
+If you'd like to add your bot to a group chat, make sure that "allow groups?" is enabled in your bot
+settings (it should be enabled by default).
 
 ## [Set environment variables](#set-environment-variables)
 Set the telegram bot token you just created as an environment variable: `TELEGRAM_BOT_TOKEN`
