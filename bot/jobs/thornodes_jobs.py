@@ -135,7 +135,7 @@ def check_churning(context):
         validators = get_node_accounts()
     except Exception as e:
         logger.exception(e)
-        logger.error("I couldn't get the node accounts while checking if churning occured.")
+        logger.error("I couldn't get the node accounts while checking if churning occurred.")
         return
 
     if 'node_statuses' not in context.bot_data:
@@ -360,3 +360,15 @@ def check_thorchain_midgard_api(context, node_address):
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
         node_data['is_midgard_healthy'] = is_midgard_healthy
+
+
+def check_network_security_job(context):
+    """
+    Check safety of network regarding bonded and staked tokens
+    """
+    health_ratio = get_network_security_ratio(get_network_data())
+
+    if health_ratio < NETWORK_SECURITY_LOWER_LIMIT or health_ratio > NETWORK_SECURITY_UPPER_LIMIT:
+        logger.warning("Network safety exceeded tresholds.")
+        text = "Network not safe! 💀💀💀"
+        try_message_to_all_users(context, text=text)

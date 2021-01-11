@@ -14,6 +14,9 @@ def setup_bot_data(dispatcher):
     dispatcher.job_queue.run_repeating(check_other_nodes_syncing_job,
                                        interval=syncing_checks_interval_in_seconds)
 
+    dispatcher.job_queue.run_repeating(check_network_security_job,
+                                       interval=3600)
+
 
 def start_user_job(context, chat_id):
     context.job_queue.run_repeating(user_specific_checks,
@@ -33,6 +36,7 @@ def user_specific_checks(context):
 
     check_versions_status(context)
     check_thornodes(context)
+
 
 
 def general_bot_checks(context):
