@@ -332,13 +332,16 @@ def show_detail_menu(update, context):
         show_my_thorchain_nodes_menu(update, context)
         return
 
+    print(node)
+
     text = 'THORNode: *' + context.chat_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
-           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n'
+           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
+           'DollyVolley Specifics: *' + "good" + '*\n'
 
     status = None
     try:
@@ -371,7 +374,15 @@ def show_detail_menu(update, context):
         text += 'Number of Unconfirmed Transactions: '
         unconfirmed_txs = get_number_of_unconfirmed_transactions(
             node['ip_address'])
-        text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+        text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n'
+    except Exception as e:
+        logger.exception(e)
+        text += 'Currently unavailable!\n'
+
+    try:
+        text += 'Profit Roll-up: '
+        profit_roll_up = get_profit_roll_up(node['ip_address'])
+        text += '*{:,}*'.format(profit_roll_up) + '\n\n'
     except Exception as e:
         logger.exception(e)
         text += 'Currently unavailable!\n\n'
