@@ -57,6 +57,24 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
     return int(get_request_json_thorchain(url_path=unconfirmed_txs_path, node_ip=node_ip)['result']['total'])
 
 
+def get_profit_roll_up(node_ip) -> int:
+    # for each pool of the node
+    profit_roll_up_path = ":1317/thorchain/nodeaccounts"
+    profit_roll_up = get_request_json_thorchain(url_path=profit_roll_up_path, node_ip=node_ip)
+
+    current_block_height = get_latest_block_height()
+
+    print(profit_roll_up)
+    for i in profit_roll_up:
+        if i["status"] == "active":
+            block_units = current_block_height - int(i["status_since"])
+            days_active = block_units * 5 / 60 / 60 / 24
+            reward_per_day = int(i["current_award"]) / days_active
+            print(f"Reward/Day: {reward_per_day} Days Active: {days_active}")
+
+    return 3
+
+
 def get_network_data(node_ip=None):
     return get_request_json_thorchain(url_path=f":8080/v1/network", node_ip=node_ip)
 
