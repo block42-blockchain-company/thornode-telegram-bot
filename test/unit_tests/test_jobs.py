@@ -1,8 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from constants.globals import NetworkHealthStatus
-from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTH_CURATION
+from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN, NetworkHealthStatus
 
 from jobs.other_nodes_jobs import *
 from jobs.other_nodes_jobs import check_health
@@ -141,7 +140,7 @@ class JobTests(unittest.TestCase):
 
         mock_get_network_security_ratio.return_value = 0.7
         network_security_message = check_network_security(self.context)
-        self.assertIn(network_security_message, NETWORK_HEALTH_CURATION,
+        self.assertIn(network_security_message, NETWORK_HEALTHY_AGAIN,
                       "Network state should have changed back to OPTIMAL again")
 
         mock_get_network_security_ratio.return_value = 0.91

@@ -1,4 +1,4 @@
-from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTH_CURATION
+from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN
 from handlers.chat_helpers import try_message_with_home_menu, try_message_to_all_users
 from packaging import version
 
@@ -364,29 +364,23 @@ def check_thorchain_midgard_api(context, node_address):
 
 
 def check_network_security_job(context):
-    """
-    Job notifying the user if network security has changed
-    """
     text = check_network_security(context)
     if text is not None:
         try_message_to_all_users(context, text=text)
 
 
 def check_network_security(context):
-    """
-    Check safety of network regarding bonded and staked tokens
-    """
     network_health_status = network_security_ratio_to_string(get_network_security_ratio(get_network_data()))
 
     if 'network_health_status' not in context.bot_data:
         context.bot_data["network_health_status"] = network_health_status
         return None
 
-    if network_health_status is not context.bot_data["network_health_status"]:
+    if network_health_status != context.bot_data["network_health_status"]:
         context.bot_data["network_health_status"] = network_health_status.value
 
         if network_health_status is NetworkHealthStatus.OPTIMAL:
-            return NETWORK_HEALTH_CURATION
+            return NETWORK_HEALTHY_AGAIN
 
         logger.warning(network_health_status.value)
         return NETWORK_HEALTH_WARNING(network_health_status)

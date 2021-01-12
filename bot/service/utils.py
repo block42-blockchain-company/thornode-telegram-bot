@@ -5,7 +5,7 @@ from typing import Callable, Awaitable
 
 from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
-from constants.globals import NetworkHealthStatus
+from constants.messages import NetworkHealthStatus
 
 
 async def for_each_async(elements: [], function: Callable[...,

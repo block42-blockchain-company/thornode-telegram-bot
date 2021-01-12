@@ -10,10 +10,9 @@ def setup_bot_data(dispatcher):
     dispatcher.job_queue.run_repeating(check_ethereum_height_increase_job,
                                        interval=EthereumNode.max_time_for_block_height_increase_in_seconds)
 
-    syncing_checks_interval_in_seconds = 120
     dispatcher.job_queue.run_repeating(check_other_nodes_syncing_job,
-                                       interval=syncing_checks_interval_in_seconds)
-
+                                       interval=120)
+    
     dispatcher.job_queue.run_repeating(check_network_security_job,
                                        interval=3600)
 
