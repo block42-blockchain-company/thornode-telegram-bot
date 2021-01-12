@@ -89,7 +89,7 @@ async def show_network_stats(update, context):
 
     except Exception as e:
         logger.exception(e)
-        text += NETWORK_ERROR_MSG
+        text += NETWORK_ERROR
     finally:
         try_message_with_home_menu(context=context,
                                    chat_id=update.effective_chat.id,
@@ -103,7 +103,7 @@ def solvency_stats(update, context):
         yggdrasil_solvency = yggdrasil_solvency_check()
     except Exception as e:
         logger.exception(e)
-        try_message_with_home_menu(context, update.effective_chat.id, NETWORK_ERROR_MSG)
+        try_message_with_home_menu(context, update.effective_chat.id, NETWORK_ERROR)
         return
 
     message = "💰 Solvency Check\n"

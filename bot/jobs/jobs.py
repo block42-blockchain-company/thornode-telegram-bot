@@ -38,7 +38,6 @@ def user_specific_checks(context):
     check_thornodes(context)
 
 
-
 def general_bot_checks(context):
     """
     Periodic checks that are interesting for all users

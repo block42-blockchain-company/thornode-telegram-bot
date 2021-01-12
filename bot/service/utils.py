@@ -5,6 +5,7 @@ from typing import Callable, Awaitable
 
 from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
+from constants.globals import NetworkHealthStatus
 
 
 async def for_each_async(elements: [], function: Callable[...,
@@ -191,15 +192,15 @@ def network_security_ratio_to_string(network_security_ratio):
     """
 
     if network_security_ratio > 0.9:
-        network_security_string = "Inefficent"
+        network_security_string = NetworkHealthStatus.INEFFICIENT
     elif 0.9 >= network_security_ratio > 0.75:
-        network_security_string = "Overbonded"
+        network_security_string = NetworkHealthStatus.OVERBONDED
     elif 0.75 >= network_security_ratio >= 0.6:
-        network_security_string = "Optimal"
+        network_security_string = NetworkHealthStatus.OPTIMAL
     elif 0.6 > network_security_ratio >= 0.5:
-        network_security_string = "Underbonded"
+        network_security_string = NetworkHealthStatus.UNDBERBONDED
     else:
-        network_security_string = "Insecure"
+        network_security_string = NetworkHealthStatus.INSECURE
 
     return network_security_string
 

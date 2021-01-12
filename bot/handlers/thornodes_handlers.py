@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton
 from telegram.ext import run_async
 
-from constants.messages import NETWORK_ERROR_MSG, HEALTH_LEGEND
+from constants.messages import NETWORK_ERROR, HEALTH_LEGEND
 from handlers.chat_helpers import *
 from service.utils import *
 from datetime import timedelta
@@ -206,7 +206,7 @@ def show_all_thorchain_nodes(update, context):
         logger.exception(e)
         try_message_with_home_menu(context=context,
                                    chat_id=update.effective_chat.id,
-                                   text=NETWORK_ERROR_MSG)
+                                   text=NETWORK_ERROR)
         return
 
     text = "Status of all THORNodes in the THORChain network:\n\n"
@@ -314,7 +314,7 @@ def show_detail_menu(update, context):
         node = get_thornode_object_or_none(address=address)
     except Exception as e:
         logger.exception(e)
-        query.edit_message_text(NETWORK_ERROR_MSG)
+        query.edit_message_text(NETWORK_ERROR)
         show_my_thorchain_nodes_menu(update, context)
         return
 

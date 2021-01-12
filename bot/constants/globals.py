@@ -1,5 +1,6 @@
 import os
 import logging
+from enum import Enum
 
 # LOGGING
 logging.basicConfig(
@@ -59,5 +60,11 @@ JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 
 # SETTINGS
 SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3
-NETWORK_SECURITY_LOWER_LIMIT = 0.50
-NETWORK_SECURITY_UPPER_LIMIT = 0.80
+
+
+class NetworkHealthStatus(Enum):
+    INEFFICIENT = "Inefficient"
+    OVERBONDED = "Overbonded"
+    OPTIMAL = "Optimal"
+    UNDBERBONDED = "Underbonded"
+    INSECURE = "Insecure"
