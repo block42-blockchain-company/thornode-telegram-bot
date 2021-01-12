@@ -207,7 +207,6 @@ class JobTests(unittest.TestCase):
         }""")
 
         changed_values = check_thorchain_constants(self.context)
-        print(changed_values)
         self.assertIn("Global Network Constants Change 📢:", changed_values,
                       "Title missing")
 
