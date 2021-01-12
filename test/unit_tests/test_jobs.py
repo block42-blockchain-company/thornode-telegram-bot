@@ -1,9 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
 
+from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN, NetworkHealthStatus
+
 from jobs.other_nodes_jobs import *
 from jobs.other_nodes_jobs import check_health
-from jobs.thornodes_jobs import check_solvency
+from jobs.thornodes_jobs import check_solvency, check_network_security
 from models.nodes import Node, UnauthorizedException
 
 
@@ -18,8 +20,8 @@ class JobTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(JobTests, self).__init__(*args, **kwargs)
         self.node_mock.get_block_height.return_value = 42
-        self.node_mock.node_id = ":)"
-        self.node_mock.node_ip = "123"
+        self.node_mock.node_id = "node_1234"
+        self.node_mock.node_ip = "11.42.25.201"
         self.node_mock.network_name = "MoshbitChain"
 
     def test_block_height_increase_check(self):
@@ -120,3 +122,38 @@ class JobTests(unittest.TestCase):
         message = check_solvency(self.context)
         self.assertIn("THORChain is *100% solvent* again! 👌\n", message,
                       "Solvency message should alert about correct funds but does not!")
+
+    @patch('jobs.thornodes_jobs.get_network_security_ratio')
+    def test_check_network_security(self, mock_get_network_security_ratio):
+        mock_get_network_security_ratio.return_value = 0.66
+        network_security_message = check_network_security(self.context)
+        self.assertIs(network_security_message, None, "Can not trigger comparison difference. No previous value")
+
+        mock_get_network_security_ratio.return_value = 0.66
+        network_security_message = check_network_security(self.context)
+        self.assertIs(network_security_message, None, "Network is optimal, but an warning is raised")
+
+        mock_get_network_security_ratio.return_value = 0.80
+        network_security_message = check_network_security(self.context)
+        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.OVERBONDED),
+                      "Network state should have changed to OVERBONDED")
+
+        mock_get_network_security_ratio.return_value = 0.7
+        network_security_message = check_network_security(self.context)
+        self.assertIn(network_security_message, NETWORK_HEALTHY_AGAIN,
+                      "Network state should have changed back to OPTIMAL again")
+
+        mock_get_network_security_ratio.return_value = 0.91
+        network_security_message = check_network_security(self.context)
+        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.INEFFICIENT),
+                      "Network state should have changed to INEFFICIENT")
+
+        mock_get_network_security_ratio.return_value = 0.3
+        network_security_message = check_network_security(self.context)
+        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.INSECURE),
+                      "Network state should have changed to INSECURE")
+
+        mock_get_network_security_ratio.return_value = 0.5
+        network_security_message = check_network_security(self.context)
+        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.UNDBERBONDED),
+                      "Network state should have changed to UNDBERBONDED")
