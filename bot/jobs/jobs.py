@@ -12,8 +12,8 @@ def setup_bot_data(dispatcher):
 
     dispatcher.job_queue.run_repeating(check_other_nodes_syncing_job,
                                        interval=120)
-    
-    dispatcher.job_queue.run_repeating(check_network_security_job,
+
+    dispatcher.job_queue.run_repeating(network_checks,
                                        interval=3600)
 
 
@@ -45,3 +45,11 @@ def general_bot_checks(context):
     check_churning(context)
     check_solvency(context)
     check_other_nodes_health(context)
+
+
+def network_checks(context):
+    """
+    Periodic checks that are interesting for all users but are rarely changing -> lower frequency
+    """
+    check_thorchain_constants_job(context)
+    check_network_security_job(context)

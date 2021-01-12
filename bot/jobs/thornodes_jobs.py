@@ -386,3 +386,41 @@ def check_network_security(context):
         return NETWORK_HEALTH_WARNING(network_health_status)
     else:
         return None
+
+
+def check_thorchain_constants_job(context):
+    changed_values = check_thorchain_constants(context)
+
+    if changed_values is not None:
+        try_message_to_all_users(context, changed_values)
+
+
+def check_thorchain_constants(context):
+    constants = get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants")
+
+    if "constants" not in context.bot_data:
+        context.bot_data["constants"] = constants
+        return None
+
+    if context.bot_data["constants"] != constants:
+        changed_keys = []
+
+        # Detect Changes
+        for k in constants.keys():
+            difference = constants[k].items() - context.bot_data["constants"][k].items()
+            changed_keys.extend([k for k, v in list(difference)])  # registering the keys of the changes
+
+        # Generate Message
+        text = "Global Network Constants Change 📢:\n"
+        for k in constants.keys():
+            for key in changed_keys:
+                if key in constants[k]:
+                    text += f"{key} has changed " \
+                            f"from {context.bot_data['constants'][k][key]} " \
+                            f"to {constants[k][key]} \n"
+
+        # Update Data
+        context.bot_data["constants"] = constants
+        return text
+
+    return None

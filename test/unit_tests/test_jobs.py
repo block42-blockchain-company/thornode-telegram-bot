@@ -1,11 +1,11 @@
+import json
 import unittest
 from unittest.mock import Mock, patch
 
 from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN, NetworkHealthStatus
-
 from jobs.other_nodes_jobs import *
-from jobs.other_nodes_jobs import check_health
-from jobs.thornodes_jobs import check_solvency, check_network_security
+from jobs.thornodes_jobs import check_network_security
+from jobs.thornodes_jobs import check_solvency, check_thorchain_constants
 from models.nodes import Node, UnauthorizedException
 
 
@@ -157,3 +157,84 @@ class JobTests(unittest.TestCase):
         network_security_message = check_network_security(self.context)
         self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.UNDBERBONDED),
                       "Network state should have changed to UNDBERBONDED")
+
+    @patch('jobs.thornodes_jobs.get_request_json_thorchain')
+    def test_network_constants_job(self, mock_get_request_json_thorchain):
+        mock_get_request_json_thorchain.return_value = json.loads(
+            """ { 
+            "int_64_values":{
+              "BadValidatorRate":17280,
+              "BlocksPerYear":6311390,
+              "ObserveFlex":5,
+              "ObserveSlashPoints":1,
+              "ValidatorRotateOutNumBeforeFull":1,
+              "WhiteListGasAsset":1000,
+              "YggFundLimit":50
+           },
+           "bool_values":{
+              "StrictBondStakeRatio":false
+           },
+           "string_values":{
+              "DefaultPoolStatus":"Bootstrap"
+           }
+        }""")
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIs(changed_values, None,
+                      "First value entered. Can not have conflict with previous.")
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIs(changed_values, None,
+                      "Same constanstants returned as previous. There should not be a difference")
+
+        mock_get_request_json_thorchain.return_value = json.loads(
+            """{ 
+            "int_64_values":{
+              "BadValidatorRate":17280,
+              "BlocksPerYear":6311390,
+              "ObserveFlex":5,
+              "ObserveSlashPoints":3,
+              "ValidatorRotateOutNumBeforeFull":2,
+              "WhiteListGasAsset":1000,
+              "YggFundLimit":50
+           },
+           "bool_values":{
+              "StrictBondStakeRatio":false
+           },
+           "string_values":{
+              "DefaultPoolStatus":"Bootstrap"
+           }
+        }""")
+
+        changed_values = check_thorchain_constants(self.context)
+        print(changed_values)
+        self.assertIn("Global Network Constants Change 📢:", changed_values,
+                      "Title missing")
+
+        self.assertIn("ValidatorRotateOutNumBeforeFull has changed from 1 to 2", changed_values,
+                      "ValidatorRotateOutNumBeforeFull changes not detected")
+
+        self.assertIn("ObserveSlashPoints has changed from 1 to 3", changed_values,
+                      "ObserveSlashPoints changes not detected")
+
+        mock_get_request_json_thorchain.return_value = json.loads(
+            """{ 
+            "int_64_values":{
+              "BadValidatorRate":17280,
+              "BlocksPerYear":6311390,
+              "ObserveFlex":5,
+              "ObserveSlashPoints":3,
+              "ValidatorRotateOutNumBeforeFull":2,
+              "WhiteListGasAsset":1000,
+              "YggFundLimit":50
+           },
+           "bool_values":{
+              "StrictBondStakeRatio":false
+           },
+           "string_values":{
+              "DefaultPoolStatus":"Bootstrap"
+           }
+        }""")
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIs(changed_values, None, "Nothing has changed, no changes should appear")
