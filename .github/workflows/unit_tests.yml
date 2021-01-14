@@ -17,8 +17,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Setup python path
-        run: export PYTHONPATH="$(pwd)/bot:$(pwd)/test/unit_tests"
-
       - name: Run tests with pytest
         run: pytest
+        env:
+          PYTHONPATH: ".:./bot:./test/unit_tests"
