@@ -148,6 +148,9 @@ def check_churning(context):
 
     local_node_statuses = context.bot_data['node_statuses']
 
+    if 'chain_addresses' not in context.bot_data:
+        context.bot_data['chain_addresses'] = {}
+
     churned_in = []
     churned_out = []
     highest_churn_status_since = 0
@@ -193,6 +196,16 @@ def check_churning(context):
                 float(network['bondingAPY']) * 100) + " %* APY\n\n" \
                                                       "↩️ Liquidity ROI: *" + '{:.2f}'.format(
                 float(network['liquidityAPY']) * 100) + " %* APY"
+
+            current_chains = get_pool_addresses_synchronous()["current"]
+            for chain in current_chains:
+                if "chain_addresses" in context.bot_data and chain['chain'] in context.bot_data['chain_addresses']:
+                    if chain['address'] != context.bot_data['chain_addresses'][chain['chain']]:
+                        text += f"\n\n*{chain['chain']}*: \n" \
+                                f"New Vault address: {chain['address']}\n" \
+                                f"Old Vault address: {context.bot_data['chain_addresses'][chain['chain']]}"
+                context.bot_data['chain_addresses'][chain['chain']] = chain['address']
+
         except Exception as e:
             logger.exception(e)
 

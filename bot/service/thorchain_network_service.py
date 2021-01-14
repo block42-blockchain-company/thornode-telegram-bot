@@ -90,6 +90,11 @@ def get_yggdrasil_json() -> dict:
     return get_request_json_thorchain(url_path=path)
 
 
+def get_pool_addresses_synchronous() -> dict:
+    path = ":8080/pool_addresses_1.json" if DEBUG else ":8080/v1/thorchain/pool_addresses"
+    return get_request_json_thorchain(path)
+
+
 async def get_pool_addresses(node_ip: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(
