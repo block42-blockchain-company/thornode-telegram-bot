@@ -15,6 +15,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest
 
       - name: Setup python path
         run: export PYTHONPATH="$(pwd)/bot:$(pwd)/test/unit_tests"
