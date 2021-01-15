@@ -199,12 +199,12 @@ def check_churning(context):
             for chain in current_chains:
                 if chain['chain'] in context.bot_data['vault_addresses']:
                     if chain['address'] != context.bot_data['vault_addresses'][chain['chain']]:
-                        text += f"\n\n🔐 *Vault Addresses*" if "Vault Addresses" not in text else ""
-                        text += f"\n\n*{chain['chain']}*: \n" \
+                        text += f"\n\n🔐 Vault Addresses:" if "Vault Addresses" not in text else ""
+                        text += f"\n*{chain['chain']}*: \n" \
                                 f"New Vault address: {chain['address']}\n" \
-                                f"Old Vault address: {context.bot_data['vault_addresses'][chain['chain']]}"
-                    elif len(churned_in):
-                        text += "⚠️ 🚨 NODES ADDED BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨"
+                                f"Old Vault address: {context.bot_data['vault_addresses'][chain['chain']]}\n"
+                    else:
+                        text += "\n\n⚠️ 🚨 CHURNING BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨\n"
                 context.bot_data['vault_addresses'][chain['chain']] = chain['address']
 
         except Exception as e:

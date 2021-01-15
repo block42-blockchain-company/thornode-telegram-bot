@@ -205,7 +205,7 @@ class JobTests(unittest.TestCase):
         check_churning(self.context)
         # assert churning out text (check for: Nodes Removed:)
         mock_try_message_to_all_users.assert_called_with(self.context,
-                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\n\nNodes Removed:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY")
+                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\n\nNodes Removed:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n⚠️ 🚨 CHURNING BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨\n")
 
         # fourth call: churning in / address changed
         mock_get_node_accounts.return_value[0]['status'] = 'active'
@@ -213,18 +213,18 @@ class JobTests(unittest.TestCase):
         check_churning(self.context)
         # assert churning in text (check for: Nodes Added, New Vault Address / Old Vault Address)
         mock_try_message_to_all_users.assert_called_with(self.context,
-                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\nNodes Added:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n🔐 *Vault Addresses*\n\n*BNB*: \nNew Vault address: CHANGED-Address\nOld Vault address: bnb1mghkd903p06fdxvm7l3pj5284sneck03gqh78r")
+                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\nNodes Added:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n🔐 Vault Addresses:\n*BNB*: \nNew Vault address: CHANGED-Address\nOld Vault address: bnb1mghkd903p06fdxvm7l3pj5284sneck03gqh78r\n")
 
         #churning out
         mock_get_node_accounts.return_value[0]['status'] = 'standby'
         check_churning(self.context)
         # assert churning out text (check for: Nodes Removed:)
         mock_try_message_to_all_users.assert_called_with(self.context,
-                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\n\nNodes Removed:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY")
+                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\n\nNodes Removed:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n⚠️ 🚨 CHURNING BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨\n")
 
         # churning in with same address - assert warning
         mock_get_node_accounts.return_value[0]['status'] = 'active'
         check_churning(self.context)
         # assert churning in text with warning (check for: Nodes Added, warning because address did not change)
         mock_try_message_to_all_users.assert_called_with(self.context,
-                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\nNodes Added:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY⚠️ 🚨 NODES ADDED BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨")
+                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\nNodes Added:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n⚠️ 🚨 CHURNING BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨\n")
