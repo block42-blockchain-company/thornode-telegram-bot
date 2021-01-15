@@ -47,12 +47,12 @@ def check_thorchain_constants(context) -> [str, None]:
     old_constants = context.bot_data["constants"]
 
     if old_constants != new_constants:
-        changed_keys = []
+        changed_keys = set()
 
         # Detect Changes
         difference = new_constants.items() - old_constants.items()     # Get added and changed keys
-        difference |= (old_constants.items() - new_constants.items())  # Merge removed and changed keys
-        changed_keys.extend([k for k, v in list(difference)])          # Register key
+        difference |= old_constants.items() - new_constants.items()    # Merge removed and changed keys
+        changed_keys.update([k for k, v in list(difference)])          # Register keys
 
         # Generate Message
         text = "Global Network Constants Change 📢:\n"
@@ -60,13 +60,13 @@ def check_thorchain_constants(context) -> [str, None]:
             if key in new_constants and key in old_constants:
                 text += f"{key} has changed " \
                         f"from {old_constants[key]} " \
-                        f"to {new_constants[key]} \n"
+                        f"to {new_constants[key]}.\n"
 
             elif key in new_constants and key not in old_constants:
-                text += f"{key} with value {new_constants[key]} has been added\n"
+                text += f"{key} with value {new_constants[key]} has been added.\n"
 
             elif key not in new_constants and key in old_constants:
-                text += f"{key} has been removed\n"
+                text += f"{key} has been removed.\n"
 
         # Update Data
         context.bot_data["constants"] = new_constants
