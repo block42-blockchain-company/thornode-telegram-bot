@@ -148,9 +148,6 @@ def check_churning(context):
 
     local_node_statuses = context.bot_data['node_statuses']
 
-    if 'chain_addresses' not in context.bot_data:
-        context.bot_data['chain_addresses'] = {}
-
     churned_in = []
     churned_out = []
     highest_churn_status_since = 0
@@ -188,7 +185,7 @@ def check_churning(context):
 
         try:
             network = get_network_data()
-            text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n\n" \
+            text += f"📡 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n\n" \
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(
                 int(get_network_security_ratio(network) * 100)) + " %*\n\n" \
@@ -197,14 +194,18 @@ def check_churning(context):
                                                       "↩️ Liquidity ROI: *" + '{:.2f}'.format(
                 float(network['liquidityAPY']) * 100) + " %* APY"
 
-            current_chains = get_pool_addresses_synchronous()["current"]
+            context.bot_data.setdefault("vault_addresses", {})
+            current_chains = get_pool_addresses_from_single_node()["current"]
             for chain in current_chains:
-                if "chain_addresses" in context.bot_data and chain['chain'] in context.bot_data['chain_addresses']:
-                    if chain['address'] != context.bot_data['chain_addresses'][chain['chain']]:
+                if chain['chain'] in context.bot_data['vault_addresses']:
+                    if chain['address'] != context.bot_data['vault_addresses'][chain['chain']]:
+                        text += f"\n\n🔐 *Vault Addresses*" if "Vault Addresses" not in text else ""
                         text += f"\n\n*{chain['chain']}*: \n" \
                                 f"New Vault address: {chain['address']}\n" \
-                                f"Old Vault address: {context.bot_data['chain_addresses'][chain['chain']]}"
-                context.bot_data['chain_addresses'][chain['chain']] = chain['address']
+                                f"Old Vault address: {context.bot_data['vault_addresses'][chain['chain']]}"
+                    elif len(churned_in):
+                        text += "⚠️ 🚨 NODES ADDED BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨"
+                context.bot_data['vault_addresses'][chain['chain']] = chain['address']
 
         except Exception as e:
             logger.exception(e)
