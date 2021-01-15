@@ -201,8 +201,9 @@ def check_churning(context):
                     if chain['address'] != context.bot_data['vault_addresses'][chain['chain']]:
                         text += f"\n\n🔐 Vault Addresses:" if "Vault Addresses" not in text else ""
                         text += f"\n*{chain['chain']}*: \n" \
-                                f"New Vault address: {chain['address']}\n" \
-                                f"Old Vault address: {context.bot_data['vault_addresses'][chain['chain']]}\n"
+                                f"Old Vault address: {context.bot_data['vault_addresses'][chain['chain']]}\n"\
+                                f"⬇️\n" \
+                                f"New Vault address: {chain['address']}\n"
                     else:
                         text += "\n\n⚠️ 🚨 CHURNING BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨\n"
                 context.bot_data['vault_addresses'][chain['chain']] = chain['address']

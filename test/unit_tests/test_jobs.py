@@ -213,7 +213,7 @@ class JobTests(unittest.TestCase):
         check_churning(self.context)
         # assert churning in text (check for: Nodes Added, New Vault Address / Old Vault Address)
         mock_try_message_to_all_users.assert_called_with(self.context,
-                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\nNodes Added:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n🔐 Vault Addresses:\n*BNB*: \nNew Vault address: CHANGED-Address\nOld Vault address: bnb1mghkd903p06fdxvm7l3pj5284sneck03gqh78r\n")
+                                                         text="🔄 CHURN SUMMARY\nTHORChain has successfully churned:\n\nNodes Added:\n*127.0.0.1*\nBond: *0.0000 RUNE*\n\nSystem:\n📡 Network Security: *NetworkHealthStatus.INSECURE*\n\n💚 Total Active Bond: *0.0000 RUNE* (total)\n\n⚖️ Bonded/Staked Ratio: *9.00 %*\n\n↩️ Bonding ROI: *10001.00 %* APY\n\n↩️ Liquidity ROI: *9901.00 %* APY\n\n🔐 Vault Addresses:\n*BNB*: \nOld Vault address: bnb1mghkd903p06fdxvm7l3pj5284sneck03gqh78r\n⬇️\nNew Vault address: CHANGED-Address\n")
 
         #churning out
         mock_get_node_accounts.return_value[0]['status'] = 'standby'
