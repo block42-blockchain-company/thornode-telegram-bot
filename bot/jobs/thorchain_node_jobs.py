@@ -1,4 +1,3 @@
-from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN
 from handlers.chat_helpers import try_message_with_home_menu, try_message_to_all_users
 from packaging import version
 
@@ -361,66 +360,3 @@ def check_thorchain_midgard_api(context, node_address):
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
         node_data['is_midgard_healthy'] = is_midgard_healthy
-
-
-def check_network_security_job(context):
-    text = check_network_security(context)
-    if text is not None:
-        try_message_to_all_users(context, text=text)
-
-
-def check_network_security(context):
-    network_health_status = network_security_ratio_to_string(get_network_security_ratio(get_network_data()))
-
-    if 'network_health_status' not in context.bot_data:
-        context.bot_data["network_health_status"] = network_health_status
-        return None
-
-    if network_health_status != context.bot_data["network_health_status"]:
-        context.bot_data["network_health_status"] = network_health_status.value
-
-        if network_health_status is NetworkHealthStatus.OPTIMAL:
-            return NETWORK_HEALTHY_AGAIN
-
-        logger.warning(network_health_status.value)
-        return NETWORK_HEALTH_WARNING(network_health_status)
-    else:
-        return None
-
-
-def check_thorchain_constants_job(context):
-    changed_values = check_thorchain_constants(context)
-
-    if changed_values is not None:
-        try_message_to_all_users(context, changed_values)
-
-
-def check_thorchain_constants(context):
-    constants = get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants")
-
-    if "constants" not in context.bot_data:
-        context.bot_data["constants"] = constants
-        return None
-
-    if context.bot_data["constants"] != constants:
-        changed_keys = []
-
-        # Detect Changes
-        for k in constants.keys():
-            difference = constants[k].items() - context.bot_data["constants"][k].items()
-            changed_keys.extend([k for k, v in list(difference)])  # registering the keys of the changes
-
-        # Generate Message
-        text = "Global Network Constants Change 📢:\n"
-        for k in constants.keys():
-            for key in changed_keys:
-                if key in constants[k]:
-                    text += f"{key} has changed " \
-                            f"from {context.bot_data['constants'][k][key]} " \
-                            f"to {constants[k][key]} \n"
-
-        # Update Data
-        context.bot_data["constants"] = constants
-        return text
-
-    return None

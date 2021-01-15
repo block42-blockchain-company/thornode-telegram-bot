@@ -1,5 +1,6 @@
 from jobs.other_nodes_jobs import *
-from jobs.thornodes_jobs import *
+from jobs.thorchain_network_jobs import check_network_security_job, check_thorchain_constants_job
+from jobs.thorchain_node_jobs import *
 
 
 def setup_bot_data(dispatcher):
