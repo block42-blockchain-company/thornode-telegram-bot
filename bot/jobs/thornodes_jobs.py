@@ -185,7 +185,7 @@ def check_churning(context):
 
         try:
             network = get_network_data()
-            text += f"🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n\n" \
+            text += f"📡 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n\n" \
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(
                 int(get_network_security_ratio(network) * 100)) + " %*\n\n" \
@@ -193,6 +193,21 @@ def check_churning(context):
                 float(network['bondingAPY']) * 100) + " %* APY\n\n" \
                                                       "↩️ Liquidity ROI: *" + '{:.2f}'.format(
                 float(network['liquidityAPY']) * 100) + " %* APY"
+
+            context.bot_data.setdefault("vault_addresses", {})
+            current_chains = get_pool_addresses_from_single_node()["current"]
+            for chain in current_chains:
+                if chain['chain'] in context.bot_data['vault_addresses']:
+                    if chain['address'] != context.bot_data['vault_addresses'][chain['chain']]:
+                        text += f"\n\n🔐 Vault Addresses:" if "Vault Addresses" not in text else ""
+                        text += f"\n*{chain['chain']}*: \n" \
+                                f"Old Vault address: {context.bot_data['vault_addresses'][chain['chain']]}\n"\
+                                f"⬇️\n" \
+                                f"New Vault address: {chain['address']}\n"
+                    else:
+                        text += "\n\n⚠️ 🚨 CHURNING BUT THE VAULT ADDRESSES DID NOT CHANGE 🚨\n"
+                context.bot_data['vault_addresses'][chain['chain']] = chain['address']
+
         except Exception as e:
             logger.exception(e)
 
