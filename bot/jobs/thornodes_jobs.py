@@ -185,7 +185,7 @@ def check_churning(context):
 
         try:
             network = get_network_data()
-            text += f"📡 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n\n" \
+            text += f"📡 Network Security: *{get_network_security_status_string(network)}*\n\n" \
                     f"💚 Total Active Bond: *{tor_to_rune(network['bondMetrics']['totalActiveBond'])}* (total)\n\n" \
                     "⚖️ Bonded/Staked Ratio: *" + '{:.2f}'.format(
                 int(get_network_security_ratio(network) * 100)) + " %*\n\n" \
@@ -385,7 +385,7 @@ def check_network_security_job(context):
 
 
 def check_network_security(context):
-    network_health_status = network_security_ratio_to_string(get_network_security_ratio(get_network_data()))
+    network_health_status = get_network_security_status(get_network_data())
 
     if 'network_health_status' not in context.bot_data:
         context.bot_data["network_health_status"] = network_health_status

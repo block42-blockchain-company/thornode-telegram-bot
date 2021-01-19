@@ -125,10 +125,8 @@ class JobTests(unittest.TestCase):
         self.assertIn("THORChain is *100% solvent* again! 👌\n", message,
                       "Solvency message should alert about correct funds but does not!")
 
-    @patch('jobs.thornodes_jobs.get_network_data')
-    @patch('jobs.thornodes_jobs.get_network_security_ratio')
-    def test_check_network_security(self, mock_get_network_security_ratio, get_network_data):
-        get_network_data.return_value = "do not care"
+    @patch('service.utils.get_network_security_ratio')
+    def test_check_network_security(self, mock_get_network_security_ratio):
         mock_get_network_security_ratio.return_value = 0.66
         network_security_message = check_network_security(self.context)
         self.assertIs(network_security_message, None, "Can not trigger comparison difference. No previous value")

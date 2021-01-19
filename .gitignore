@@ -164,5 +164,6 @@ $RECYCLE.BIN/
 storage/session.data
 storage/health.check
 /test/telegram_session.string
+_trial_temp/
 
 bot/thornode_telegram_bot.egg-info/

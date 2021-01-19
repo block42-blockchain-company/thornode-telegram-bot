@@ -186,10 +186,12 @@ def get_insolvent_balances_message(asgard_solvency, yggdrasil_solvency) -> str:
     return message
 
 
-def network_security_ratio_to_string(network_security_ratio):
-    """
-    Converts the network security ratio to an understandable english string
-    """
+def get_network_security_status_string(network_json):
+    return get_network_security_status(network_json).value
+
+
+def get_network_security_status(network_json):
+    network_security_ratio = get_network_security_ratio(network_json)
 
     if network_security_ratio > 0.9:
         network_security_string = NetworkHealthStatus.INEFFICIENT
