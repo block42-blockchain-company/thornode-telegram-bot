@@ -1,14 +1,13 @@
+import copy
 import unittest
 from unittest.mock import Mock, patch
 
 from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN, NetworkHealthStatus
-
 from jobs.other_nodes_jobs import *
+from jobs.thorchain_network_jobs import check_network_security, check_thorchain_constants
 from jobs.other_nodes_jobs import check_health
-from jobs.thornodes_jobs import check_solvency, check_network_security, check_churning
+from jobs.thorchain_node_jobs import check_solvency, check_churning
 from models.nodes import Node, UnauthorizedException
-
-from handlers import chat_helpers
 
 
 class ContextMock:
@@ -88,8 +87,8 @@ class JobTests(unittest.TestCase):
         message = check_other_nodes_syncing(self.node_mock, self.context)
         self.assertIs(message, None)
 
-    @patch('jobs.thornodes_jobs.yggdrasil_solvency_check')
-    @patch('jobs.thornodes_jobs.asgard_solvency_check')
+    @patch('jobs.thorchain_node_jobs.yggdrasil_solvency_check')
+    @patch('jobs.thorchain_node_jobs.asgard_solvency_check')
     def test_solvency_check_success(self, mock_asgard_solvency_check, mock_yggdrasil_solvency_check):
         mock_asgard_solvency_check.return_value = {"is_solvent": True,
                                                    "solvent_coins": {'BNB.RUNE-67C': '461534.11554061',
@@ -125,10 +124,8 @@ class JobTests(unittest.TestCase):
         self.assertIn("THORChain is *100% solvent* again! 👌\n", message,
                       "Solvency message should alert about correct funds but does not!")
 
-    @patch('jobs.thornodes_jobs.get_network_data')
-    @patch('jobs.thornodes_jobs.get_network_security_ratio')
-    def test_check_network_security(self, mock_get_network_security_ratio, get_network_data):
-        get_network_data.return_value = "do not care"
+    @patch('jobs.thorchain_network_jobs.get_network_security_ratio')
+    def test_check_network_security(self, mock_get_network_security_ratio):
         mock_get_network_security_ratio.return_value = 0.66
         network_security_message = check_network_security(self.context)
         self.assertIs(network_security_message, None, "Can not trigger comparison difference. No previous value")
@@ -137,9 +134,9 @@ class JobTests(unittest.TestCase):
         network_security_message = check_network_security(self.context)
         self.assertIs(network_security_message, None, "Network is optimal, but an warning is raised")
 
-        mock_get_network_security_ratio.return_value = 0.80
+        mock_get_network_security_ratio.return_value = 0.8
         network_security_message = check_network_security(self.context)
-        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.OVERBONDED),
+        self.assertIn(NETWORK_HEALTH_WARNING(NetworkHealthStatus.OVERBONDED), network_security_message,
                       "Network state should have changed to OVERBONDED")
 
         mock_get_network_security_ratio.return_value = 0.7
@@ -162,10 +159,70 @@ class JobTests(unittest.TestCase):
         self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.UNDBERBONDED),
                       "Network state should have changed to UNDBERBONDED")
 
-    @patch('jobs.thornodes_jobs.try_message_to_all_users')
-    @patch('jobs.thornodes_jobs.get_node_accounts')
-    @patch('jobs.thornodes_jobs.get_network_data')
-    @patch('jobs.thornodes_jobs.get_pool_addresses_from_single_node')
+    @patch('jobs.thorchain_network_jobs.get_thorchain_network_constants')
+    def test_network_constants_job(self, mock_get_thorchain_network_constants):
+
+        constants_payload = {
+                "int_64_values": {
+                    "BadValidatorRate": 17280,
+                    "BlocksPerYear": 6311390,
+                    "ObserveFlex": 5,
+                    "ObserveSlashPoints": 3,
+                    "ValidatorRotateOutNumBeforeFull": 2,
+                    "WhiteListGasAsset": 1000,
+                    "YggFundLimit": 50
+                },
+                "bool_values": {
+                    "StrictBondStakeRatio": False
+                },
+                "string_values": {
+                    "DefaultPoolStatus": "Bootstrap"
+                }
+        }
+
+        mock_get_thorchain_network_constants.return_value = constants_payload
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIs(changed_values, None,
+                      "First value entered. Can not have conflict with previous.")
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIs(changed_values, None,
+                      "Same constanstants returned as previous. There should not be a difference")
+
+        new_constants_payload = copy.deepcopy(constants_payload)
+
+        new_constants_payload["int_64_values"]["ValidatorRotateOutNumBeforeFull"] = 1
+        new_constants_payload["bool_values"]["StrictBondStakeRatio"] = True
+        mock_get_thorchain_network_constants.return_value = new_constants_payload
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIn("Global Network Constants Change 📢:", changed_values,
+                      "Title missing")
+
+        self.assertIn("ValidatorRotateOutNumBeforeFull has changed from 2 to 1", changed_values,
+                      "ValidatorRotateOutNumBeforeFull changes not detected")
+
+        self.assertIn("StrictBondStakeRatio has changed from False to True", changed_values,
+                      "StrictBondStakeRatio changes not detected")
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIs(changed_values, None, "Nothing has changed, no changes should appear")
+
+        another_new_constants_payload = copy.deepcopy(new_constants_payload)
+        another_new_constants_payload["int_64_values"].pop("YggFundLimit")
+        another_new_constants_payload["bool_values"]["NewRandomGlobalConstant"] = True
+        mock_get_thorchain_network_constants.return_value = another_new_constants_payload
+
+        changed_values = check_thorchain_constants(self.context)
+        self.assertIn("YggFundLimit has been removed", changed_values, "YggFundLimit removal was not detected")
+        self.assertIn("NewRandomGlobalConstant with value True has been added", changed_values,
+                      "NewRandomGlobalConstant was not detected")
+
+    @patch('jobs.thorchain_node_jobs.try_message_to_all_users')
+    @patch('jobs.thorchain_node_jobs.get_node_accounts')
+    @patch('jobs.thorchain_node_jobs.get_network_data')
+    @patch('jobs.thorchain_node_jobs.get_pool_addresses_from_single_node')
     def test_check_churning(self, mock_get_pool_addresses_from_single_node, mock_get_network_data,
                             mock_get_node_accounts, mock_try_message_to_all_users):
         mock_get_node_accounts.return_value = [{

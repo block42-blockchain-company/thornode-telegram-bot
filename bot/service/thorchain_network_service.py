@@ -61,8 +61,12 @@ def get_network_data(node_ip=None):
     return get_request_json_thorchain(url_path=f":8080/v1/network", node_ip=node_ip)
 
 
+def get_thorchain_network_constants(node_ip=None):
+    return get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants")
+
+
 def get_thorchain_blocks_per_year(node_ip=None):
-    constants = get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants", node_ip=node_ip)
+    constants = get_thorchain_network_constants()
     return constants['int_64_values']['BlocksPerYear']
 
 

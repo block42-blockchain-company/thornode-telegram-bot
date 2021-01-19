@@ -3,7 +3,7 @@ import unittest
 
 from constants.globals import SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT
 from handlers.settings_handlers import set_slash_points_threshold
-from jobs.thornodes_jobs import build_notification_message_for_active_node
+from jobs.thorchain_node_jobs import build_notification_message_for_active_node
 from service.utils import get_slash_points_threshold
 from helpers import ContextMock, node_mock, JobContextMock
 
