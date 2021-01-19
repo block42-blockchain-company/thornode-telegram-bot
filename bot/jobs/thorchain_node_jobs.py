@@ -401,3 +401,4 @@ def check_network_security(context):
         return NETWORK_HEALTH_WARNING(network_health_status)
     else:
         return None
+

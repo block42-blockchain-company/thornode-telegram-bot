@@ -7,6 +7,27 @@ from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
 from constants.messages import NetworkHealthStatus
 
+from collections import MutableMapping
+
+
+def flatten_dictionary(dictionary: dict) -> dict:
+    tuple_list = dictionary_to_flat_tuple_list(dictionary)
+    flat_dict = {tuple_list[i][0]: tuple_list[i][1] for i in range(0, len(tuple_list))}
+    return flat_dict
+
+
+def dictionary_to_flat_tuple_list(dictionary: dict) -> list:
+    # This function exists to allow the calls to be recursive
+    items = []
+    for k, v in dictionary.items():
+
+        if isinstance(v, MutableMapping):
+            items.extend(dictionary_to_flat_tuple_list(dictionary[k]))
+        else:
+            items.append((k, v))
+
+    return items
+
 
 async def for_each_async(elements: [], function: Callable[...,
                                                           Awaitable[None]]):
