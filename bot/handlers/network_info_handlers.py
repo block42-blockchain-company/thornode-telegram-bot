@@ -120,7 +120,7 @@ def solvency_stats(update, context):
 async def save_pool_address(ip_address, chain_to_node_addresses,
                             unavailable_addresses):
     try:
-        pool_addresses = await get_pool_addresses(ip_address)
+        pool_addresses = await get_pool_addresses_from_all_node(ip_address)
     except Exception as exc:
         unavailable_addresses.append(ip_address)
         logger.exception(exc)
