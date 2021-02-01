@@ -250,6 +250,7 @@ def show_all_thorchain_nodes(update, context):
 
 
 def show_my_thorchain_nodes_menu(update, context):
+    PAGE_SIZE = 30
     chat_data = context.chat_data if context.chat_data else context.job.context[
         'chat_data']
 
