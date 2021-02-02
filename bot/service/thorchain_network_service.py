@@ -64,7 +64,6 @@ def get_profit_roll_up(node_ip) -> int:
 
     current_block_height = get_latest_block_height()
 
-    print(profit_roll_up)
     for i in profit_roll_up:
         if i["status"] == "active":
             block_units = current_block_height - int(i["status_since"])
