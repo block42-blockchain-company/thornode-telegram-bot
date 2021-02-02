@@ -23,6 +23,9 @@ NOTIFICATION_TIMEOUT_MULTIPLIER = 1.5
 # Base notification timeout in seconds
 INITIAL_NOTIFICATION_TIMEOUT = 15
 
+# Keyboard Limit for a single message
+KEYBOARD_PAGE_SIZE = 30
+
 # Emojis
 
 # Be aware that keys of STATUS_EMOJIS are displayed to the user

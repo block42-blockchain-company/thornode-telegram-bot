@@ -1,3 +1,5 @@
+import math
+
 from telegram import InlineKeyboardButton
 from telegram.ext import run_async
 
@@ -267,10 +269,20 @@ def show_my_thorchain_nodes_menu(update, context):
     else:
         text = 'You do not monitor any THORNodes yet.\nAdd a Node!'
 
-    update.callback_query.edit_message_text(context=context,
-                                            text=text,
-                                            parse_mode='markdown',
-                                            reply_markup=InlineKeyboardMarkup(keyboard))
+    if len(keyboard) < KEYBOARD_PAGE_SIZE:
+        update.callback_query.edit_message_text(context=context,
+                                                text=text,
+                                                parse_mode='markdown',
+                                                reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        pages = math.ceil(len(keyboard) / KEYBOARD_PAGE_SIZE)
+        for i in range(pages):
+            try_message(context=context,
+                        chat_id=update.effective_message.chat_id,
+                        text=f"{text}\n(Page {i+1} of {pages})",
+                        reply_markup=InlineKeyboardMarkup(keyboard[(i * KEYBOARD_PAGE_SIZE): ((i + 1) * KEYBOARD_PAGE_SIZE)]))
+            text = "Click an address from the list below or add a node:"
+
 
 
 def get_thornode_menu_buttons(chat_data):
