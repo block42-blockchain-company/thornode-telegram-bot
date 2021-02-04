@@ -13,6 +13,7 @@ def check_network_security_job(context):
 
 def check_network_security(context):
     network_health_status = network_security_ratio_to_string(get_network_security_ratio(get_network_data()))
+    logger.info(f"Network Health Status: {network_health_status}")
 
     if 'network_health_status' not in context.bot_data:
         context.bot_data["network_health_status"] = network_health_status
@@ -22,9 +23,10 @@ def check_network_security(context):
         context.bot_data["network_health_status"] = network_health_status.value
 
         if network_health_status is NetworkHealthStatus.OPTIMAL:
+            logger.info(f"Network is healthy again: {network_health_status.value}")
             return NETWORK_HEALTHY_AGAIN
 
-        logger.warning(network_health_status.value)
+        logger.info(f"Network is unhealthy: {network_health_status.value}")
         return NETWORK_HEALTH_WARNING(network_health_status)
     else:
         return None
@@ -46,30 +48,35 @@ def check_thorchain_constants(context) -> [str, None]:
 
     old_constants = context.bot_data["constants"]
 
-    if old_constants != new_constants:
-        changed_keys = set()
+    try:
+        if old_constants != new_constants:
+            changed_keys = set()
 
-        # Detect Changes
-        difference = new_constants.items() - old_constants.items()     # Get added and changed keys
-        difference |= old_constants.items() - new_constants.items()    # Merge removed and changed keys
-        changed_keys.update([k for k, v in list(difference)])          # Register keys
+            # Detect Changes
+            difference = new_constants.items() - old_constants.items()  # Get added and changed keys
+            difference |= old_constants.items() - new_constants.items()  # Merge removed and changed keys
+            changed_keys.update([k for k, v in list(difference)])  # Register keys
 
-        # Generate Message
-        text = "Global Network Constants Change 📢:\n"
-        for key in changed_keys:
-            if key in new_constants and key in old_constants:
-                text += f"{key} has changed " \
-                        f"from {old_constants[key]} " \
-                        f"to {new_constants[key]}.\n"
+            # Generate Message
+            text = "Global Network Constants Change 📢:\n"
+            for key in changed_keys:
+                if key in new_constants and key in old_constants:
+                    text += f"{key} has changed " \
+                            f"from {old_constants[key]} " \
+                            f"to {new_constants[key]}.\n"
 
-            elif key in new_constants and key not in old_constants:
-                text += f"{key} with value {new_constants[key]} has been added.\n"
+                elif key in new_constants and key not in old_constants:
+                    text += f"{key} with value {new_constants[key]} has been added.\n"
 
-            elif key not in new_constants and key in old_constants:
-                text += f"{key} has been removed.\n"
+                elif key not in new_constants and key in old_constants:
+                    text += f"{key} has been removed.\n"
 
-        # Update Data
-        context.bot_data["constants"] = new_constants
-        return text
+            # Update Data
+            context.bot_data["constants"] = new_constants
+            return text
 
-    return None
+        return None
+
+    except:
+        context.bot_data["constants"] = None
+        return None
