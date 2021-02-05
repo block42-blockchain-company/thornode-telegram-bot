@@ -1,6 +1,8 @@
 #ready Created by https://www.gitignore.io/api/venv,macos,pycharm,windows
 # Edit at https://www.gitignore.io/?templates=venv,macos,pycharm,windows
 
+**/_trial_temp/
+
 ### macOS ###
 # General
 .DS_Store

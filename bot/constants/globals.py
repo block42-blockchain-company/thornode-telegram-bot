@@ -3,9 +3,9 @@ import logging
 
 # LOGGING
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
     level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
