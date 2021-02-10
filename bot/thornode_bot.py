@@ -33,18 +33,17 @@ def main():
         raise
 
     bot = Updater(bot=mq_bot,
-                  persistence=PicklePersistence(filename=session_data_path),
-                  use_context=True)
+                  persistence=PicklePersistence(filename=session_data_path))
 
     dispatcher = bot.dispatcher
 
     setup_existing_users(dispatcher=dispatcher)
-    setup_bot_data(dispatcher=dispatcher)
+    setup_bot_jobs(dispatcher=dispatcher)
 
-    dispatcher.add_handler(CommandHandler('start', on_start_command))
-    dispatcher.add_handler(CallbackQueryHandler(dispatch_query))
-    dispatcher.add_handler(MessageHandler(Filters.text, dispatch_plain_input_query))
-    dispatcher.add_error_handler(error_handler)
+    dispatcher.add_handler(CommandHandler('start', on_start_command, run_async=True))
+    dispatcher.add_handler(CallbackQueryHandler(dispatch_query, run_async=True))
+    dispatcher.add_handler(MessageHandler(Filters.text, dispatch_plain_input_query, run_async=True))
+    dispatcher.add_error_handler(error_handler, run_async=True)
 
     # Start the bot
     bot.start_polling()

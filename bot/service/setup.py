@@ -111,5 +111,4 @@ def setup_debug_processes():
         increase_block_height_process.terminate()
 
     atexit.register(cleanup)
-    time.sleep(
-        1)  # Make sure all processes started before bot starts using them
+    time.sleep(1)  # Make sure all processes started before bot starts using them

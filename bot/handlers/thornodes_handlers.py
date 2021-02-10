@@ -9,7 +9,6 @@ from service.utils import *
 from datetime import timedelta
 
 
-@run_async
 def confirm_add_all_thornodes(update, _):
     """
     Ask user if he really wants to add all available Thornodes
@@ -24,7 +23,6 @@ def confirm_add_all_thornodes(update, _):
     return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
 
 
-@run_async
 def confirm_delete_all_thornodes(update, context):
     """
     Ask user if he really wants to delete all available Thornodes
@@ -39,7 +37,6 @@ def confirm_delete_all_thornodes(update, context):
     return show_confirmation_menu(update=update, text=text, keyboard=keyboard)
 
 
-@run_async
 def add_thornode(update, context):
     """
     Initiate a conversation and prompt for user input (thornode address).
@@ -51,7 +48,6 @@ def add_thornode(update, context):
     return show_text_input_message(update, text)
 
 
-@run_async
 def change_alias(update, context):
     """
     Initiate a conversation and prompt for user input (new alias).
@@ -270,8 +266,7 @@ def show_my_thorchain_nodes_menu(update, context):
         text = 'You do not monitor any THORNodes yet.\nAdd a Node!'
 
     if len(keyboard) < KEYBOARD_PAGE_SIZE:
-        update.callback_query.edit_message_text(context=context,
-                                                text=text,
+        update.callback_query.edit_message_text(text=text,
                                                 parse_mode='markdown',
                                                 reply_markup=InlineKeyboardMarkup(keyboard))
     else:
@@ -279,10 +274,10 @@ def show_my_thorchain_nodes_menu(update, context):
         for i in range(pages):
             try_message(context=context,
                         chat_id=update.effective_message.chat_id,
-                        text=f"{text}\n(Page {i+1} of {pages})",
-                        reply_markup=InlineKeyboardMarkup(keyboard[(i * KEYBOARD_PAGE_SIZE): ((i + 1) * KEYBOARD_PAGE_SIZE)]))
+                        text=f"{text}\n(Page {i + 1} of {pages})",
+                        reply_markup=InlineKeyboardMarkup(
+                            keyboard[(i * KEYBOARD_PAGE_SIZE): ((i + 1) * KEYBOARD_PAGE_SIZE)]))
             text = "Click an address from the list below or add a node:"
-
 
 
 def get_thornode_menu_buttons(chat_data):
