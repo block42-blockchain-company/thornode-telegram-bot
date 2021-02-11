@@ -9,7 +9,6 @@ from handlers.thornodes_handlers import *
 from jobs.jobs import start_user_job
 
 
-@run_async
 def on_start_command(update, context):
     """
     Send start message and display action buttons.
@@ -46,7 +45,6 @@ def on_start_command(update, context):
                                text=text)
 
 
-@run_async
 def dispatch_query(update, context):
     """
     Call right function depending on the button clicked
@@ -123,7 +121,6 @@ def dispatch_query(update, context):
         return asyncio.run(call(update, context))
 
 
-@run_async
 def dispatch_plain_input_query(update, context):
     """
     Handle if the users sends a message
@@ -151,7 +148,6 @@ def dispatch_plain_input_query(update, context):
         return handle_change_threshold(update, context)
 
 
-@run_async
 def on_my_nodes_clicked(update, context):
     keyboard = [[
         InlineKeyboardButton('🦸 THORCHAIN NODES',
@@ -182,4 +178,4 @@ def error_handler(update, context):
     Log error.
     """
 
-    logger.warning('Update "%s" caused error: %s', update, context.error)
+    logger.error(f'There is an undhandled error!\n {context.error} ')

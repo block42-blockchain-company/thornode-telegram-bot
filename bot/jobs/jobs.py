@@ -3,7 +3,7 @@ from jobs.thorchain_network_jobs import check_network_security_job, check_thorch
 from jobs.thorchain_node_jobs import *
 
 
-def setup_bot_data(dispatcher):
+def setup_bot_jobs(dispatcher):
     dispatcher.job_queue.run_repeating(general_bot_checks,
                                        interval=JOB_INTERVAL_IN_SECONDS)
     dispatcher.job_queue.run_repeating(check_bitcoin_height_increase_job,

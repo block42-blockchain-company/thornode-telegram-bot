@@ -21,10 +21,10 @@ def show_other_nodes_menu(update, context):
     keyboard = build_2_columns_keyboard(buttons)
     keyboard.append([InlineKeyboardButton('⬅ BACK', callback_data='my_nodes_menu-edit')])
 
-    update.callback_query.edit_message_text(context=context,
-                                            text=text,
-                                            parse_mode='markdown',
-                                            reply_markup=InlineKeyboardMarkup(keyboard))
+    update.callback_query.edit_message_text(
+        text=text,
+        parse_mode='markdown',
+        reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def show_other_nodes_details(update, context):
@@ -66,8 +66,7 @@ def show_other_nodes_details(update, context):
     else:
         text += f"*currently unavailable*"
 
-    query.edit_message_text(context=context,
-                            text=text,
+    query.edit_message_text(text=text,
                             parse_mode='markdown',
                             reply_markup=InlineKeyboardMarkup(
                                 [[InlineKeyboardButton('⬅️ BACK', callback_data='show_nodes_other')]]))
