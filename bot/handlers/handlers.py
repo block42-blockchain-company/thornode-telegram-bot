@@ -178,4 +178,4 @@ def error_handler(update, context):
     Log error.
     """
 
-    logger.error(f'There is an unhandler error!\n {context.error} ')
+    logger.error(f'There is an undhandled error!\n {context.error} ')

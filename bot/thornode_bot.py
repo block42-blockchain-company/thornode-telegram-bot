@@ -32,8 +32,8 @@ def main():
                      " correct Telegram bot token. Check project docs for more details.", exc_info=True)
         raise
 
-    bot = Updater(bot=mq_bot,
-                  persistence=PicklePersistence(filename=session_data_path))
+    bot = Updater(bot=mq_bot, persistence=PicklePersistence(filename=session_data_path, store_bot_data=False),
+                  workers=8)
 
     dispatcher = bot.dispatcher
 
