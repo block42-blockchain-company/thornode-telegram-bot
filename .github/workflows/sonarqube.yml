@@ -12,5 +12,5 @@ jobs:
     - name: Install sonarqube
       run: unzip sonar-scanner-cli-4.5.0.2216-linux.zip
     - name: run sonarqube
-      run: ./sonar-scanner-4.5.0.2216-linux/bin/sonar-scanner -Dsonar.projectKey=thornode-telegram-bot -Dsonar.sources=. -Dsonar.host.url=${{ secrets.SONARQUBE_ADDRESS }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
+      run: ./sonar-scanner-4.5.0.2216-linux/bin/sonar-scanner -Dsonar.projectKey=${GITHUB_REPOSITORY#*/} -Dsonar.sources=. -Dsonar.host.url=${{ secrets.SONARQUBE_ADDRESS }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
       
