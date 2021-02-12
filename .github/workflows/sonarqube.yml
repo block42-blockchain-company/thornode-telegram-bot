@@ -1,0 +1,35 @@
+# This is a basic workflow that is manually triggered
+
+name: sonarqube
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Sonarqube'
+        # Default value if no value is explicitly provided
+        default: 'World'
+        # Input has to be provided for the workflow to run
+        required: false
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  sonarqube:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download sonarqube
+      run: wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.5.0.2216-linux.zip > sonarqube.zip
+    - name: Install sonarqube
+      run: unzip sonarqube.zip
+    - name: run sonarqube
+      run: ./sonar-scanner-4.5.0.2216-linux/bin/sonar-scanner -Dsonar.projectKey=thornode-telegram-bot -Dsonar.sources=. -Dsonar.host.url=${{ secrets.SONARQUBE_ADDRESS }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
+      
