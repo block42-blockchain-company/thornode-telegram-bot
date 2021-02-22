@@ -14,8 +14,16 @@ services:
     volumes:
       - thornode-bot-testnet-volume:/storage
 
+  mongodb_container:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+
 volumes:
-  thornode-bot-testnet-volume:
+  thornode-bot-chaosnet-volume:
+  mongodb_data_container:
 
 
 # If you have problems running 'docker-compose up' and you're using a VPN, try to run this command in the console:

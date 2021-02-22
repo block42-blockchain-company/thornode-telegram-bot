@@ -3,9 +3,10 @@ from time import sleep
 
 import aiohttp
 import requests
-from requests.exceptions import Timeout, ConnectionError
+from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
+from handlers.mongodb_handler import get_churn_cycles_with_node
 from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
@@ -39,13 +40,9 @@ def is_midgard_api_healthy(node_ip) -> bool:
     except (Timeout, ConnectionError):
         logger.warning(f"Timeout or Connection error with {node_ip}")
         return False
-    except Exception as e:
-        if len(e.args) > 0 and "status_code" in e.args[0] and e.args[0].status_code == 502:
-            logger.info(f"Bad Status Request (status code 502) in 'is_midgard_api_healthy(node_ip)' with {node_ip}")
-        else:
-            logger.exception(e)
+    except HTTPError as e:
+        logger.info(f"Error {e.errno} in 'is_midgard_api_healthy({node_ip}).")
         return False
-
     return True
 
 
@@ -57,21 +54,36 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
     return int(get_request_json_thorchain(url_path=unconfirmed_txs_path, node_ip=node_ip)['result']['total'])
 
 
-def get_profit_roll_up(node_ip) -> int:
-    # for each pool of the node
-    profit_roll_up_path = ":1317/thorchain/nodeaccounts"
-    profit_roll_up = get_request_json_thorchain(url_path=profit_roll_up_path, node_ip=node_ip)
+def get_profit_roll_up_stats(node_address):
+    from service.utils import get_profit_rollup_block_heights
+    block_heights = get_profit_rollup_block_heights()
 
-    current_block_height = get_latest_block_height()
+    profit_rollup = {
+        "daily_rollup": 0,
+        "weekly_rollup": 0,
+        "monthly_rollup": 0,
+        "overall_rollup": 0,
+    }
 
-    for i in profit_roll_up:
-        if i["status"] == "active":
-            block_units = current_block_height - int(i["status_since"])
-            days_active = block_units * 5 / 60 / 60 / 24
-            reward_per_day = int(i["current_award"]) / days_active
-            print(f"Reward/Day: {reward_per_day} Days Active: {days_active}")
+    for rollup_type, profit in profit_rollup.items():
+        churn_cycles = get_churn_cycles_with_node(block_heights[rollup_type], block_heights["current"], node_address)
 
-    return 3
+        for churn_cycle in churn_cycles:
+            churn_cycle_length = churn_cycle["block_height_end"] - churn_cycle["block_height_start"]
+
+            slashpoints = 0
+            for validator in churn_cycle["validator_set"]:
+                if validator["address"] == node_address:
+                    slashpoints = validator["slashpoints"]
+
+            # If the node has no slashpoints factor = 1, otherwise < 1 according to Thorchain reward system
+            accredited_factor = (churn_cycle_length - slashpoints) / churn_cycle_length
+            profit_per_node = churn_cycle["total_added_rewards"] / len(churn_cycle["validator_set"])
+            churn_profit = round((profit_per_node * accredited_factor) / RUNE_TO_THOR)
+            #logger.info(f"In churn_cycle {churn_cycle['_churn_number']} with {churn_profit} profit and af = {accredited_factor}")
+            profit_rollup[rollup_type] += churn_profit
+
+    return profit_rollup
 
 
 def get_network_data(node_ip=None):

@@ -39,6 +39,7 @@ def on_start_command(update, context):
             '- the correct *vault addresses*.\n' \
             '- the current *solvency* status.\n'
 
+
     # Send message
     try_message_with_home_menu(context=context,
                                chat_id=update.message.chat.id,

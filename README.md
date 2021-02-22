@@ -9,6 +9,8 @@ If you have questions feel free to open a github issue or contact us in our Tele
 * Docker (if you want to run with docker or docker-compose)
 * Docker Compose (if you want to run with docker-compose)
 * Python3 (if you want to run without docker)
+* MongoDB (if you want to run without docker-compose)
+
 
 ## Quickstart
 For *kubernetes* open `kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml` and/or 
@@ -20,6 +22,8 @@ For *docker-compose* open `variables-chaosnet.env` and/or
  
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
+- `NATIVE_DEPLOYMENT` to `True` if you don't use a containered solution. It will look for an existing MongoDB container 
+and in case it is non-existent spin it up. This is also necessary during development.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Binance Node.
 - `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs with ports you want to monitor.
@@ -43,7 +47,7 @@ variable:
 export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
 ```
 
-Now, from the project's main directoty, run 
+Now, from the project's main directory, run 
 ```
 # One Bot on Chaosnet:
 kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
@@ -177,6 +181,7 @@ configuration which is very convenient for development
 (see: https://stackoverflow.com/questions/42708389/how-to-set-environment-variables-in-pycharm).
 
 
+
 ## [Start the bot](#start-the-bot)
 Start the bot via:
 
@@ -307,7 +312,8 @@ Build the docker image as described in the `Dockerfile`:
 docker build -t thornode-bot .
 ```
 
-To make the bot's data persistent, you need to create a docker volume.
+To make the bot's data persistent, you need to create a docker volume. The Thorchain Telegram Bot also makes use of MongoDB 
+for certain data. Make sure an instance is running with the name ``thornode_bot_mongodb``, otherwise the bot can not connect.
 If the bot crashes or restarts the volume won't be affected and keeps all the session data:
 
 ```

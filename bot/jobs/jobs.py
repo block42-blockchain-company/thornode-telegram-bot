@@ -1,6 +1,17 @@
+import fcntl
+
+from handlers.mongodb_handler import get_current_churn_cycle
 from jobs.other_nodes_jobs import *
 from jobs.thorchain_network_jobs import check_network_security_job, check_thorchain_constants_job
 from jobs.thorchain_node_jobs import *
+
+
+block_parser = None
+
+
+def set_block_parser(bp):
+    global block_parser
+    block_parser = bp
 
 
 def setup_bot_jobs(dispatcher):
@@ -16,6 +27,12 @@ def setup_bot_jobs(dispatcher):
 
     dispatcher.job_queue.run_repeating(network_checks,
                                        interval=3600)
+
+    dispatcher.job_queue.run_repeating(network_checks,
+                                       interval=3600)
+
+    dispatcher.job_queue.run_repeating(check_binary_jobs,
+                                       interval=60)
 
 
 def start_user_job(context, chat_id):
@@ -54,3 +71,12 @@ def network_checks(context):
     """
     check_thorchain_constants_job(context)
     check_network_security_job(context)
+
+
+def check_binary_jobs(context):
+    if block_parser.poll() is not None:
+        logger.error("Block parser is not running anymore.")
+        # TODO Do something to resolve this situtation
+    else:
+        logger.info(f"Current blockheight: {get_current_churn_cycle()['block_height_end']}")
+

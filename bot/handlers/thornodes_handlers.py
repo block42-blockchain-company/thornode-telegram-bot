@@ -1,8 +1,6 @@
 import math
 
 from telegram import InlineKeyboardButton
-from telegram.ext import run_async
-
 from constants.messages import NETWORK_ERROR, HEALTH_LEGEND
 from handlers.chat_helpers import *
 from service.utils import *
@@ -332,16 +330,13 @@ def show_detail_menu(update, context):
         show_my_thorchain_nodes_menu(update, context)
         return
 
-    print(node)
-
     text = 'THORNode: *' + context.chat_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
-           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-           'DollyVolley Specifics: *' + "good" + '*\n'
+           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n'
 
     status = None
     try:
@@ -380,9 +375,16 @@ def show_detail_menu(update, context):
         text += 'Currently unavailable!\n'
 
     try:
-        text += 'Profit Roll-up: '
-        profit_roll_up = get_profit_roll_up(node['ip_address'])
-        text += '*{:,}*'.format(profit_roll_up) + '\n\n'
+        text += '\nProfit Roll-ups:\n'
+        catching_up, progress = is_block_parser_catching_up()
+        if catching_up:
+            text += f"_Note: Block parser is still catching up. Currently at {round(progress * 100, 1)}%_\n"
+
+        profit_roll_up = get_profit_roll_up_stats(node['node_address'])
+        for rollup_type, profit in profit_roll_up.items():
+            text += rollup_type.split('_')[0].capitalize() + f": *{profit} RUNE*\n"
+        text += '\n'
+
     except Exception as e:
         logger.exception(e)
         text += 'Currently unavailable!\n\n'
