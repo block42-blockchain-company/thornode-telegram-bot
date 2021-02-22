@@ -45,9 +45,6 @@ def try_message(context, chat_id, text, reply_markup=None):
     Send a message to a user.
     """
 
-    if context.job and not context.job.enabled:
-        return
-
     try:
         context.bot.send_message(chat_id,
                                  text,
@@ -68,7 +65,6 @@ def try_message(context, chat_id, text, reply_markup=None):
             if len(context.dispatcher.persistence.chat_data) == 0:
                 if os.path.exists(session_data_path):
                     os.remove(session_data_path)
-            context.job.enabled = False
             context.job.schedule_removal()
         else:
             print("Got Error\n" + str(e) + "\nwith telegram user " +
