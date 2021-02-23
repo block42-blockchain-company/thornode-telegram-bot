@@ -330,16 +330,13 @@ def show_detail_menu(update, context):
         show_my_thorchain_nodes_menu(update, context)
         return
 
-    print(node)
-
     text = 'THORNode: *' + context.chat_data['nodes'][address]['alias'] + '*\n' + \
            'Address: *' + address + '*\n' + \
            'Version: *' + node['version'] + '*\n\n' + \
            'Status: *' + node['status'].capitalize() + '*\n' + \
            'Bond: *' + tor_to_rune(node['bond']) + '*\n' + \
            'Slash Points: ' + '*{:,}*'.format(int(node['slash_points'])) + '\n' + \
-           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n' + \
-           'DollyVolley Specifics: *' + "good" + '*\n'
+           'Accrued Rewards: *' + tor_to_rune(node['current_award']) + '*\n'
 
     status = None
     try:
