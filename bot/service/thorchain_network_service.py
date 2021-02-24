@@ -65,7 +65,7 @@ def get_profit_roll_up_stats(node_address):
         "overall_rollup": 0,
     }
 
-    for rollup_type, profit in profit_rollup.items():
+    for rollup_type, _ in profit_rollup.items():
         churn_cycles = get_churn_cycles_with_node(block_heights[rollup_type], block_heights["current"], node_address)
 
         for churn_cycle in churn_cycles:
@@ -79,11 +79,20 @@ def get_profit_roll_up_stats(node_address):
             # If the node has no slashpoints factor = 1, otherwise < 1 according to Thorchain reward system
             accredited_factor = (churn_cycle_length - slashpoints) / churn_cycle_length
             profit_per_node = churn_cycle["total_added_rewards"] / len(churn_cycle["validator_set"])
-            churn_profit = round((profit_per_node * accredited_factor) / RUNE_TO_THOR)
-            logger.info(f"In churn_cycle {churn_cycle['_churn_number']} with {churn_profit} profit and af = {accredited_factor}")
-            profit_rollup[rollup_type] += churn_profit
+            node_profit = profit_per_node * accredited_factor
 
-    print(get_current_churn_cycle())
+            # Calculate
+            effective_churn_cycle_start = churn_cycle["block_height_start"]
+            if churn_cycle["block_height_start"] < block_heights[rollup_type]:
+                effective_churn_cycle_start = block_heights[rollup_type]
+
+            # Calculate ratio of accountable profits to given time frame
+            effective_churn_length = churn_cycle["block_height_end"] - effective_churn_cycle_start
+            effective_node_profits = node_profit * (effective_churn_length / churn_cycle_length)
+            profit = round(effective_node_profits / RUNE_TO_THOR)
+
+            logger.info(f"In churn_cycle {churn_cycle['_churn_number']} with {profit} profit and af = {accredited_factor}")
+            profit_rollup[rollup_type] += profit
 
     return profit_rollup
 

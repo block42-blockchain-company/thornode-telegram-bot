@@ -10,7 +10,7 @@ block_parser = None
 def start_block_parser():
     global block_parser
     logger.info("Setting up block parser")
-    block_parser = Popen(['../binaries/tmClient'], stdout=subprocess.DEVNULL)
+    block_parser = Popen(['../binaries/tendermintClient'], stdout=subprocess.DEVNULL)
 
 
 def stop_block_parser():
