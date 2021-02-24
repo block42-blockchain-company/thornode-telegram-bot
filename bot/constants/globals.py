@@ -8,8 +8,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
-DEV = bool(os.environ['NATIVE_DEPLOYMENT'] == 'True') if 'NATIVE_DEPLOYMENT' in os.environ else False
-MONGO_URL = "localhost" if DEV else "thornode_bot_mongodb"
+NATIVE_DEPLOYMENT = bool(os.environ['NATIVE_DEPLOYMENT'] == 'True') if 'NATIVE_DEPLOYMENT' in os.environ else False
 
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
@@ -62,8 +61,12 @@ REQUEST_POSTFIX = '?height=0'  # currently needed to get correct results due to 
 MONITORED_STATUSES = ["standby", "ready", "active"]
 JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 
-# SETTINGS
+# Thorchain
 SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3
 SECONDS_PER_BLOCK = 5.5
 RUNE_TO_THOR = 100000000
 
+# MongoDB Settings
+MONGO_URL = "localhost" if NATIVE_DEPLOYMENT else "thornode_bot_mongodb"
+MONGO_SNAPSHOT_HEIGHT = -1
+MONGO_CONTAINER_NAME = "mongodb" if NATIVE_DEPLOYMENT else "thornode_bot_mongodb"

@@ -282,10 +282,10 @@ def get_slash_points_threshold(context):
 
 def get_profit_rollup_block_heights():
     current_block_height = get_latest_block_height()
+
     daily_start_block_height = round(current_block_height - (24 * 60 * 60) / 5.5)
     weekly_start_block_height = round(current_block_height - (7 * 24 * 60 * 60) / 5.5)
     monthly_start_block_height = round(current_block_height - (30 * 24 * 60 * 60) / 5.5)
-
     return {
         "current": current_block_height,
         "daily_rollup": daily_start_block_height,
@@ -300,7 +300,7 @@ def is_block_parser_catching_up():
     current_block_height = get_latest_block_height()
     progress = current_churn_cycle["block_height_end"] / current_block_height
     logger.info("Current Progress is " + str(progress))
-    if progress < 0.99:
+    if progress < 0.999:
         return True,  progress
 
-    return False
+    return False, progress

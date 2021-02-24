@@ -4,7 +4,10 @@ from telegram.error import InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters, messagequeue)
 from telegram.utils.request import Request
+
+from handlers.block_parser_handler import start_block_parser
 from handlers.handlers import *
+from handlers.mongodb_handler import init_mongo_db
 from message_queue import MQBot
 from service.setup import *
 
@@ -15,25 +18,8 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
-    if DEV:
-        logger.info("Running in debug... Setting up environment")
-        os.environ.setdefault("TM_CLIENT_DEV", "true")
-
-        get_container_names = "docker ps --format '{{.Names}}'"
-        result = subprocess.check_output(get_container_names, shell=True)
-        if b"mongodb" not in result:
-            logger.info("Spinning up new MongoDB container")
-            os.system("docker run --name mongodb -p 27017:27017 mongo:latest &")
-        else:
-            logger.info("Using existing MongoDB container")
-
-    else:
-        logger.info("Running in production environment")
-
-    logger.info("Setting up block parser")
-    block_parser = Popen(['../binaries/tmClient'], stdout=subprocess.DEVNULL)
-    set_block_parser(block_parser)
-
+    init_mongo_db()
+    start_block_parser()
     # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
     # We cannot set burst_limit to 1, because of some off-by-one if check in the library
     m_queue = messagequeue.MessageQueue(all_burst_limit=20, all_time_limit_ms=1000,

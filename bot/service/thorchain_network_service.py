@@ -6,7 +6,7 @@ import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
-from handlers.mongodb_handler import get_churn_cycles_with_node
+from handlers.mongodb_handler import get_churn_cycles_with_node, get_current_churn_cycle
 from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
@@ -80,8 +80,10 @@ def get_profit_roll_up_stats(node_address):
             accredited_factor = (churn_cycle_length - slashpoints) / churn_cycle_length
             profit_per_node = churn_cycle["total_added_rewards"] / len(churn_cycle["validator_set"])
             churn_profit = round((profit_per_node * accredited_factor) / RUNE_TO_THOR)
-            #logger.info(f"In churn_cycle {churn_cycle['_churn_number']} with {churn_profit} profit and af = {accredited_factor}")
+            logger.info(f"In churn_cycle {churn_cycle['_churn_number']} with {churn_profit} profit and af = {accredited_factor}")
             profit_rollup[rollup_type] += churn_profit
+
+    print(get_current_churn_cycle())
 
     return profit_rollup
 
@@ -157,10 +159,11 @@ def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
 
     random.shuffle(available_node_ips)
     for random_node_ip in available_node_ips:
-        try:
-            return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
-        except Exception:
-            continue
+        if not is_thorchain_catching_up(random_node_ip):
+            try:
+                return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
+            except Exception:
+                continue
     raise Exception("No seed node returned a valid response!")
 
 

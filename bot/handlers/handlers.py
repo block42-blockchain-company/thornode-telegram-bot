@@ -37,7 +37,9 @@ def on_start_command(update, context):
     text += 'Moreover, in the Network section you can display\n' \
             '- the *status of the whole network*\n' \
             '- the correct *vault addresses*.\n' \
-            '- the current *solvency* status.\n'
+            '- the current *solvency* status.\n\n'
+    text += 'We develop for the community and depend on your input. Participate and shape the Thorchain Telegram Bot ' \
+            'by joining the discussion on GitHub: https://github.com/block42-blockchain-company/thornode-telegram-bot/discussions/146\n'
 
 
     # Send message
