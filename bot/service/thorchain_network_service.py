@@ -6,7 +6,7 @@ import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
-from handlers.mongodb_handler import get_churn_cycles_with_node, get_current_churn_cycle
+from handlers.mongodb_handler import get_churn_cycles_with_node
 from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
@@ -58,6 +58,8 @@ def get_profit_roll_up_stats(node_address):
     from service.utils import get_profit_rollup_block_heights
     block_heights = get_profit_rollup_block_heights()
 
+    print(block_heights)
+
     profit_rollup = {
         "daily_rollup": 0,
         "weekly_rollup": 0,
@@ -81,7 +83,7 @@ def get_profit_roll_up_stats(node_address):
             profit_per_node = churn_cycle["total_added_rewards"] / len(churn_cycle["validator_set"])
             node_profit = profit_per_node * accredited_factor
 
-            # Calculate
+            # Strip churn cycle time frame to actual query time frame
             effective_churn_cycle_start = churn_cycle["block_height_start"]
             if churn_cycle["block_height_start"] < block_heights[rollup_type]:
                 effective_churn_cycle_start = block_heights[rollup_type]
@@ -91,7 +93,6 @@ def get_profit_roll_up_stats(node_address):
             effective_node_profits = node_profit * (effective_churn_length / churn_cycle_length)
             profit = round(effective_node_profits / RUNE_TO_THOR)
 
-            logger.info(f"In churn_cycle {churn_cycle['_churn_number']} with {profit} profit and af = {accredited_factor}")
             profit_rollup[rollup_type] += profit
 
     return profit_rollup

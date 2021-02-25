@@ -22,11 +22,11 @@ def init_mongo_db():
             logger.info(f"Continue parsing thorchain from {block_height}")
             return
 
-    # load snapshot in db
-    logger.info("Loading snapshot to container")
-    os.system(f"docker cp ../snapshot {MONGO_CONTAINER_NAME}:/snapshot")
+    logger.info("Removing obsoleted db")
+    client.drop_database('thorchain')
 
-    logger.info("Restoring db from snapshot")
+    logger.info("Loading snapshot to container and restore database")
+    os.system(f"docker cp ../snapshot {MONGO_CONTAINER_NAME}:/snapshot")
     os.system(f"docker exec {MONGO_CONTAINER_NAME} mongorestore ./snapshot")
 
 
