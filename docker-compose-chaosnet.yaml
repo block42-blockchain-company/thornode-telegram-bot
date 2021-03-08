@@ -19,7 +19,7 @@ services:
     container_name: thornode_bot_mongodb
     image: mongo:latest
     ports:
-      - 27017:27017
+      - 42042:27017
     volumes:
       - thornode-bot-mongodb:/data/db
 

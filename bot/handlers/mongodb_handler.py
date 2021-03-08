@@ -5,7 +5,7 @@ from pymongo import MongoClient
 
 from constants.globals import MONGO_URL, MONGO_SNAPSHOT_HEIGHT, NATIVE_DEPLOYMENT, MONGO_CONTAINER_NAME, logger
 
-client = MongoClient(f"mongodb://{MONGO_URL}:27017/")
+client = MongoClient(f"mongodb://{MONGO_URL}:42042/")
 
 
 def init_mongo_db():
@@ -39,7 +39,7 @@ def spin_up_mongo_db():
         result = subprocess.check_output(get_container_names, shell=True)
         if b"mongodb" not in result:
             logger.info("Spinning up new MongoDB container")
-            os.system("docker run --name mongodb -p 27017:27017 mongo:latest &")
+            os.system("docker run --name mongodb -p 42042:27017 mongo:latest &")
         else:
             logger.info("Using existing MongoDB container")
 
