@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Callable, Awaitable
 
-from handlers.mongodb_handler import get_current_churn_cycle
+from service.mongodb_service import get_current_churn_cycle
 from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
 from constants.messages import NetworkHealthStatus

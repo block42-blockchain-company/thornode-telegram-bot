@@ -6,7 +6,7 @@ import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
-from handlers.mongodb_handler import get_churn_cycles_with_node
+from service.mongodb_service import get_churn_cycles_with_node
 from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
@@ -91,7 +91,7 @@ def get_profit_roll_up_stats(node_address):
             # Calculate ratio of accountable profits to given time frame
             effective_churn_length = churn_cycle["block_height_end"] - effective_churn_cycle_start
             effective_node_profits = node_profit * (effective_churn_length / churn_cycle_length)
-            profit = round(effective_node_profits / RUNE_TO_THOR)
+            profit = round(effective_node_profits / RUNE_DECIMALS)
 
             profit_rollup[rollup_type] += profit
 
