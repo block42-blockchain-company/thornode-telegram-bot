@@ -1,50 +1,7 @@
-import os
-import subprocess
-
 from pymongo import MongoClient
+from constants.globals import MONGO_URL
 
-from constants.globals import MONGO_URL, MONGO_SNAPSHOT_HEIGHT, NATIVE_DEPLOYMENT, MONGO_CONTAINER_NAME, logger
-
-client = MongoClient(f"mongodb://{MONGO_URL}:42042/")
-
-
-def init_mongo_db():
-    spin_up_mongo_db()
-
-    # check if db exists
-    dbs = client.list_database_names()
-    if "thorchain" in dbs:
-        docs = client["thorchain"]["config"].find_one()
-        block_height = docs["block_height_end"]
-
-        # check if db is more advanced than snapshot
-        if block_height > MONGO_SNAPSHOT_HEIGHT:
-            logger.info(f"Continue parsing thorchain from {block_height}")
-            return
-
-    logger.info("Removing obsoleted db")
-    client.drop_database('thorchain')
-
-    logger.info("Loading snapshot to container and restore database")
-    os.system(f"docker cp ../snapshot {MONGO_CONTAINER_NAME}:/snapshot")
-    os.system(f"docker exec {MONGO_CONTAINER_NAME} mongorestore ./snapshot")
-
-
-def spin_up_mongo_db():
-    # check if bot runs not in container
-    if NATIVE_DEPLOYMENT:
-        logger.info("Running in debug... Setting up environment")
-        os.environ.setdefault("TM_CLIENT_DEV", "true")
-        get_container_names = "docker ps --format '{{.Names}}'"
-        result = subprocess.check_output(get_container_names, shell=True)
-        if b"mongodb" not in result:
-            logger.info("Spinning up new MongoDB container")
-            os.system("docker run --name mongodb -p 42042:27017 mongo:latest &")
-        else:
-            logger.info("Using existing MongoDB container")
-
-    else:
-        logger.info("Assuming bot runs dockerized. Using default config.")
+client = MongoClient(f"mongodb://{MONGO_URL}")
 
 
 def get_current_churn_cycle():

@@ -3,26 +3,34 @@ version: '3'
 services:
   thornode_bot_testnet:
     container_name: thornode_bot_testnet
-
-    # comment 'image:' in and 'build:' out to use official image from docker hub
-    # comment 'image:' out and 'build:' in to build an image from your local directory
-    image: "block42blockchaincompany/thornode_bot:latest"
+    image: block42blockchaincompany/thornode_bot:latest
     #build: .
-
+    depends_on:
+      - mongodb_container
+      - tendermint_client_container
     env_file:
       - variables-testnet.env
     volumes:
       - thornode-bot-testnet-volume:/storage
 
+  tendermint_client_container:
+    container_name: thornode_bot_tendermint_client
+    image: block42blockchaincompany/thorchain-parser:latest
+    depends_on:
+      - mongodb_container
+
   mongodb_container:
+    container_name: thornode_bot_mongodb
     image: mongo:latest
     ports:
       - 42042:27017
     volumes:
       - thornode-bot-mongodb:/data/db
+      - ./scripts/mongo-setup.sh:/docker-entrypoint-initdb.d/mongo-setup.sh
+      - ./snapshot:/snapshot/
 
 volumes:
-  thornode-bot-testnet-volume:
+  thornode-bot-chaosnet-volume:
   thornode-bot-mongodb:
 
 

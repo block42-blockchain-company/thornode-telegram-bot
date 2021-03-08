@@ -67,6 +67,4 @@ SECONDS_PER_BLOCK = 5.5
 RUNE_TO_THOR = 100000000
 
 # MongoDB Settings
-MONGO_URL = "localhost" if NATIVE_DEPLOYMENT else "thornode_bot_mongodb"
-MONGO_SNAPSHOT_HEIGHT = 2783864
-MONGO_CONTAINER_NAME = "mongodb" if NATIVE_DEPLOYMENT else "thornode_bot_mongodb"
+MONGO_URL = "localhost:42042/" if NATIVE_DEPLOYMENT else "thornode_bot_mongodb:27017/"

@@ -5,9 +5,7 @@ from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters, messagequeue)
 from telegram.utils.request import Request
 
-from handlers.block_parser_handler import start_block_parser
 from handlers.handlers import *
-from handlers.mongodb_handler import init_mongo_db
 from message_queue import MQBot
 from service.setup import *
 
@@ -18,8 +16,9 @@ def main():
     if DEBUG:
         setup_debug_processes()
 
-    init_mongo_db()
-    start_block_parser()
+    if NATIVE_DEPLOYMENT:
+        os.system("docker-compose -f ../docker-compose-dev.yaml up -d")
+
     # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
     # We cannot set burst_limit to 1, because of some off-by-one if check in the library
     m_queue = messagequeue.MessageQueue(all_burst_limit=20, all_time_limit_ms=1000,

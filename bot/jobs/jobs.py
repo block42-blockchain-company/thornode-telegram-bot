@@ -1,4 +1,3 @@
-from handlers.block_parser_handler import check_block_parser_health
 from jobs.other_nodes_jobs import *
 from jobs.thorchain_network_jobs import check_network_security_job, check_thorchain_constants_job
 from jobs.thorchain_node_jobs import *
@@ -20,9 +19,6 @@ def setup_bot_jobs(dispatcher):
 
     dispatcher.job_queue.run_repeating(network_checks,
                                        interval=3600)
-
-    dispatcher.job_queue.run_repeating(check_binary_jobs,
-                                       interval=60)
 
 
 def start_user_job(context, chat_id):
@@ -61,8 +57,3 @@ def network_checks(context):
     """
     check_thorchain_constants_job(context)
     check_network_security_job(context)
-
-
-def check_binary_jobs(context):
-    check_block_parser_health()
-
