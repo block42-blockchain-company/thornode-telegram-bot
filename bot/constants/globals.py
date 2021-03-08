@@ -8,7 +8,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
-NATIVE_DEPLOYMENT = bool(os.environ['NATIVE_DEPLOYMENT'] == 'True') if 'NATIVE_DEPLOYMENT' in os.environ else False
+NATIVE_DEPLOYMENT = bool(os.environ.get('NATIVE_DEPLOYMENT', False) == 'True')
 
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
