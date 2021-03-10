@@ -67,4 +67,4 @@ SECONDS_PER_BLOCK = 5.5
 RUNE_DECIMALS = 100000000
 
 # MongoDB Settings
-MONGO_URL = "localhost:42042/" if NATIVE_DEPLOYMENT else "thornode_bot_mongodb:27017/"
+MONGO_URL = "localhost:27017/" if NATIVE_DEPLOYMENT else "thornode-bot-mongodb:27017/"

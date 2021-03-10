@@ -20,10 +20,10 @@ services:
       - mongodb_container
 
   mongodb_container:
-    container_name: thornode_bot_mongodb
+    container_name: thornode-bot-mongodb
     image: mongo:latest
     ports:
-      - 42042:27017
+      - 27017:27017
     volumes:
       - thornode-bot-mongodb:/data/db
       - ./scripts/mongo-setup.sh:/docker-entrypoint-initdb.d/mongo-setup.sh
