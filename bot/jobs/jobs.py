@@ -17,6 +17,9 @@ def setup_bot_jobs(dispatcher):
     dispatcher.job_queue.run_repeating(network_checks,
                                        interval=3600)
 
+    dispatcher.job_queue.run_repeating(network_checks,
+                                       interval=3600)
+
 
 def start_user_job(context, chat_id):
     context.job_queue.run_repeating(user_specific_checks,

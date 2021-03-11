@@ -1,8 +1,6 @@
 import math
 
 from telegram import InlineKeyboardButton
-from telegram.ext import run_async
-
 from constants.messages import NETWORK_ERROR, HEALTH_LEGEND
 from handlers.chat_helpers import *
 from service.utils import *
@@ -250,6 +248,7 @@ def show_all_thorchain_nodes(update, context):
 
 
 def show_my_thorchain_nodes_menu(update, context):
+    PAGE_SIZE = 30
     chat_data = context.chat_data if context.chat_data else context.job.context[
         'chat_data']
 
@@ -370,7 +369,22 @@ def show_detail_menu(update, context):
         text += 'Number of Unconfirmed Transactions: '
         unconfirmed_txs = get_number_of_unconfirmed_transactions(
             node['ip_address'])
-        text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n\n'
+        text += '*{:,}*'.format(int(unconfirmed_txs)) + '\n'
+    except Exception as e:
+        logger.exception(e)
+        text += 'Currently unavailable!\n'
+
+    try:
+        text += '\nProfit Roll-ups:\n'
+        catching_up, progress = is_block_parser_catching_up()
+        if catching_up:
+            text += f"_Note: Block parser is still catching up. Currently at {round(progress * 100, 1)}%_\n"
+
+        profit_roll_up = get_profit_roll_up_stats(node['node_address'])
+        for rollup_type, profit in profit_roll_up.items():
+            text += rollup_type.split('_')[0].capitalize() + f": *{profit} RUNE*\n"
+        text += '\n'
+
     except Exception as e:
         logger.exception(e)
         text += 'Currently unavailable!\n\n'
