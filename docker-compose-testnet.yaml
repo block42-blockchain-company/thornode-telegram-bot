@@ -14,7 +14,7 @@ services:
       - thornode-bot-testnet-volume:/storage
 
   tendermint_client_container:
-    container_name: thornode_bot_tendermint_client
+    container_name: thornode_bot_tendermint_testnet_client
     image: block42blockchaincompany/thorchain-parser:latest
     depends_on:
       - mongodb_container
