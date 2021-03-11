@@ -20,18 +20,6 @@ spec:
             - name: thornode-bot-mongodb-testnet-volume
               mountPath: /data/db
 
-            - name: mongodb-setup-script
-              mountPath: /docker-entrypoint-initdb.d/mongo-setup.sh
-              subPath: script.sh
-
-            - name: mongo-config-snapshot
-              mountPath: /snapshot/thorchain/config.bson
-              subPath: config.bson
-
-            - name: mongo-churns-snapshot
-              mountPath: /snapshot/thorchain/churns.bson
-              subPath: churns.bson
-
         - name: thornode-bot-deployment-testnet
           image: block42blockchaincompany/thornode_bot:latest
           imagePullPolicy: Always
@@ -56,6 +44,8 @@ spec:
           env:
             - name: NATIVE_DEPLOYMENT
               value: "True"             # Running in the same pod is the same as running on the same machine
+            - name: TESTNET
+              value: "True"
 
       volumes:
         - name: thornode-bot-testnet-volume
@@ -65,17 +55,3 @@ spec:
         - name: thornode-bot-mongodb-testnet-volume
           persistentVolumeClaim:
             claimName: thornode-bot-mongodb-testnet-pvc
-
-        - name: mongodb-setup-script
-          configMap:
-            name: thornode-bot-mongodb-setup-script
-
-        - name: mongo-config-snapshot
-          configMap:
-            name: thornode-mongo-config-snapshot
-
-        - name: mongo-churns-snapshot
-          configMap:
-            name: thornode-mongo-churns-snapshot
-
-
