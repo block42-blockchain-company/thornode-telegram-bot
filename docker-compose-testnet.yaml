@@ -14,25 +14,24 @@ services:
       - thornode-bot-testnet-volume:/storage
 
   tendermint_client_container:
-    container_name: thornode_bot_tendermint_client
+    container_name: thornode_bot_tendermint_testnet_client
     image: block42blockchaincompany/thorchain-parser:latest
     depends_on:
       - mongodb_container
+    environment:
+      - TESTNET=True
 
   mongodb_container:
-    container_name: thornode-bot-mongodb
+    container_name: thornode-bot-testnet-mongodb
     image: mongo:latest
     ports:
       - 27017:27017
     volumes:
-      - thornode-bot-mongodb:/data/db
-      - ./scripts/mongo-setup.sh:/docker-entrypoint-initdb.d/mongo-setup.sh
-      - ./snapshot:/snapshot/
+      - thornode-bot-testnet-mongodb:/data/db
 
 volumes:
-  thornode-bot-chaosnet-volume:
-  thornode-bot-mongodb:
-
+  thornode-bot-testnet-volume:
+  thornode-bot-testnet-mongodb:
 
 # If you have problems running 'docker-compose up' and you're using a VPN, try to run this command in the console:
 # docker network create vpnworkaround --subnet 10.0.1.0/24
