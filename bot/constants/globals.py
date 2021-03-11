@@ -8,6 +8,8 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
+NATIVE_DEPLOYMENT = bool(os.environ.get('NATIVE_DEPLOYMENT', False) == 'True')
+
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
 # WHITELISTED USERS
@@ -57,8 +59,12 @@ REQUEST_POSTFIX = '?height=0'  # currently needed to get correct results due to 
 # Other
 
 MONITORED_STATUSES = ["standby", "ready", "active"]
-
 JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 
-# SETTINGS
+# Thorchain
 SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3
+SECONDS_PER_BLOCK = 5.5
+RUNE_DECIMALS = 100000000
+
+# MongoDB Settings
+MONGO_URL = "localhost:27017/" if NATIVE_DEPLOYMENT else "thornode-bot-mongodb:27017/"

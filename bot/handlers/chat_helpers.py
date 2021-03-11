@@ -8,8 +8,7 @@ def try_message_with_home_menu(context, chat_id, text):
                 chat_id=chat_id,
                 text=text,
                 reply_markup=ReplyKeyboardMarkup(keyboard,
-                                                 resize_keyboard=True)
-                )
+                resize_keyboard=True))
 
 
 def try_message_to_all_users(context, text):

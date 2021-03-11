@@ -1,18 +1,23 @@
+from subprocess import Popen
+
 from telegram.error import InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters, messagequeue)
 from telegram.utils.request import Request
+
 from handlers.handlers import *
 from message_queue import MQBot
 from service.setup import *
 
 
 def main():
-    """
-    Init telegram bot, attach handlers and wait for incoming requests.
-    """
+    logger.info("Starting Thorchain Telegram Bot")
+
     if DEBUG:
         setup_debug_processes()
+
+    if NATIVE_DEPLOYMENT:
+        os.system("docker-compose -f ../docker-compose-dev.yaml up -d")
 
     # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
     # We cannot set burst_limit to 1, because of some off-by-one if check in the library

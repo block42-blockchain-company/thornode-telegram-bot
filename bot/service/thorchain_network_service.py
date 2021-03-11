@@ -3,9 +3,10 @@ from time import sleep
 
 import aiohttp
 import requests
-from requests.exceptions import Timeout, ConnectionError
+from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
+from service.mongodb_service import get_churn_cycles_with_node
 from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
@@ -39,13 +40,9 @@ def is_midgard_api_healthy(node_ip) -> bool:
     except (Timeout, ConnectionError):
         logger.warning(f"Timeout or Connection error with {node_ip}")
         return False
-    except Exception as e:
-        if len(e.args) > 0 and "status_code" in e.args[0] and e.args[0].status_code == 502:
-            logger.info(f"Bad Status Request (status code 502) in 'is_midgard_api_healthy(node_ip)' with {node_ip}")
-        else:
-            logger.exception(e)
+    except HTTPError as e:
+        logger.info(f"Error {e.errno} in 'is_midgard_api_healthy({node_ip}).")
         return False
-
     return True
 
 
@@ -55,6 +52,50 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
         "CHAOSNET": ":27147/num_unconfirmed_txs"
     }[NETWORK_TYPE]
     return int(get_request_json_thorchain(url_path=unconfirmed_txs_path, node_ip=node_ip)['result']['total'])
+
+
+def get_profit_roll_up_stats(node_address):
+    from service.utils import get_profit_rollup_block_heights
+    block_heights = get_profit_rollup_block_heights()
+
+    print(block_heights)
+
+    profit_rollup = {
+        "daily_rollup": 0,
+        "weekly_rollup": 0,
+        "monthly_rollup": 0,
+        "overall_rollup": 0,
+    }
+
+    for rollup_type, _ in profit_rollup.items():
+        churn_cycles = get_churn_cycles_with_node(block_heights[rollup_type], block_heights["current"], node_address)
+
+        for churn_cycle in churn_cycles:
+            churn_cycle_length = churn_cycle["block_height_end"] - churn_cycle["block_height_start"]
+
+            slashpoints = 0
+            for validator in churn_cycle["validator_set"]:
+                if validator["address"] == node_address:
+                    slashpoints = validator["slashpoints"]
+
+            # If the node has no slashpoints factor = 1, otherwise < 1 according to Thorchain reward system
+            accredited_factor = (churn_cycle_length - slashpoints) / churn_cycle_length
+            profit_per_node = churn_cycle["total_added_rewards"] / len(churn_cycle["validator_set"])
+            node_profit = profit_per_node * accredited_factor
+
+            # Strip churn cycle time frame to actual query time frame
+            effective_churn_cycle_start = churn_cycle["block_height_start"]
+            if churn_cycle["block_height_start"] < block_heights[rollup_type]:
+                effective_churn_cycle_start = block_heights[rollup_type]
+
+            # Calculate ratio of accountable profits to given time frame
+            effective_churn_length = churn_cycle["block_height_end"] - effective_churn_cycle_start
+            effective_node_profits = node_profit * (effective_churn_length / churn_cycle_length)
+            profit = round(effective_node_profits / RUNE_DECIMALS)
+
+            profit_rollup[rollup_type] += profit
+
+    return profit_rollup
 
 
 def get_network_data(node_ip=None):
@@ -128,10 +169,11 @@ def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
 
     random.shuffle(available_node_ips)
     for random_node_ip in available_node_ips:
-        try:
-            return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
-        except Exception:
-            continue
+        if not is_thorchain_catching_up(random_node_ip):
+            try:
+                return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
+            except Exception:
+                continue
     raise Exception("No seed node returned a valid response!")
 
 

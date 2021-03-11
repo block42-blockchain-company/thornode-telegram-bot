@@ -1,20 +1,8 @@
 version: '3'
 
 services:
-  thornode_bot_testnet:
-    container_name: thornode_bot_testnet
-    image: block42blockchaincompany/thornode_bot:latest
-    #build: .
-    depends_on:
-      - mongodb_container
-      - tendermint_client_container
-    env_file:
-      - variables-testnet.env
-    volumes:
-      - thornode-bot-testnet-volume:/storage
-
   tendermint_client_container:
-    container_name: thornode_bot_tendermint_client
+    container_name: thornode_tendermint_client
     image: block42blockchaincompany/thorchain-parser:latest
     depends_on:
       - mongodb_container
@@ -30,9 +18,7 @@ services:
       - ./snapshot:/snapshot/
 
 volumes:
-  thornode-bot-chaosnet-volume:
   thornode-bot-mongodb:
-
 
 # If you have problems running 'docker-compose up' and you're using a VPN, try to run this command in the console:
 # docker network create vpnworkaround --subnet 10.0.1.0/24

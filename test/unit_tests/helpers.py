@@ -50,3 +50,291 @@ node_mock = {'node_address': 'thor92', 'status': 'standby', 'pub_key_set': {
              'jail': {'node_address': 'tthor14pncj84nsda4x39y4h8acwexagff23dzgupzel', 'release_height': '120188',
                       'reason': 'failed to perform keysign'}, 'current_award': '44187532', 'alias': 'Thor-1',
              'last_notification_timestamp': 1607008058.286409, 'notification_timeout_in_seconds': 15}
+
+churn_cycles_mock_daily = [
+    {
+            "_churn_number": 17,
+            "block_height_start": 484292,
+            "block_height_end": 487791,
+            "total_added_rewards": 600000000,
+            "validator_set": [
+                {
+                    "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                    "slashpoints": 0
+                }
+            ]
+        },
+    {
+            "_churn_number": 20,
+            "block_height_start": 496500,
+            "block_height_end": 500000,
+            "total_added_rewards": 600000000,
+            "validator_set": [
+                {
+                    "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                    "slashpoints": 0
+                }
+            ]
+        }]
+
+churn_cycles_mock_weekly = [
+    {
+        "_churn_number": 16,
+        "block_height_start": 480792,
+        "block_height_end": 484291,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+        "_churn_number": 17,
+        "block_height_start": 484292,
+        "block_height_end": 487791,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+            "_churn_number": 20,
+            "block_height_start": 496500,
+            "block_height_end": 500000,
+            "total_added_rewards": 600000000,
+            "validator_set": [
+                {
+                    "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                    "slashpoints": 0
+                }
+            ]
+        }]
+
+churn_cycles_mock_monthly = [
+    {
+        "_churn_number": 5,
+        "block_height_start": 29000,
+        "block_height_end": 32000,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+        "_churn_number": 16,
+        "block_height_start": 480792,
+        "block_height_end": 484291,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+        "_churn_number": 17,
+        "block_height_start": 484292,
+        "block_height_end": 487791,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+            "_churn_number": 20,
+            "block_height_start": 496500,
+            "block_height_end": 500000,
+            "total_added_rewards": 600000000,
+            "validator_set": [
+                {
+                    "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                    "slashpoints": 0
+                }
+            ]
+        }]
+
+churn_cycles_mock_overall = [
+    {
+            "_churn_number": 0,
+            "block_height_start": 1,
+            "block_height_end": 3500,
+            "total_added_rewards": 600000000,
+            "validator_set": [
+                {
+                    "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                    "slashpoints": 0
+                }
+            ]
+        },
+    {
+        "_churn_number": 5,
+        "block_height_start": 12000,
+        "block_height_end": 15000,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+        "_churn_number": 16,
+        "block_height_start": 480792,
+        "block_height_end": 484291,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+        "_churn_number": 17,
+        "block_height_start": 484292,
+        "block_height_end": 487791,
+        "total_added_rewards": 600000000,
+        "validator_set": [
+            {
+                "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                "slashpoints": 0
+            },
+            {
+                "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                "slashpoints": 0
+            }
+        ]
+    },
+    {
+            "_churn_number": 20,
+            "block_height_start": 496500,
+            "block_height_end": 500000,
+            "total_added_rewards": 600000000,
+            "validator_set": [
+                {
+                    "address": "thor18md2p592zdkn440rfd3y5c26jencsryql75kep",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor13a45mdaac40v0yty3ndm7f04nkmrcx4pf8an0v",
+                    "slashpoints": 0
+                },
+                {
+                    "address": "thor1kg57w3z7c5jh06vnxwzmugfh6urc4zezl3kvch",
+                    "slashpoints": 0
+                }
+            ]
+        }]
