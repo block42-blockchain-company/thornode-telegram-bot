@@ -2,8 +2,6 @@ import os
 import logging
 
 # LOGGING
-from constants.node_ips import NETWORK_TYPE
-
 logging.basicConfig(
     format='%(asctime)s - %(filename)s - %(levelname)s - %(message)s',
     level=logging.INFO)
@@ -69,5 +67,9 @@ SECONDS_PER_BLOCK = 5.5
 RUNE_DECIMALS = 100000000
 
 # MongoDB Settings
+NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
+NETWORK_TYPE = os.getenv("NETWORK_TYPE").upper() \
+    if os.getenv("NETWORK_TYPE", "notFound").upper() in NETWORK_TYPES and not DEBUG else 'TESTNET'
+
 PROD_MONGO_URL = "thornode-bot-chaosnet-mongodb:27017/" if NETWORK_TYPE == "CHAOSNET" else "thornode-bot-testnet-mongodb:27017/"
 MONGO_URL = "localhost:27017/" if NATIVE_DEPLOYMENT else PROD_MONGO_URL
