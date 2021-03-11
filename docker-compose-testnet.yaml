@@ -18,6 +18,8 @@ services:
     image: block42blockchaincompany/thorchain-parser:latest
     depends_on:
       - mongodb_container
+    environment:
+      - TESTNET=True
 
   mongodb_container:
     container_name: thornode-bot-testnet-mongodb
@@ -26,8 +28,6 @@ services:
       - 27017:27017
     volumes:
       - thornode-bot-testnet-mongodb:/data/db
-      - ./scripts/mongo-setup.sh:/docker-entrypoint-initdb.d/mongo-setup.sh
-      - ./snapshot:/snapshot/
 
 volumes:
   thornode-bot-testnet-volume:
