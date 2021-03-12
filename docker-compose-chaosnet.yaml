@@ -3,7 +3,7 @@ version: '3'
 services:
   thornode_bot_chaosnet:
     container_name: thornode_bot_chaosnet
-    image: block42blockchaincompany/thornode_bot:master-branch
+    image: block42blockchaincompany/thornode_bot:latest
     #build: .
     depends_on:
       - mongodb_container
