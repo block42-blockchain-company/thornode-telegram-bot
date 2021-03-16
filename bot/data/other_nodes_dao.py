@@ -21,7 +21,9 @@ class OtherNodesDao(metaclass=Singleton):
         self.other_nodes = {}
         all_nodes = itertools.chain(EthereumNode.from_ips(ETHEREUM_NODE_IPS),
                                     BitcoinNode.from_ips(BITCOIN_NODE_IPS),
-                                    BinanceNode.from_ips(BINANCE_NODE_IPS))
+                                    BinanceNode.from_ips(BINANCE_NODE_IPS),
+                                    BitcoinCashNode.from_ips(BITCOIN_CASH_NODE_IPS),
+                                    LiteCoinNode.from_ips(LITECOIN_NODE_IPS))
         for node in all_nodes:
             self.other_nodes[str(hash(node))] = node
 

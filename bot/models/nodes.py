@@ -133,5 +133,94 @@ class BinanceNode(Node):
         return get_binance_network_block_count()
 
 
+class BitcoinCashNode(Node):
+    max_time_for_block_height_increase_in_seconds = 60 * 60  # 1 hour
+    network_name = "Bitcoin Cash"
+    ip_with_credentials: str = None
+
+    def __init__(self, node_ip):
+        super().__init__(node_ip, self.network_name, "BCH")
+
+    def is_fully_synced(self) -> bool:
+        info = bch_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo').json()['result']
+
+        return info['blocks'] == info['headers']
+
+    def get_block_height(self):
+        block_count_res = bch_rpc_request(address=self.ip_with_credentials, method='getblockcount')
+        if block_count_res.status_code == 401:
+            raise UnauthorizedException()
+
+        return block_count_res.json()['result']
+
+    def is_healthy(self) -> bool:
+        res = bch_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo')
+        if res.status_code == 401:
+            raise UnauthorizedException()
+
+        return res.ok
+
+    def get_network_block_count(self):
+        res = bch_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo')
+        if res.status_code == 401:
+            raise UnauthorizedException()
+
+        return res.json()['result']['headers']
+
+    @staticmethod
+    def from_ips(ips) -> list:
+        bch_nodes = []
+        for index, bch_address in enumerate(ips):
+            bch_nodes.append(BitcoinCashNode(bch_address))
+
+        return bch_nodes
+
+
+class LiteCoinNode(Node):
+    # https://litecoin.info/index.php/Litecoin_API
+
+    max_time_for_block_height_increase_in_seconds = 60 * 60  # 1 hour
+    network_name = "Litecoin"
+    ip_with_credentials: str = None
+
+    def __init__(self, node_ip):
+        super().__init__(node_ip, self.network_name, "LTC")
+
+    def is_fully_synced(self) -> bool:
+        node_height = self.get_block_height()
+        network_height = self.get_network_block_count()
+
+        return node_height == network_height
+
+    def get_block_height(self):
+        res = ltc_rpc_request(address=self.ip_with_credentials, method='getblockcount')
+        if res.status_code == 401:
+            raise UnauthorizedException()
+
+        return res.json()['result']
+
+    def is_healthy(self) -> bool:
+        res = ltc_rpc_request(address=self.ip_with_credentials, method='getinfo')
+        if res.status_code == 401:
+            raise UnauthorizedException()
+
+        return res.ok
+
+    def get_network_block_count(self):
+        res = ltc_rpc_request(address=self.ip_with_credentials, method='getinfo')
+        if res.status_code == 401:
+            raise UnauthorizedException()
+
+        return res.json()['result']["blocks"]
+
+    @staticmethod
+    def from_ips(ips) -> list:
+        ltc_nodes = []
+        for index, ltc_address in enumerate(ips):
+            ltc_nodes.append(LiteCoinNode(ltc_address))
+
+        return ltc_nodes
+
+
 class UnauthorizedException(Exception):
     pass
