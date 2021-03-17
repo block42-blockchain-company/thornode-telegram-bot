@@ -200,18 +200,18 @@ class LiteCoinNode(Node):
         return res.json()['result']
 
     def is_healthy(self) -> bool:
-        res = ltc_rpc_request(address=self.ip_with_credentials, method='getinfo')
+        res = ltc_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo')
         if res.status_code == 401:
             raise UnauthorizedException()
 
         return res.ok
 
     def get_network_block_count(self):
-        res = ltc_rpc_request(address=self.ip_with_credentials, method='getinfo')
+        res = ltc_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo')
         if res.status_code == 401:
             raise UnauthorizedException()
 
-        return res.json()['result']["blocks"]
+        return res.json()['result']['headers']
 
     @staticmethod
     def from_ips(ips) -> list:
