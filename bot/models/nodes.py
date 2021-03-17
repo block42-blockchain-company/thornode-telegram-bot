@@ -138,8 +138,10 @@ class BitcoinCashNode(Node):
     network_name = "Bitcoin Cash"
     ip_with_credentials: str = None
 
-    def __init__(self, node_ip):
-        super().__init__(node_ip, self.network_name, "BCH")
+    def __init__(self, address):
+        self.ip_with_credentials = address
+        ip = address.split("@")[-1].split(":")[0]
+        super().__init__(ip, self.network_name, "BCH")
 
     def is_fully_synced(self) -> bool:
         info = bch_rpc_request(address=self.ip_with_credentials, method='getblockchaininfo').json()['result']
@@ -177,14 +179,14 @@ class BitcoinCashNode(Node):
 
 
 class LiteCoinNode(Node):
-    # https://litecoin.info/index.php/Litecoin_API
-
     max_time_for_block_height_increase_in_seconds = 60 * 60  # 1 hour
     network_name = "Litecoin"
     ip_with_credentials: str = None
 
-    def __init__(self, node_ip):
-        super().__init__(node_ip, self.network_name, "LTC")
+    def __init__(self, address):
+        self.ip_with_credentials = address
+        ip = address.split("@")[-1].split(":")[0]
+        super().__init__(ip, self.network_name, "LTC")
 
     def is_fully_synced(self) -> bool:
         node_height = self.get_block_height()

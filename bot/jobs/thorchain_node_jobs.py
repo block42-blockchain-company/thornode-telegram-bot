@@ -16,8 +16,7 @@ def check_thornodes(context):
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
         except HTTPError as e:
-            if e.errno != 429:
-                logger.exception(e)
+            logger.exception(e)
             continue
 
         if remote_node is None:

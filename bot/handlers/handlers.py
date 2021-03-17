@@ -177,4 +177,5 @@ def on_my_nodes_clicked(update, context):
 
 
 def error_handler(update, context):
-    logger.error(f'There is an undhandled error!\n {context.error} ')
+    logger.error(f'There is an undhandled error!\n {context.error}')
+
