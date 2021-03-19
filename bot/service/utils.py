@@ -69,7 +69,8 @@ def asgard_solvency_check() -> dict:
     solvency_report = {'is_solvent': True}
     asgard_actual = defaultdict(lambda: {"json": {}})
     asgard_expected = get_asgard_json()
-    pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
+
+    pool_addresses = get_pool_addresses_from_any_node()
 
     for chain_data in pool_addresses['current']:
         chain = chain_data['chain']

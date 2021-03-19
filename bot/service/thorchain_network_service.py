@@ -35,7 +35,7 @@ def is_thorchain_catching_up(node_ip=None) -> bool:
 
 def is_midgard_api_healthy(node_ip) -> bool:
     try:
-        get_request_json_thorchain(url_path=":8080/v1/health", node_ip=node_ip)
+        get_request_json_thorchain(url_path=":8080/v2/health", node_ip=node_ip)
     except (Timeout, ConnectionError):
         logger.warning(f"Timeout or Connection error with {node_ip}")
         return False
@@ -61,11 +61,11 @@ def get_profit_roll_up_stats(node_address):
 
 
 def get_network_data(node_ip=None):
-    return get_request_json_thorchain(url_path=f":8080/v1/network", node_ip=node_ip)
+    return get_request_json_thorchain(url_path=f":8080/v2/network", node_ip=node_ip)
 
 
 def get_thorchain_network_constants(node_ip=None):
-    return get_request_json_thorchain(url_path=f":8080/v1/thorchain/constants")
+    return get_request_json_thorchain(url_path=f":8080/v2/thorchain/constants")
 
 
 def get_thorchain_blocks_per_year(node_ip=None):
@@ -82,7 +82,7 @@ def get_thorchain_last_block(node_ip=None):
         sleep(0.5)
         last_block = thorchain_last_block_mock
     else:
-        last_block = get_request_json_thorchain(url_path=f":8080/v1/thorchain/lastblock", node_ip=node_ip)
+        last_block = get_request_json_thorchain(url_path=f":8080/v2/thorchain/lastblock", node_ip=node_ip)
 
     return last_block['thorchain']
 
@@ -97,15 +97,16 @@ def get_yggdrasil_json() -> dict:
     return get_request_json_thorchain(url_path=path)
 
 
-def get_pool_addresses_from_single_node() -> dict:
-    path = ":8080/pool_addresses_1.json" if DEBUG else ":8080/v1/thorchain/pool_addresses"
+def get_pool_addresses_from_any_node() -> dict:
+    path = ":8080/pool_addresses_1.json" if DEBUG else ":1317/thorchain/inbound_addresses"
     return get_request_json_thorchain(path)
 
 
-async def get_pool_addresses_from_all_node(node_ip: str):
+async def get_pool_addresses_from_node(node_ip: str):
+
     async with aiohttp.ClientSession() as session:
         async with session.get(
-                f'http://{node_ip}:8080/v1/thorchain/pool_addresses',
+                f'http://{node_ip}:1317/thorchain/inbound_addresses',
                 timeout=CONNECTION_TIMEOUT) as response:
             if response.status != 200:
                 raise Exception(
