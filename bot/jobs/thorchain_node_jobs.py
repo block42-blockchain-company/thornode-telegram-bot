@@ -57,7 +57,7 @@ def check_thornodes(context):
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
-        if local_node['status'] in MONITORED_STATUSES:
+        if local_node['status'] in MONITORED_STATUSES and is_thornode_healthy(context, node_address=node_address):
             check_thorchain_block_height(context, node_address=node_address)
             check_thorchain_catch_up_status(context, node_address=node_address)
             check_thorchain_midgard_api(context, node_address=node_address)
@@ -224,11 +224,24 @@ def did_churn_happen(validator, local_node_statuses, highest_churn_status_since)
     return False
 
 
-def check_thorchain_block_height(context, node_address):
-    """
-    Make sure the block height increases
-    """
+def is_thornode_healthy(context, node_address) -> bool:
+    chat_id = context.job.context['chat_id']
+    node_data = context.job.context['chat_data']['nodes'][node_address]
 
+    try:
+        get_latest_block_height(node_data['ip_address'])
+        return True
+    except (Timeout, ConnectionError):
+        if node_data["status"] == "active" or node_data["status"] == "ready":
+            text = f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️ \n" \
+                   f"Node is *not responding*!\nAddress: {node_data['node_address']}\nIP: {node_data['ip_address']}\n"\
+                   f"\nCheck it's health immediately\n" \
+                   f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️"
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+        return False
+
+
+def check_thorchain_block_height(context, node_address):
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['chat_data']['nodes'][node_address]
 
