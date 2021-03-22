@@ -26,7 +26,7 @@ spec:
             - name: NETWORK_TYPE
               value: "TESTNET"              # Choose "CHAOSNET" or "TESTNET"
             - name: ALLOWED_USER_IDS
-              value: "1234,5678,42"         # Leave these values the same (Admin Area is currently not enabled on K8s)
+              value: "ALL"
             - name: BINANCE_NODE_IPS
               value: ""                     # Node IPs of your Binance nodes, "localhost" or leave it empty to not monitor binance node
             - name: ETHEREUM_NODE_IPS
