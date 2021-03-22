@@ -376,7 +376,10 @@ def show_detail_menu(update, context):
 
     try:
         text += '\nProfit Roll-ups:\n'
-        profit_roll_up = get_profit_roll_up_stats(node['node_address'])
+        profit_roll_up, parsing_progress = get_profit_roll_up_stats(node['node_address'])
+        if parsing_progress < 0.99:
+            text += f"_Note: Block parser is still catching up. Currently at {round(parsing_progress * 100)}%_\n"
+
         for rollup_type, profit in profit_roll_up.items():
             text += rollup_type.split('_')[0].capitalize() + f": *{profit} RUNE*\n"
         text += '\n'

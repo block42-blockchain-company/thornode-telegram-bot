@@ -55,7 +55,9 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
 
 def get_profit_roll_up_stats(node_address):
     profit_rollup = get_request_json(url=THORCHAIN_ONCHAIN_API_URL + f"profit-roll-ups/{node_address}")
-    return profit_rollup
+    parsing_progress = get_request_json(url=THORCHAIN_ONCHAIN_API_URL + f"health")["parsing_progress"]
+
+    return profit_rollup, parsing_progress
 
 
 def get_network_data(node_ip=None):
