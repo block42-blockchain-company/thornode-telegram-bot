@@ -3,7 +3,6 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Callable, Awaitable
 
-from service.mongodb_service import get_current_churn_cycle
 from service.binance_network_service import get_binance_balance
 from service.thorchain_network_service import *
 from constants.messages import NetworkHealthStatus
@@ -278,29 +277,3 @@ def add_thornode_to_chat_data(chat_data, address, node):
 def get_slash_points_threshold(context):
     settings = context.bot_data.setdefault("settings", {})
     return settings.get("slash_points_threshold", SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT)
-
-
-def get_profit_rollup_block_heights():
-    current_block_height = get_latest_block_height()
-
-    daily_start_block_height = round(current_block_height - (24 * 60 * 60) / 5.5)
-    weekly_start_block_height = round(current_block_height - (7 * 24 * 60 * 60) / 5.5)
-    monthly_start_block_height = round(current_block_height - (30 * 24 * 60 * 60) / 5.5)
-    return {
-        "current": current_block_height,
-        "daily_rollup": daily_start_block_height,
-        "weekly_rollup": weekly_start_block_height,
-        "monthly_rollup": monthly_start_block_height,
-        "overall_rollup": 0
-    }
-
-
-def is_block_parser_catching_up():
-    current_churn_cycle = get_current_churn_cycle()
-    current_block_height = get_latest_block_height()
-    progress = current_churn_cycle["block_height_end"] / current_block_height
-    logger.info("Current Progress is " + str(progress))
-    if progress < 0.999:
-        return True,  progress
-
-    return False, progress

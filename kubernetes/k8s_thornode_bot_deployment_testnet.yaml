@@ -14,22 +14,19 @@ spec:
         app: thornode-bot-deployment-testnet
     spec:
       containers:
-        - name: thornode-bot-mongodb # MongoDB
-          image: mongo:latest
-          volumeMounts:
-            - name: thornode-bot-mongodb-testnet-volume
-              mountPath: /data/db
-
         - name: thornode-bot-deployment-testnet
           image: block42blockchaincompany/thornode_bot:latest
           imagePullPolicy: Always
+          volumeMounts:
+            - name: thornode-bot-chaosnet-volume
+              mountPath: /storage
           env:
             - name: TELEGRAM_BOT_TOKEN
               value: "XXX"                  # Input the API Token you got from @BotFather
             - name: NETWORK_TYPE
               value: "TESTNET"              # Choose "CHAOSNET" or "TESTNET"
             - name: ALLOWED_USER_IDS
-              value: "1234,5678,42"         # Leave these values the same (Admin Area is currently not enabled on K8s)
+              value: "ALL"
             - name: BINANCE_NODE_IPS
               value: ""                     # Node IPs of your Binance nodes, "localhost" or leave it empty to not monitor binance node
             - name: ETHEREUM_NODE_IPS
@@ -37,21 +34,7 @@ spec:
             - name: BITCOIN_NODE_IPS
               value: ""                     # Addresses of your Bitcoin nodes, use format `username:password@ip:port'
 
-
-        - name: thornode-bot-tendermint-client # Tendermint Client
-          image: block42blockchaincompany/thorchain-parser:latest
-          imagePullPolicy: Always
-          env:
-            - name: NATIVE_DEPLOYMENT
-              value: "True"             # Running in the same pod is the same as running on the same machine
-            - name: TESTNET
-              value: "True"
-
       volumes:
         - name: thornode-bot-testnet-volume
           persistentVolumeClaim:
             claimName: thornode-bot-testnet-pvc
-
-        - name: thornode-bot-mongodb-testnet-volume
-          persistentVolumeClaim:
-            claimName: thornode-bot-mongodb-testnet-pvc
