@@ -47,10 +47,8 @@ def check_thornodes(context):
                 local_node['bond'] = remote_node['bond']
                 local_node['slash_points'] = remote_node['slash_points']
                 local_node['ip_address'] = remote_node['ip_address']
-                local_node['last_notification_timestamp'] = datetime.timestamp(
-                    datetime.now())
-                local_node[
-                    'notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
+                local_node['last_notification_timestamp'] = datetime.timestamp(datetime.now())
+                local_node['notification_timeout_in_seconds'] *= NOTIFICATION_TIMEOUT_MULTIPLIER
 
                 try_message_with_home_menu(context=context,
                                            chat_id=chat_id,
@@ -61,9 +59,7 @@ def check_thornodes(context):
 
         if local_node['status'] in MONITORED_STATUSES:
             check_thorchain_block_height(context, node_address=node_address)
-
             check_thorchain_catch_up_status(context, node_address=node_address)
-
             check_thorchain_midgard_api(context, node_address=node_address)
 
     for node_address in inactive_nodes:

@@ -6,7 +6,6 @@ import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
-from service.mongodb_service import get_churn_cycles_with_node
 from service.general_network_service import get_request_json
 from constants.globals import *
 from constants.node_ips import *
@@ -55,47 +54,10 @@ def get_number_of_unconfirmed_transactions(node_ip) -> int:
 
 
 def get_profit_roll_up_stats(node_address):
-    from service.utils import get_profit_rollup_block_heights
-    block_heights = get_profit_rollup_block_heights()
+    profit_rollup = get_request_json(url=THORCHAIN_ONCHAIN_API_URL + f"profit-roll-ups/{node_address}")
+    parsing_progress = get_request_json(url=THORCHAIN_ONCHAIN_API_URL + f"health")["parsing_progress"]
 
-    print(block_heights)
-
-    profit_rollup = {
-        "daily_rollup": 0,
-        "weekly_rollup": 0,
-        "monthly_rollup": 0,
-        "overall_rollup": 0,
-    }
-
-    for rollup_type, _ in profit_rollup.items():
-        churn_cycles = get_churn_cycles_with_node(block_heights[rollup_type], block_heights["current"], node_address)
-
-        for churn_cycle in churn_cycles:
-            churn_cycle_length = churn_cycle["block_height_end"] - churn_cycle["block_height_start"]
-
-            slashpoints = 0
-            for validator in churn_cycle["validator_set"]:
-                if validator["address"] == node_address:
-                    slashpoints = validator["slashpoints"]
-
-            # If the node has no slashpoints factor = 1, otherwise < 1 according to Thorchain reward system
-            accredited_factor = (churn_cycle_length - slashpoints) / churn_cycle_length
-            profit_per_node = churn_cycle["total_added_rewards"] / len(churn_cycle["validator_set"])
-            node_profit = profit_per_node * accredited_factor
-
-            # Strip churn cycle time frame to actual query time frame
-            effective_churn_cycle_start = churn_cycle["block_height_start"]
-            if churn_cycle["block_height_start"] < block_heights[rollup_type]:
-                effective_churn_cycle_start = block_heights[rollup_type]
-
-            # Calculate ratio of accountable profits to given time frame
-            effective_churn_length = churn_cycle["block_height_end"] - effective_churn_cycle_start
-            effective_node_profits = node_profit * (effective_churn_length / churn_cycle_length)
-            profit = round(effective_node_profits / RUNE_DECIMALS)
-
-            profit_rollup[rollup_type] += profit
-
-    return profit_rollup
+    return profit_rollup, parsing_progress
 
 
 def get_network_data(node_ip=None):

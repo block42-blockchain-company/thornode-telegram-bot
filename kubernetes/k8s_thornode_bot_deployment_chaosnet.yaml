@@ -14,25 +14,7 @@ spec:
         app: thornode-bot-deployment-chaosnet
     spec:
       containers:
-        - name: thornode-bot-mongodb # MongoDB
-          image: mongo:latest
-          volumeMounts:
-            - name: thornode-bot-mongodb-chaosnet-volume
-              mountPath: /data/db
-
-            - name: mongodb-setup-script
-              mountPath: /docker-entrypoint-initdb.d/mongo-setup.sh
-              subPath: script.sh
-
-            - name: mongo-config-snapshot
-              mountPath: /snapshot/thorchain/config.bson
-              subPath: config.bson
-
-            - name: mongo-churns-snapshot
-              mountPath: /snapshot/thorchain/churns.bson
-              subPath: churns.bson
-
-        - name: thornode-bot-deployment-chaosnet # Telegram Bot
+        - name: thornode-bot-deployment-chaosnet
           image: block42blockchaincompany/thornode_bot:latest
           imagePullPolicy: Always
           volumeMounts:
@@ -40,44 +22,19 @@ spec:
               mountPath: /storage
           env:
             - name: TELEGRAM_BOT_TOKEN
-              value: "XXXX"             # Input the API Token you got from @BotFather
+              value: "XXX"                # Input the API Token you got from @BotFather
             - name: NETWORK_TYPE
-              value: "CHAOSNET"         # Choose "CHAOSNET" or "TESTNET"
+              value: "CHAOSNET"           # Choose "CHAOSNET" or "TESTNET"
             - name: ALLOWED_USER_IDS
-              value: "1234,5678,42"     # Leave these values the same (Admin Area is currently not enabled on K8s)
+              value: "ALL"
             - name: BINANCE_NODE_IPS
               value: "localhost,0.0.0.0"# Node IPs of your Binance nodes, leave it empty to not monitor binance node
             - name: ETHEREUM_NODE_IPS
               value: ""                 # Node IPs of your Ethereum nodes, leave it empty to not monitor Ethereum node
             - name: BITCOIN_NODE_IPS
               value: ""                 # Addresses of your Bitcoin nodes, use format `username:password@ip:port'
-            - name: NATIVE_DEPLOYMENT
-              value: "True"             # Do not change this: Running in the same pod is the same as running on the same machine
-
-        - name: thornode-bot-tendermint-client # Tendermint Client
-          image: block42blockchaincompany/thorchain-parser:latest
-          imagePullPolicy: Always
-          env:
-            - name: NATIVE_DEPLOYMENT
-              value: "True"             # Running in the same pod is the same as running on the same machine
 
       volumes:
         - name: thornode-bot-chaosnet-volume
           persistentVolumeClaim:
             claimName: thornode-bot-chaosnet-pvc
-
-        - name: thornode-bot-mongodb-chaosnet-volume
-          persistentVolumeClaim:
-            claimName: thornode-bot-mongodb-chaosnet-pvc
-
-        - name: mongodb-setup-script
-          configMap:
-            name: thornode-bot-mongodb-setup-script
-
-        - name: mongo-config-snapshot
-          configMap:
-            name: thornode-mongo-config-snapshot
-
-        - name: mongo-churns-snapshot
-          configMap:
-            name: thornode-mongo-churns-snapshot

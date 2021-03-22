@@ -2,7 +2,7 @@ pyrogram==0.16.0
 requests==2.23.0
 python-telegram-bot==13.2
 tgcrypto==1.2.0
-aiohttp==3.6.2
+aiohttp==3.7.4
 packaging==20.4
 future~=0.18.2
 urllib3~=1.25.11

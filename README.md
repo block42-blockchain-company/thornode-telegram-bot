@@ -9,8 +9,6 @@ If you have questions feel free to open a github issue or contact us in our Tele
 * Docker (if you want to run with docker or docker-compose)
 * Docker Compose (if you want to run with docker-compose)
 * Python3 (if you want to run without docker)
-* MongoDB (if you want to run without docker-compose)
-
 
 ## Quickstart
 For *kubernetes* open `kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml` and/or 
@@ -22,8 +20,6 @@ For *docker-compose* open `variables-chaosnet.env` and/or
  
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
-- `NATIVE_DEPLOYMENT` to `True` if you don't run the bot in a container. If this flag is active you simply need to run the bot. 
-It will spin up the environment itself, if it's not already up. This is also necessary during development.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Binance Node.
 - `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs with ports you want to monitor.
@@ -245,9 +241,6 @@ export KUBECONFIG=/your/path/to/the/moon/k8s-kubeconfig.yaml
 Now create first the setup manifest, and then the deployment manifest with:
 ```
 # One Bot on Chaosnet:
-kubectl create -f kubernetes/k8s_churns_snapshot.yaml
-kubectl create -f kubernetes/k8s_config_snapshot.yaml
-
 kubectl create -f kubernetes/k8s_setup_chaosnet.yaml
 kubectl create -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml
 
@@ -312,19 +305,6 @@ To run the bot as a docker container, make sure you have docker installed (see: 
 
 Navigate to the root directory of this repository and execute the following commands:
 The environment includes a mongodb instance as well as the [Tendermint Client](https://github.com/block42-blockchain-company/tendermint-block-parser)
-Fist start the mongodb container with 
-
-```
-docker run --name thornode-bot-mongodb -d mongo:latest
-```
-Notice that you won't have any snapshots included and the tendermint client will parse the chain starting from block height 0.
-
-
-Then you need to spin up the tendermint client:
-
-```
-docker run --name thornode_tendermint_client -d block42blockchaincompany/thorchain-parser:latest
-```
 
 Build the thornode bot docker image as described in the `Dockerfile`:
 

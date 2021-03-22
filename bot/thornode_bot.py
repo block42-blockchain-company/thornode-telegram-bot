@@ -1,5 +1,3 @@
-from subprocess import Popen
-
 from telegram.error import InvalidToken
 from telegram.ext import (Updater, CommandHandler, PicklePersistence,
                           CallbackQueryHandler, MessageHandler, Filters, messagequeue)
@@ -15,9 +13,6 @@ def main():
 
     if DEBUG:
         setup_debug_processes()
-
-    if NATIVE_DEPLOYMENT:
-        os.system("docker-compose -f ../docker-compose-dev.yaml up -d")
 
     # M messages/N milliseconds is set as M burst_limit and N time_limit_ms
     # We cannot set burst_limit to 1, because of some off-by-one if check in the library

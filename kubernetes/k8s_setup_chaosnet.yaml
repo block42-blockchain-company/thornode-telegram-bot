@@ -19,31 +19,3 @@ spec:
     requests:
       storage: 1Gi
 
----
-
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: thornode-bot-mongodb-chaosnet-pvc
-  namespace: thornode-bot
-  labels:
-    pvclaim: thornode-bot-mongodb-chaosnet-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-
----
-
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: thornode-bot-mongodb-setup-script
-  namespace: thornode-bot
-data:
-  script.sh: |
-    echo "Initialize Database"
-    mongorestore /snapshot
-    echo "Loaded db from snapshot"
