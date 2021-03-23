@@ -5,9 +5,6 @@ services:
     container_name: thornode_bot_testnet
     image: block42blockchaincompany/thornode_bot:latest
     #build: .
-    depends_on:
-      - mongodb_container
-      - tendermint_client_container
     env_file:
       - variables-testnet.env
     volumes:
