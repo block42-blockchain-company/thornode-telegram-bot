@@ -1,5 +1,5 @@
 from constants.globals import logger
-from constants.messages import NetworkHealthStatus, NETWORK_HEALTHY_AGAIN, NETWORK_HEALTH_WARNING
+from constants.messages import NetworkHealthStatus, NETWORK_HEALTHY_AGAIN, get_network_health_warning
 from handlers.chat_helpers import try_message_to_all_users
 from service.thorchain_network_service import get_network_data, get_thorchain_network_constants
 from service.utils import network_security_ratio_to_string, get_network_security_ratio, flatten_dictionary
@@ -27,7 +27,7 @@ def check_network_security(context):
             return NETWORK_HEALTHY_AGAIN
 
         logger.info(f"Network is unhealthy: {network_health_status.value}")
-        return NETWORK_HEALTH_WARNING(network_health_status)
+        return get_network_health_warning(network_health_status)
     else:
         return None
 

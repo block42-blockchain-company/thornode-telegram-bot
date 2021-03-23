@@ -18,7 +18,7 @@ class NetworkHealthStatus(Enum):
 NETWORK_HEALTHY_AGAIN = "The network is safe and efficient again! ✅"
 
 
-def NETWORK_HEALTH_WARNING(network_health_status: NetworkHealthStatus) -> str:
+def get_network_health_warning(network_health_status: NetworkHealthStatus) -> str:
     severity = "🤒"
     if network_health_status is NetworkHealthStatus.INSECURE:
         severity = "💀"
@@ -26,4 +26,16 @@ def NETWORK_HEALTH_WARNING(network_health_status: NetworkHealthStatus) -> str:
         severity = "🦥"
 
     return f"Network health is not optimal: {network_health_status.value} {severity}"
+
+
+def get_node_healthy_again_message(node_data) -> str:
+    return f"⚕️Node is healthy again⚕️\nAddress: {node_data['node_address']}\nIP: {node_data['ip_address']}\n" \
+
+
+
+def get_node_health_warning_message(node_data) -> str:
+    return "⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️ \n" \
+           f"Node is *not responding*!\nAddress: {node_data['node_address']}\nIP: {node_data['ip_address']}\n" \
+           "\nCheck it's health immediately\n" \
+           "⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️"
 
