@@ -223,7 +223,7 @@ def network_security_ratio_to_string(network_security_ratio):
     else:
         network_security_string = NetworkHealthStatus.INSECURE
 
-    return network_security_string
+    return network_security_string.value
 
 
 def get_network_security_ratio(network_json):

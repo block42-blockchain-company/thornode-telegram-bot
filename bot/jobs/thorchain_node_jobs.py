@@ -1,3 +1,4 @@
+from constants.messages import get_node_health_warning_message, get_node_healthy_again_message
 from handlers.chat_helpers import try_message_with_home_menu, try_message_to_all_users
 from packaging import version
 
@@ -57,7 +58,7 @@ def check_thornodes(context):
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
-        if local_node['status'] in MONITORED_STATUSES and is_thornode_healthy(context, node_address=node_address):
+        if local_node['status'] in MONITORED_STATUSES and is_thornode_healthy(context, node_address):
             check_thorchain_block_height(context, node_address=node_address)
             check_thorchain_catch_up_status(context, node_address=node_address)
             check_thorchain_midgard_api(context, node_address=node_address)
@@ -228,15 +229,26 @@ def is_thornode_healthy(context, node_address) -> bool:
     chat_id = context.job.context['chat_id']
     node_data = context.job.context['chat_data']['nodes'][node_address]
 
+    # If not initialized assuming node was healhty.
+    if "healthy" not in context.job.context['chat_data']['nodes'][node_address]:
+        context.job.context['chat_data']['nodes'][node_address]["healthy"] = True
+
+    was_healthy = node_data["healthy"]
+
     try:
         get_latest_block_height(node_data['ip_address'])
+
+        if not was_healthy:
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=get_node_healthy_again_message(node_data))
+
+        context.job.context['chat_data']['nodes'][node_address]["healthy"] = True
         return True
+
     except (Timeout, ConnectionError):
-        text = f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️ \n" \
-               f"Node is *not responding*!\nAddress: {node_data['node_address']}\nIP: {node_data['ip_address']}\n"\
-               f"\nCheck it's health immediately\n" \
-               f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️"
-        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+        if was_healthy:
+            try_message_with_home_menu(context=context, chat_id=chat_id, text=get_node_health_warning_message(node_data))
+
+        context.job.context['chat_data']['nodes'][node_address]["healthy"] = False
         return False
 
 
@@ -383,3 +395,4 @@ def check_thorchain_midgard_api(context, node_address):
             try_message_with_home_menu(context, chat_id=chat_id, text=text)
 
         node_data['is_midgard_healthy'] = is_midgard_healthy
+
