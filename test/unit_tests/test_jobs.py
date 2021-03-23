@@ -2,7 +2,7 @@ import copy
 import unittest
 from unittest.mock import Mock, patch
 
-from constants.messages import NETWORK_HEALTH_WARNING, NETWORK_HEALTHY_AGAIN, NetworkHealthStatus
+from constants.messages import get_network_health_warning, NETWORK_HEALTHY_AGAIN, NetworkHealthStatus
 from jobs.other_nodes_jobs import *
 from jobs.thorchain_network_jobs import check_network_security, check_thorchain_constants
 from jobs.other_nodes_jobs import check_health
@@ -136,7 +136,7 @@ class JobTests(unittest.TestCase):
 
         mock_get_network_security_ratio.return_value = 0.8
         network_security_message = check_network_security(self.context)
-        self.assertIn(NETWORK_HEALTH_WARNING(NetworkHealthStatus.OVERBONDED), network_security_message,
+        self.assertIn(get_network_health_warning(NetworkHealthStatus.OVERBONDED), network_security_message,
                       "Network state should have changed to OVERBONDED")
 
         mock_get_network_security_ratio.return_value = 0.7
@@ -146,17 +146,17 @@ class JobTests(unittest.TestCase):
 
         mock_get_network_security_ratio.return_value = 0.91
         network_security_message = check_network_security(self.context)
-        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.INEFFICIENT),
+        self.assertIn(network_security_message, get_network_health_warning(NetworkHealthStatus.INEFFICIENT),
                       "Network state should have changed to INEFFICIENT")
 
         mock_get_network_security_ratio.return_value = 0.3
         network_security_message = check_network_security(self.context)
-        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.INSECURE),
+        self.assertIn(network_security_message, get_network_health_warning(NetworkHealthStatus.INSECURE),
                       "Network state should have changed to INSECURE")
 
         mock_get_network_security_ratio.return_value = 0.5
         network_security_message = check_network_security(self.context)
-        self.assertIn(network_security_message, NETWORK_HEALTH_WARNING(NetworkHealthStatus.UNDBERBONDED),
+        self.assertIn(network_security_message, get_network_health_warning(NetworkHealthStatus.UNDBERBONDED),
                       "Network state should have changed to UNDBERBONDED")
 
     @patch('jobs.thorchain_network_jobs.get_thorchain_network_constants')
