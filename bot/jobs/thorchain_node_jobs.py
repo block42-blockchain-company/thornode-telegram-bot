@@ -232,12 +232,11 @@ def is_thornode_healthy(context, node_address) -> bool:
         get_latest_block_height(node_data['ip_address'])
         return True
     except (Timeout, ConnectionError):
-        if node_data["status"] == "active" or node_data["status"] == "ready":
-            text = f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️ \n" \
-                   f"Node is *not responding*!\nAddress: {node_data['node_address']}\nIP: {node_data['ip_address']}\n"\
-                   f"\nCheck it's health immediately\n" \
-                   f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️"
-            try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
+        text = f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️ \n" \
+               f"Node is *not responding*!\nAddress: {node_data['node_address']}\nIP: {node_data['ip_address']}\n"\
+               f"\nCheck it's health immediately\n" \
+               f"⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️   ️⚠   ️⚠  ⚠️   ️⚠ ️  ️⚠️  ️ ⚠   ️⚠   ⚠️"
+        try_message_with_home_menu(context=context, chat_id=chat_id, text=text)
         return False
 
 
