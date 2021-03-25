@@ -70,7 +70,7 @@ async def show_network_stats(update, context):
                 '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
                     network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
-        text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network))}*\n"
+        text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network)).value}*\n"
 
         text += "\n↩️ Node ROI: *" + \
                 '{:.2f}'.format(float(network['bondingAPY']) * 100) \

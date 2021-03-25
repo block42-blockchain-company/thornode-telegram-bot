@@ -143,6 +143,10 @@ class JobTests(unittest.TestCase):
         network_security_message = check_network_security(self.context)
         self.assertIn(network_security_message, NETWORK_HEALTHY_AGAIN,
                       "Network state should have changed back to OPTIMAL again")
+        
+        mock_get_network_security_ratio.return_value = 0.66
+        network_security_message = check_network_security(self.context)
+        self.assertIs(network_security_message, None, "Network is optimal, but an warning is raised")
 
         mock_get_network_security_ratio.return_value = 0.91
         network_security_message = check_network_security(self.context)
