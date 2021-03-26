@@ -29,7 +29,6 @@ INITIAL_NOTIFICATION_TIMEOUT = 15
 KEYBOARD_PAGE_SIZE = 30
 
 # Emojis
-
 # Be aware that keys of STATUS_EMOJIS are displayed to the user
 STATUS_EMOJIS = {
     "unknown": "❓",
@@ -64,4 +63,3 @@ JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 # Thorchain
 SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3
 THORCHAIN_ONCHAIN_API_URL = "https://thorchain-service.b42.tech/v1/"
-
