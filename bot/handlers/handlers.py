@@ -21,7 +21,7 @@ def on_start_command(update, context):
     if 'job_started' not in context.chat_data:
         start_user_job(context, update.message.chat.id)
 
-    text = 'Heil ok sæll! I am your THORNode Bot runaning on ' + NETWORK_TYPE + '. 🤖\n\n'
+    text = f'Heil ok sæll! I am your THORNode Bot running on {NETWORK_TYPE}. 🤖\n\n'
     text += 'I will notify you about changes of your THORNode\'s\n' \
             '- *Status*\n' \
             '- *Bond*\n' \

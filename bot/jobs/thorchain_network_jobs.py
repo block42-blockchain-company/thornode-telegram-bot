@@ -20,7 +20,7 @@ def check_network_security(context):
         return None
 
     if network_health_status != context.bot_data["network_health_status"]:
-        context.bot_data["network_health_status"] = network_health_status.value
+        context.bot_data["network_health_status"] = network_health_status
 
         if network_health_status is NetworkHealthStatus.OPTIMAL:
             logger.info(f"Network is healthy again: {network_health_status.value}")
