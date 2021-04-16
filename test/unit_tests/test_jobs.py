@@ -8,6 +8,7 @@ from jobs.thorchain_network_jobs import check_network_security, check_thorchain_
 from jobs.other_nodes_jobs import check_health
 from jobs.thorchain_node_jobs import check_solvency, check_churning
 from models.nodes import Node, UnauthorizedException
+from helpers import network_data
 
 
 class ContextMock:
@@ -124,9 +125,12 @@ class JobTests(unittest.TestCase):
         self.assertIn("THORChain is *100% solvent* again! 👌\n", message,
                       "Solvency message should alert about correct funds but does not!")
 
+    @patch('jobs.thorchain_network_jobs.get_network_data')
     @patch('jobs.thorchain_network_jobs.get_network_security_ratio')
-    def test_check_network_security(self, mock_get_network_security_ratio):
+    def test_check_network_security(self, mock_get_network_security_ratio, mock_get_network_data):
         mock_get_network_security_ratio.return_value = 0.66
+        mock_get_network_data.return_value = "network_data"
+
         network_security_message = check_network_security(self.context)
         self.assertIs(network_security_message, None,
                       "Can not trigger comparison difference. No previous value")
@@ -234,8 +238,8 @@ class JobTests(unittest.TestCase):
     @patch('jobs.thorchain_node_jobs.try_message_to_all_users')
     @patch('jobs.thorchain_node_jobs.get_node_accounts')
     @patch('jobs.thorchain_node_jobs.get_network_data')
-    @patch('jobs.thorchain_node_jobs.get_pool_addresses_from_single_node')
-    def test_check_churning(self, mock_get_pool_addresses_from_single_node, mock_get_network_data,
+    @patch('jobs.thorchain_node_jobs.get_pool_addresses_from_any_node')
+    def test_check_churning(self, mock_get_pool_addresses_from_any_node, mock_get_network_data,
                             mock_get_node_accounts, mock_try_message_to_all_users):
         mock_get_node_accounts.return_value = [{
             'node_address': "127.0.0.1",
@@ -251,7 +255,7 @@ class JobTests(unittest.TestCase):
             'bondingAPY': '100.01',
             'liquidityAPY': '99.01'
         }
-        mock_get_pool_addresses_from_single_node.return_value = {
+        mock_get_pool_addresses_from_any_node.return_value = {
             "current": [
                 {
                     "chain": "BNB",
@@ -280,7 +284,7 @@ class JobTests(unittest.TestCase):
 
         # fourth call: churning in / address changed
         mock_get_node_accounts.return_value[0]['status'] = 'active'
-        mock_get_pool_addresses_from_single_node.return_value['current'][0]['address'] = 'CHANGED-Address'
+        mock_get_pool_addresses_from_any_node.return_value['current'][0]['address'] = 'CHANGED-Address'
         check_churning(self.context)
         # assert churning in text (check for: Nodes Added, New Vault Address / Old Vault Address)
         mock_try_message_to_all_users.assert_called_with(self.context,
