@@ -12,7 +12,7 @@ from constants.node_ips import *
 
 
 def get_node_accounts():
-    path = ":8080/nodeaccounts.json" if DEBUG else ":1317/thorchain/nodeaccounts"
+    path = ":8080/nodeaccounts.json" if DEBUG else ":1317/thorchain/nodes"
     return get_request_json_thorchain(url_path=path)
 
 

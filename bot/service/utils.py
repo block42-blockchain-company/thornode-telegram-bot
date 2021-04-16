@@ -72,7 +72,7 @@ def asgard_solvency_check() -> dict:
 
     pool_addresses = get_pool_addresses_from_any_node()
 
-    for chain_data in pool_addresses['current']:
+    for chain_data in pool_addresses:
         chain = chain_data['chain']
         if chain == 'BNB':
             asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
