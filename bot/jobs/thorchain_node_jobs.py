@@ -192,6 +192,7 @@ def check_churning(context):
 
             context.bot_data.setdefault("vault_addresses", {})
             current_chains = get_pool_addresses_from_any_node()
+
             for chain in current_chains:
                 if chain['chain'] in context.bot_data['vault_addresses']:
                     if chain['address'] != context.bot_data['vault_addresses'][chain['chain']]:
