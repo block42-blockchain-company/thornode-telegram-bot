@@ -50,6 +50,16 @@ def btc_rpc_request(address: str, method: str, params=None):
                        params=params)
 
 
+def bch_rpc_request(address: str, method: str, params=None):
+    return rpc_request(url=f'http://{address}', jsonrpc_version="1.0", method=method,
+                       params=params)
+
+
+def ltc_rpc_request(address: str, method: str, params=None):
+    return rpc_request(url=f'http://{address}', jsonrpc_version="1.0", method=method,
+                       params=params)
+
+
 def eth_rpc_request(ip: str, method: str, params=None):
     return rpc_request(url=f'http://{ip}', jsonrpc_version="2.0", method=method,
                        params=params)

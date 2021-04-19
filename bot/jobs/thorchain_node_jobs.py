@@ -6,10 +6,6 @@ from service.utils import *
 
 
 def check_thornodes(context):
-    """
-    Check all added thornodes for any changes.
-    """
-
     chat_id = context.job.context['chat_id']
     chat_data = context.job.context['chat_data']
 
@@ -19,7 +15,7 @@ def check_thornodes(context):
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
-        except Exception as e:
+        except HTTPError as e:
             logger.exception(e)
             continue
 
