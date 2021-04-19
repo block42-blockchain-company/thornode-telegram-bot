@@ -69,17 +69,20 @@ def asgard_solvency_check() -> dict:
     solvency_report = {'is_solvent': True}
     asgard_actual = defaultdict(lambda: {"json": {}})
     asgard_expected = get_asgard_json()
-    pool_addresses = get_request_json_thorchain(url_path=':8080/v1/thorchain/pool_addresses')
 
-    for chain_data in pool_addresses['current']:
+    pool_addresses = get_pool_addresses_from_any_node()
+
+    for chain_data in pool_addresses:
         chain = chain_data['chain']
         if chain == 'BNB':
             asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
+            break
 
     for chain_key, chain_value in asgard_actual.items():
         if chain_key == 'BNB':
             for balance in chain_value['json']:
                 chain_value[balance['symbol']] = balance['free']
+            break
 
     for chain in asgard_expected:
         if chain['status'] == 'active':
