@@ -6,10 +6,6 @@ from service.utils import *
 
 
 def check_thornodes(context):
-    """
-    Check all added thornodes for any changes.
-    """
-
     chat_id = context.job.context['chat_id']
     chat_data = context.job.context['chat_data']
 
@@ -19,7 +15,7 @@ def check_thornodes(context):
 
         try:
             remote_node = get_thornode_object_or_none(address=node_address)
-        except Exception as e:
+        except HTTPError as e:
             logger.exception(e)
             continue
 
@@ -191,7 +187,8 @@ def check_churning(context):
                 float(network['liquidityAPY']) * 100) + " %* APY"
 
             context.bot_data.setdefault("vault_addresses", {})
-            current_chains = get_pool_addresses_from_single_node()["current"]
+            current_chains = get_pool_addresses_from_any_node()
+
             for chain in current_chains:
                 if chain['chain'] in context.bot_data['vault_addresses']:
                     if chain['address'] != context.bot_data['vault_addresses'][chain['chain']]:

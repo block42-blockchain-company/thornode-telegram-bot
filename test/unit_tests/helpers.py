@@ -93,6 +93,7 @@ churn_cycles_mock_daily = [
             ]
         }]
 
+
 churn_cycles_mock_weekly = [
     {
         "_churn_number": 16,
@@ -338,3 +339,5 @@ churn_cycles_mock_overall = [
                 }
             ]
         }]
+
+network_data = {"activeBonds":["3251838867462","1224445361097","1007196760386","5412660469344","3925694112419","4347585521357","4150573702493","1360727022258"],"activeNodeCount":8,"blockRewards":{"blockReward":"257888","bondReward":"237772","stakeReward":"20115"},"bondMetrics":{"averageActiveBond":"3085090227102","averageStandbyBond":"2893032932586.222","maximumActiveBond":"5412660469344","maximumStandbyBond":"6000868993322","medianActiveBond":"3925694112419","medianStandbyBond":"100000000000","minimumActiveBond":"1007196760386","minimumStandbyBond":"100000000000","totalActiveBond":"24680721816816","totalStandbyBond":"26037296393276"},"bondingAPY":"0.06252683225574751","liquidityAPY":"0.0045319632375318","nextChurnHeight":"3165604","poolActivationCountdown":170,"poolShareFactor":"0.07800247677137709","standbyBonds":["6000868993322","2320192318072","2966156802987","3200447789835","100000000000","3827347974206","1000100000000","3339283699744","3282898815110"],"standbyNodeCount":9,"totalReserve":"9765819282152","totalStaked":"21109009373292"}
