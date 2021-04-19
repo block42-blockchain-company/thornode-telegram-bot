@@ -19,17 +19,19 @@ For *docker-compose* open `variables-chaosnet.env` and/or
  `variables-testnet.env` file and set:
  
 - `TELEGRAM_BOT_TOKEN` to your Telegram Bot Token obtained from BotFather.
+- `ALLOWED_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
+Bot. Set it to `ALL` to make it available to everybody.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Binance Node.
 - `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Ethereum Node.
-- `ALLOWED_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
-Bot. Set it to `ALL` to make it available to everybody.
 - `BITCOIN_NODE_IPS` to a list of Bitcoin Node addresses you want to monitor.
 Bitcoin [json-rpc API](https://en.bitcoin.it/wiki/API_reference_(JSON-RPC))
 requires authentication, so the format is `username:password@ip:port`.
 Leave it empty or remove it to not monitor any Bitcoin Node.
+- `BITCOIN_CASH_NODE_IPS` to a list of BitcoinCash Node addresses you want to monitor. Configure as in BITCOIN_NODE_IPS.
+- `LITECOIN_NODE_IPS` to a list of Litecoin Node addresses you want to monitor. Configure as in BITCOIN_NODE_IPS.
 
 ### Kubernetes (K8s)
 
