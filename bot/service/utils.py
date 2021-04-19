@@ -76,11 +76,13 @@ def asgard_solvency_check() -> dict:
         chain = chain_data['chain']
         if chain == 'BNB':
             asgard_actual[chain]['json'] = get_binance_balance(chain_data['address'])
+            break
 
     for chain_key, chain_value in asgard_actual.items():
         if chain_key == 'BNB':
             for balance in chain_value['json']:
                 chain_value[balance['symbol']] = balance['free']
+            break
 
     for chain in asgard_expected:
         if chain['status'] == 'active':
