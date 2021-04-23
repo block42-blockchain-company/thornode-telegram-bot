@@ -35,7 +35,7 @@ async def show_network_stats(update, context):
         validators = get_node_accounts()
 
         statuses_counter = Counter(map(lambda v: v['status'], validators))
-        active_validators = filter(lambda v: v['status'] == 'active',
+        active_validators = filter(lambda v: v['status'] == 'Active',
                                    validators)
         versions_counter = Counter(
             map(lambda v: v['version'], active_validators))
@@ -43,20 +43,20 @@ async def show_network_stats(update, context):
         text += "\n📡 Nodes:\n"
         for status in statuses_counter:
             emoji = STATUS_EMOJIS[
-                status] if status in STATUS_EMOJIS else STATUS_EMOJIS["unknown"]
+                status] if status in STATUS_EMOJIS else STATUS_EMOJIS["Unknown"]
             text += f"  *{str(statuses_counter[status])}* ({status} {emoji})\n"
 
         total_nodes = len(validators)
         text += f"  = *{str(total_nodes)}* (total)\n"
 
-        text += "\n" + STATUS_EMOJIS["active"] + " Active Bonds:\n  *" + \
+        text += "\n" + STATUS_EMOJIS["Active"] + " Active Bonds:\n  *" + \
                 tor_to_rune(network['bondMetrics']['totalActiveBond']) + "* (total)\n  *" + \
                 tor_to_rune(network['bondMetrics']['averageActiveBond']) + "* (avg)\n  *" + \
                 tor_to_rune(network['bondMetrics']['medianActiveBond']) + "* (median)\n  *" + \
                 tor_to_rune(network['bondMetrics']['maximumActiveBond']) + "* (max)\n  *" + \
                 tor_to_rune(network['bondMetrics']['minimumActiveBond']) + "* (min)\n"
 
-        text += "\n" + STATUS_EMOJIS["standby"] + "  Standby Bonds:\n  *" + \
+        text += "\n" + STATUS_EMOJIS["Standby"] + "  Standby Bonds:\n  *" + \
                 tor_to_rune(network['bondMetrics']['totalStandbyBond']) + "* (total)\n  *" + \
                 tor_to_rune(network['bondMetrics']['averageStandbyBond']) + "* (avg)\n  *" + \
                 tor_to_rune(network['bondMetrics']['medianStandbyBond']) + "* (median)\n  *" + \

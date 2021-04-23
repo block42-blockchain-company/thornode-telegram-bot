@@ -30,12 +30,12 @@ KEYBOARD_PAGE_SIZE = 30
 # Emojis
 # Be aware that keys of STATUS_EMOJIS are displayed to the user
 STATUS_EMOJIS = {
-    "unknown": "❓",
-    "whitelisted": "📋",
-    "standby": "📆",
-    "ready": "✔️",
-    "active": "💚",
-    "disabled": "🔴"
+    "Unknown": "❓",
+    "Whitelisted": "📋",
+    "Standby": "📆",
+    "Ready": "✔️",
+    "Active": "💚",
+    "Disabled": "🔴"
 }
 
 HEALTH_EMOJIS = {

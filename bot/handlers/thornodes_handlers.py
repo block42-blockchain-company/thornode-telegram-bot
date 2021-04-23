@@ -283,7 +283,7 @@ def get_thornode_menu_buttons(chat_data):
     buttons = []
     for address in chat_data.get('nodes', {}).keys():
         node = chat_data['nodes'][address]
-        status_emoji = STATUS_EMOJIS.get(node['status'], STATUS_EMOJIS["unknown"])
+        status_emoji = STATUS_EMOJIS.get(node['status'], STATUS_EMOJIS["Unknown"])
         truncated_address = f"...{address[-3:]}"
         is_catching_up = node.get('is_catching_up', None)
         is_healthy = None if is_catching_up is None else not is_catching_up
