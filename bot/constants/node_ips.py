@@ -1,10 +1,6 @@
 import os
 
-from constants.globals import DEBUG
-
-NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
-NETWORK_TYPE = os.getenv("NETWORK_TYPE").upper() \
-    if os.getenv("NETWORK_TYPE", "notFound").upper() in NETWORK_TYPES and not DEBUG else 'TESTNET'
+from constants.globals import DEBUG, NETWORK_TYPE
 
 if DEBUG:
     BINANCE_NODE_IPS = ['localhost', '0.0.0.0']

@@ -84,7 +84,7 @@ def get_thorchain_last_block(node_ip=None):
     else:
         last_block = get_request_json_thorchain(url_path=f":8080/v2/thorchain/lastblock", node_ip=node_ip)
 
-    return last_block['thorchain']
+    return last_block[0]['thorchain']
 
 
 def get_asgard_json() -> dict:
@@ -124,11 +124,7 @@ def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
     if node_ip:
         return get_request_json(url=f"http://{node_ip}{url_path}{REQUEST_POSTFIX}")
 
-    seeding_node_url = \
-        {"TESTNET": "https://testnet-seed.thorchain.info", "CHAOSNET": "https://chaosnet-seed.thorchain.info"}[
-            NETWORK_TYPE]
-
-    available_node_ips = requests.get(url=seeding_node_url, timeout=CONNECTION_TIMEOUT).json()
+    available_node_ips = requests.get(url=SEED_LIST_URL, timeout=CONNECTION_TIMEOUT).json()
 
     random.shuffle(available_node_ips)
     for random_node_ip in available_node_ips:

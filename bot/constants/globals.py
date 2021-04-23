@@ -8,7 +8,6 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 DEBUG = bool(os.environ['DEBUG'] == 'True') if 'DEBUG' in os.environ else False
-NATIVE_DEPLOYMENT = bool(os.environ.get('NATIVE_DEPLOYMENT', False) == 'True')
 
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 
@@ -57,9 +56,18 @@ REQUEST_POSTFIX = '?height=0'  # currently needed to get correct results due to 
 
 # Other
 
-MONITORED_STATUSES = ["standby", "ready", "active"]
+MONITORED_STATUSES = ["STANDBY", "READY", "ACTIVE"]
 JOB_INTERVAL_IN_SECONDS = 5 if DEBUG else 30
 
 # Thorchain
+NETWORK_TYPES = ["TESTNET", "CHAOSNET"]
+NETWORK_TYPE = os.getenv("NETWORK_TYPE").upper() \
+    if os.getenv("NETWORK_TYPE", "notFound").upper() in NETWORK_TYPES and not DEBUG else 'TESTNET'
+
 SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3
 THORCHAIN_ONCHAIN_API_URL = "https://thorchain-service.b42.tech/v1/"
+
+DEFAULT_SEED_LIST = "https://chaosnet-seed.thorchain.info/" \
+    if NETWORK_TYPE == "CHAOSNET" else "https://testnet-seed.thorchain.info/"
+
+SEED_LIST_URL = os.environ.get("SEED_LIST_URL", DEFAULT_SEED_LIST)
