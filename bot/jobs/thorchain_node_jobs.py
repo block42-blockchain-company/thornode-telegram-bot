@@ -54,7 +54,7 @@ def check_thornodes(context):
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
-        if local_node['status'] in MONITORED_STATUSES and is_thornode_healthy(context, node_address):
+        if local_node['status'].upper() in MONITORED_STATUSES and is_thornode_healthy(context, node_address):
             check_thorchain_block_height(context, node_address=node_address)
             check_thorchain_catch_up_status(context, node_address=node_address)
             check_thorchain_midgard_api(context, node_address=node_address)
