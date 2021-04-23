@@ -22,6 +22,7 @@ For *docker-compose* open `variables-chaosnet.env` and/or
 - `ALLOWED_USER_IDS` to a list of Telegram User IDs that are permitted to access the 
 Bot. Set it to `ALL` to make it available to everybody.
 - `NETWORK_TYPE` to either `TESTNET` or `CHAOSNET`.
+- `SEED_LIST_URL` to specify the endpoint for the seed list which provides the IPs of the nodes in the network.
 - `BINANCE_NODE_IPS` to a list of Binance Node IPs with ports you want to monitor.
 Leave it empty or remove it to not monitor any Binance Node.
 - `ETHEREUM_NODE_IPS` to a list of Ethereum Node IPs with ports you want to monitor.
