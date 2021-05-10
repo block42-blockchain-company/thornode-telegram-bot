@@ -233,7 +233,7 @@ def is_thornode_healthy(context, node_address) -> bool:
     was_healthy = node_data["healthy"]
 
     try:
-        # WHUT?
+        # Check whether node answers. If it doesn't we get an Exception.
         get_latest_block_height(node_data['ip_address'])
 
         if not was_healthy:

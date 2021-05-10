@@ -143,7 +143,7 @@ def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
         reference_index = (index + 1) % len(available_node_ips)
         reference_node_ip = available_node_ips[reference_index]
 
-        if not is_thorchain_catching_up(random_node_ip) and not is_block_height_stuck(random_node_ip, reference_node_ip):
+        if not is_block_height_stuck(random_node_ip, reference_node_ip):
             try:
                 return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
             except Exception:
