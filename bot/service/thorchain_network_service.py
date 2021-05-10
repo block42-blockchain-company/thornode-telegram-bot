@@ -29,6 +29,14 @@ def get_latest_block_height(node_ip=None) -> int:
     return int(get_node_status(node_ip)['result']['sync_info']['latest_block_height'])
 
 
+def is_block_height_stuck(main_node_ip, reference_node_ip) -> bool:
+    main_block_height = get_latest_block_height(main_node_ip)
+    reference_block_height = get_latest_block_height(reference_node_ip)
+
+    # block heights within plus minus 1 block are considered equal (network latency could lead to one block difference)
+    return not (main_block_height == reference_block_height or main_block_height == reference_block_height + 1 or main_block_height == reference_block_height - 1)
+
+
 def is_thorchain_catching_up(node_ip=None) -> bool:
     return get_node_status(node_ip)['result']['sync_info']['catching_up']
 
@@ -64,11 +72,11 @@ def get_network_data(node_ip=None):
     return get_request_json_thorchain(url_path=f":8080/v2/network", node_ip=node_ip)
 
 
-def get_thorchain_network_constants(node_ip=None):
+def get_thorchain_network_constants():
     return get_request_json_thorchain(url_path=f":8080/v2/thorchain/constants")
 
 
-def get_thorchain_blocks_per_year(node_ip=None):
+def get_thorchain_blocks_per_year():
     constants = get_thorchain_network_constants()
     return constants['int_64_values']['BlocksPerYear']
 
@@ -127,8 +135,15 @@ def get_request_json_thorchain(url_path: str, node_ip: str = None) -> dict:
     available_node_ips = requests.get(url=SEED_LIST_URL, timeout=CONNECTION_TIMEOUT).json()
 
     random.shuffle(available_node_ips)
-    for random_node_ip in available_node_ips:
-        if not is_thorchain_catching_up(random_node_ip):
+    for index in range(0, len(available_node_ips)):
+        random_node_ip = available_node_ips[index]
+
+        # Most performant way at hand to use a different node ip in the list.
+        # If index + 1 is out of bounce, it becomes 0 due to remainder division.
+        reference_index = (index + 1) % len(available_node_ips)
+        reference_node_ip = available_node_ips[reference_index]
+
+        if not is_thorchain_catching_up(random_node_ip) and not is_block_height_stuck(random_node_ip, reference_node_ip):
             try:
                 return get_request_json(url=f"http://{random_node_ip}{url_path}{REQUEST_POSTFIX}")
             except Exception:
