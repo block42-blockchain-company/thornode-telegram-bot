@@ -18,7 +18,7 @@ spec:
           image: block42blockchaincompany/thornode_bot:latest
           imagePullPolicy: Always
           volumeMounts:
-            - name: thornode-bot-chaosnet-volume
+            - name: thornode-bot-testnet-volume
               mountPath: /storage
           env:
             - name: TELEGRAM_BOT_TOKEN
