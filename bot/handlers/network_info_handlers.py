@@ -66,8 +66,8 @@ async def show_network_stats(update, context):
         text += "\n💰 Block Rewards:\n  *" + \
                 tor_to_rune(network['blockRewards']['blockReward']) + "* (total)\n  *" + \
                 tor_to_rune(network['blockRewards']['bondReward']) + "* (nodes)\n  *" + \
-                tor_to_rune(network['blockRewards']['stakeReward']) + "* (stakers)\n  *" + \
-                '{:.2f}'.format((int(network['blockRewards']['stakeReward']) / int(
+                tor_to_rune(network['blockRewards']['poolReward']) + "* (stakers)\n  *" + \
+                '{:.2f}'.format((int(network['blockRewards']['poolReward']) / int(
                     network['blockRewards']['blockReward']) * 100)) + " %* (staker share)\n"
 
         text += f"\n🔓 Network Security: *{network_security_ratio_to_string(get_network_security_ratio(network)).value}*\n"
