@@ -2,7 +2,8 @@
 A telegram bot to monitor the status of THORNodes.
 
 **We highly encourage the community to create Pull Requests. 
-block42 isn't developing new features for the time being and will only provide bug fixes and maintenance work.**
+As we shifted our development focus to brokkr.finance, block42 isn't developing new features for the time being. 
+Of course we will provide bug fixes and maintenance work.**
 
 If you have questions feel free to open a github issue or contact us in our Telegram Channel https://t.me/block42_crypto!
 
