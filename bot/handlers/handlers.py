@@ -41,7 +41,6 @@ def on_start_command(update, context):
     text += 'We develop for the community and depend on your input. Participate and shape the Thorchain Telegram Bot ' \
             'by joining the discussion on GitHub: https://github.com/block42-blockchain-company/thornode-telegram-bot/discussions/146\n'
 
-
     # Send message
     try_message_with_home_menu(context=context,
                                chat_id=update.message.chat.id,
