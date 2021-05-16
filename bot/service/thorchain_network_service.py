@@ -6,7 +6,7 @@ import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError
 
 from constants.mock_values import thorchain_last_block_mock
-from service.general_network_service import get_request_json
+from service.general_network_service import get_request_json, BadStatusException
 from constants.globals import *
 from constants.node_ips import *
 
@@ -44,11 +44,11 @@ def is_thorchain_catching_up(node_ip=None) -> bool:
 def is_midgard_api_healthy(node_ip) -> bool:
     try:
         get_request_json_thorchain(url_path=":8080/v2/health", node_ip=node_ip)
-    except (Timeout, ConnectionError):
+    except (Timeout, ConnectionError, HTTPError):
         logger.warning(f"Timeout or Connection error with {node_ip}")
         return False
-    except HTTPError as e:
-        logger.info(f"Error {e.errno} in 'is_midgard_api_healthy({node_ip}).")
+    except (BadStatusException, Exception) as e:
+        logger.info(f"Error {e.message} in 'is_midgard_api_healthy({node_ip}).")
         return False
     return True
 

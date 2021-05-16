@@ -53,9 +53,6 @@ def check_thornodes(context):
             else:
                 local_node['notification_timeout_in_seconds'] = INITIAL_NOTIFICATION_TIMEOUT
 
-        # This logic with is_thornode_healthy is flawed. In is_thornod_healthy we only check one endpoint, while below
-        # we check all endpoints. If one endpoint isn't working, the bot spams "Node is unhealthy" and then
-        # "node is healthy again" in an endless loop.
         if local_node['status'].upper() in MONITORED_STATUSES and is_thornode_healthy(context, node_address):
             check_thorchain_block_height(context, node_address=node_address)
             check_thorchain_catch_up_status(context, node_address=node_address)
@@ -244,7 +241,7 @@ def is_thornode_healthy(context, node_address) -> bool:
         context.job.context['chat_data']['nodes'][node_address]["healthy"] = True
         return True
 
-    except (Timeout, ConnectionError):
+    except (Timeout, ConnectionError, BadStatusException, Exception):
         if was_healthy:
             try_message_with_home_menu(context=context, chat_id=chat_id, text=get_node_health_warning_message(node_data))
 
