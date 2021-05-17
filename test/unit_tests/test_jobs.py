@@ -8,7 +8,7 @@ from jobs.thorchain_network_jobs import check_network_security, check_thorchain_
 from jobs.other_nodes_jobs import check_health
 from jobs.thorchain_node_jobs import check_solvency, check_churning
 from models.nodes import Node, UnauthorizedException
-from helpers import network_data
+from unit_tests.helpers import network_data
 
 
 class ContextMock:
@@ -251,7 +251,7 @@ class JobTests(unittest.TestCase):
             'bondMetrics': {
                 'totalActiveBond': '10'
             },
-            'totalStaked': '100',
+            'totalPooledRune': '100',
             'bondingAPY': '100.01',
             'liquidityAPY': '99.01'
         }
@@ -262,7 +262,6 @@ class JobTests(unittest.TestCase):
                     "address": "bnb1mghkd903p06fdxvm7l3pj5284sneck03gqh78r"
                 }
             ]
-
 
         # first call: no churning, just initializing
         check_churning(self.context)
