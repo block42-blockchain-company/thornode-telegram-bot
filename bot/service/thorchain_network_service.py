@@ -33,8 +33,11 @@ def is_block_height_stuck(main_node_ip, reference_node_ip) -> bool:
     main_block_height = get_latest_block_height(main_node_ip)
     reference_block_height = get_latest_block_height(reference_node_ip)
 
-    # block heights within plus minus 1 block are considered equal (network latency could lead to one block difference)
-    return not (main_block_height == reference_block_height or main_block_height == reference_block_height + 1 or main_block_height == reference_block_height - 1)
+    # Block heights within plus minus 1 block are considered equal (network latency could lead to one block difference).
+    # If both nodes have the same blockheight it's very likely that they are "good" nodes. It's very unlikely
+    # that two nodes get stuck at the same block height.
+    block_height_difference = abs(main_block_height - reference_block_height)
+    return block_height_difference > 1
 
 
 def is_thorchain_catching_up(node_ip=None) -> bool:
