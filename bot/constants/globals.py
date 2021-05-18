@@ -71,3 +71,5 @@ DEFAULT_SEED_LIST = "https://seed.thorchain.info/" \
     if NETWORK_TYPE == "CHAOSNET" else "https://testnet.seed.thorchain.info/"
 
 SEED_LIST_URL = os.environ.get("SEED_LIST_URL", DEFAULT_SEED_LIST)
+if SEED_LIST_URL == '':
+    SEED_LIST_URL = DEFAULT_SEED_LIST
