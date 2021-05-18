@@ -35,7 +35,6 @@ def check_thornodes(context):
                          datetime.timestamp(
                              datetime.now() - timedelta(seconds=local_node['notification_timeout_in_seconds']))
         if is_not_blocked:
-
             message = build_notification_message_for_active_node(local_node, remote_node, context)
 
             if message:
@@ -233,6 +232,7 @@ def is_thornode_healthy(context, node_address) -> bool:
     was_healthy = node_data["healthy"]
 
     try:
+        # Check whether node answers. If it doesn't we get an Exception.
         get_latest_block_height(node_data['ip_address'])
 
         if not was_healthy:
@@ -241,7 +241,7 @@ def is_thornode_healthy(context, node_address) -> bool:
         context.job.context['chat_data']['nodes'][node_address]["healthy"] = True
         return True
 
-    except (Timeout, ConnectionError):
+    except (Timeout, ConnectionError, BadStatusException, Exception):
         if was_healthy:
             try_message_with_home_menu(context=context, chat_id=chat_id, text=get_node_health_warning_message(node_data))
 

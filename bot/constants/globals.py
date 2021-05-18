@@ -67,7 +67,7 @@ NETWORK_TYPE = os.getenv("NETWORK_TYPE").upper() \
 SLASH_POINTS_NOTIFICATION_THRESHOLD_DEFAULT = 3
 THORCHAIN_ONCHAIN_API_URL = "https://thorchain-service.b42.tech/v1/"
 
-DEFAULT_SEED_LIST = "https://chaosnet-seed.thorchain.info/" \
-    if NETWORK_TYPE == "CHAOSNET" else "https://testnet-seed.thorchain.info/"
+DEFAULT_SEED_LIST = "https://seed.thorchain.info/" \
+    if NETWORK_TYPE == "CHAOSNET" else "https://testnet.seed.thorchain.info/"
 
 SEED_LIST_URL = os.environ.get("SEED_LIST_URL", DEFAULT_SEED_LIST)

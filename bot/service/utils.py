@@ -235,7 +235,7 @@ def get_network_security_ratio(network_json):
     """
 
     total_active_bond = int(network_json['bondMetrics']['totalActiveBond'])
-    total_staked = int(network_json['totalStaked'])
+    total_staked = int(network_json['totalPooledRune'])
     return total_active_bond / (total_active_bond + total_staked)
 
 

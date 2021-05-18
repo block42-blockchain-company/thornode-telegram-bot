@@ -1,7 +1,11 @@
 # thornode-telegram-bot ⚡🤖
 A telegram bot to monitor the status of THORNodes.
 
+**We highly encourage the community to create Pull Requests.**
+
 If you have questions feel free to open a github issue or contact us in our Telegram Channel https://t.me/block42_crypto!
+
+*The current maser is made for Multichain (Testnet and Chaosnet). The last single chain release is v1.13.2*
 
 ## Requirements
 * Telegram
@@ -305,9 +309,6 @@ kubectl delete -f kubernetes/k8s_thornode_bot_deployment_chaosnet.yaml -f kubern
 
 ### [Docker Standalone](#docker-standalone)
 To run the bot as a docker container, make sure you have docker installed (see: https://docs.docker.com/get-docker).
-
-Navigate to the root directory of this repository and execute the following commands:
-The environment includes a mongodb instance as well as the [Tendermint Client](https://github.com/block42-blockchain-company/tendermint-block-parser)
 
 Build the thornode bot docker image as described in the `Dockerfile`:
 
